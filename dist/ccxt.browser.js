@@ -25283,6 +25283,9 @@ class bigone extends _abstract_bigone_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'swap': true,
                 'future': undefined,
                 'option': false,
+                'borrowCrossMargin': false,
+                'borrowIsolatedMargin': false,
+                'borrowMargin': false,
                 'cancelAllOrders': true,
                 'cancelOrder': true,
                 'createMarketBuyOrderWithCost': true,
@@ -25293,8 +25296,17 @@ class bigone extends _abstract_bigone_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'createStopLimitOrder': true,
                 'createStopMarketOrder': true,
                 'createStopOrder': true,
+                'fetchAllGreeks': false,
                 'fetchBalance': true,
+                'fetchBorrowInterest': false,
+                'fetchBorrowRate': false,
+                'fetchBorrowRateHistories': false,
+                'fetchBorrowRateHistory': false,
+                'fetchBorrowRates': false,
+                'fetchBorrowRatesPerSymbol': false,
                 'fetchClosedOrders': true,
+                'fetchCrossBorrowRate': false,
+                'fetchCrossBorrowRates': false,
                 'fetchCurrencies': true,
                 'fetchDepositAddress': true,
                 'fetchDepositAddresses': false,
@@ -25304,10 +25316,15 @@ class bigone extends _abstract_bigone_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'fetchFundingRate': false,
                 'fetchFundingRateHistory': false,
                 'fetchFundingRates': false,
+                'fetchGreeks': false,
+                'fetchIsolatedBorrowRate': false,
+                'fetchIsolatedBorrowRates': false,
                 'fetchMarkets': true,
                 'fetchMyTrades': true,
                 'fetchOHLCV': true,
                 'fetchOpenOrders': true,
+                'fetchOption': false,
+                'fetchOptionChain': false,
                 'fetchOrder': true,
                 'fetchOrderBook': true,
                 'fetchOrders': true,
@@ -25318,7 +25335,10 @@ class bigone extends _abstract_bigone_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'fetchTradingFee': false,
                 'fetchTradingFees': false,
                 'fetchTransactionFees': false,
+                'fetchVolatilityHistory': false,
                 'fetchWithdrawals': true,
+                'repayCrossMargin': false,
+                'repayIsolatedMargin': false,
                 'transfer': true,
                 'withdraw': true,
             },
@@ -278372,7 +278392,7 @@ class ascendex extends _ascendex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] *
         const orderbook = await this.watchPublic(channel, params);
         return orderbook.limit();
     }
-    async fetchOrderBookSnapshot(symbol, limit = undefined, params = {}) {
+    async fetchOrderBookSnapshotCustom(symbol, limit = undefined, params = {}) {
         const restOrderBook = await this.fetchRestOrderBookSafe(symbol, limit, params);
         if (!(symbol in this.orderbooks)) {
             this.orderbooks[symbol] = this.orderBook();
@@ -279062,7 +279082,7 @@ class ascendex extends _ascendex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] *
         }
         this.orderbooks[symbol] = this.orderBook({});
         if (this.options['defaultType'] === 'swap' || market['contract']) {
-            this.spawn(this.fetchOrderBookSnapshot, symbol);
+            this.spawn(this.fetchOrderBookSnapshotCustom, symbol);
         }
         else {
             this.spawn(this.watchOrderBookSnapshot, symbol);
