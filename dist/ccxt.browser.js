@@ -4692,14 +4692,14 @@ class apex extends _abstract_apex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
     }
     parseOrderType(type) {
         const types = {
-            'LIMIT': 'LIMIT',
-            'MARKET': 'MARKET',
-            'STOP_LIMIT': 'STOP_LIMIT',
-            'STOP_MARKET': 'STOP_MARKET',
-            'TAKE_PROFIT_LIMIT': 'TAKE_PROFIT_LIMIT',
-            'TAKE_PROFIT_MARKET': 'TAKE_PROFIT_MARKET',
+            'LIMIT': 'limit',
+            'MARKET': 'market',
+            'STOP_LIMIT': 'limit',
+            'STOP_MARKET': 'market',
+            'TAKE_PROFIT_LIMIT': 'limit',
+            'TAKE_PROFIT_MARKET': 'market',
         };
-        return this.safeStringUpper(types, type, type);
+        return this.safeString(types, type, type);
     }
     safeMarket(marketId = undefined, market = undefined, delimiter = undefined, marketType = undefined) {
         if (market === undefined && marketId !== undefined) {
@@ -4764,6 +4764,8 @@ class apex extends _abstract_apex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
      * @param {float} [price] the price at which the order is to be fullfilled, in units of the quote currency, ignored in market orders
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @param {float} [params.triggerPrice] The price a trigger order is triggered at
+     * @param {float} [params.stopLossPrice] The price a stop loss order is triggered at
+     * @param {float} [params.takeProfitPrice] The price a take profit order is triggered at
      * @param {string} [params.timeInForce] "GTC", "IOC", or "POST_ONLY"
      * @param {bool} [params.postOnly] true or false
      * @param {bool} [params.reduceOnly] Ensures that the executed order does not flip the opened position.
@@ -4773,7 +4775,7 @@ class apex extends _abstract_apex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
     async createOrder(symbol, type, side, amount, price = undefined, params = {}) {
         await this.loadMarkets();
         const market = this.market(symbol);
-        const orderType = type.toUpperCase();
+        let orderType = type.toUpperCase();
         const orderSide = side.toUpperCase();
         const orderSize = this.amountToPrecision(symbol, amount);
         let orderPrice = '0';
@@ -4781,11 +4783,21 @@ class apex extends _abstract_apex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
             orderPrice = this.priceToPrecision(symbol, price);
         }
         const fees = this.safeDict(this.fees, 'swap', {});
-        const taker = this.safeNumber(fees, 'taker', 0.0005);
-        const maker = this.safeNumber(fees, 'maker', 0.0002);
-        const limitFee = this.decimalToPrecision(_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringAdd(_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringMul(_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringMul(orderPrice, orderSize), taker.toString()), market['precision']['price'].toString()), _base_functions_number_js__WEBPACK_IMPORTED_MODULE_2__/* .TRUNCATE */ .R3, market['precision']['price'], this.precisionMode, this.paddingMode);
+        const taker = this.safeString(fees, 'taker', '0.0005');
+        const maker = this.safeString(fees, 'maker', '0.0002');
+        const limitFee = this.decimalToPrecision(_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringAdd(_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringMul(_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringMul(orderPrice, orderSize), taker), this.numberToString(market['precision']['price'])), _base_functions_number_js__WEBPACK_IMPORTED_MODULE_2__/* .TRUNCATE */ .R3, market['precision']['price'], this.precisionMode, this.paddingMode);
         const timeNow = this.milliseconds();
-        // const triggerPrice = this.safeString2 (params, 'triggerPrice', 'stopPrice');
+        let triggerPrice = this.safeString(params, 'triggerPrice');
+        const stopLossPrice = this.safeString(params, 'stopLossPrice');
+        const takeProfitPrice = this.safeString(params, 'takeProfitPrice');
+        if (stopLossPrice !== undefined) {
+            orderType = (orderType === 'MARKET') ? 'STOP_MARKET' : 'STOP_LIMIT';
+            triggerPrice = stopLossPrice;
+        }
+        else if (takeProfitPrice !== undefined) {
+            orderType = (orderType === 'MARKET') ? 'TAKE_PROFIT_MARKET' : 'TAKE_PROFIT_LIMIT';
+            triggerPrice = takeProfitPrice;
+        }
         const isMarket = orderType === 'MARKET';
         if (isMarket && (price === undefined)) {
             throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ArgumentsRequired(this.id + ' createOrder() requires a price argument for market orders');
@@ -4810,7 +4822,7 @@ class apex extends _abstract_apex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
         if (clientOrderId === undefined) {
             clientOrderId = this.generateRandomClientIdOmni(accountId);
         }
-        params = this.omit(params, ['clientId', 'clientOrderId', 'client_order_id']);
+        params = this.omit(params, ['clientId', 'clientOrderId', 'client_order_id', 'stopLossPrice', 'takeProfitPrice', 'triggerPrice']);
         const orderToSign = {
             'accountId': accountId,
             'slotId': clientOrderId,
@@ -4819,9 +4831,12 @@ class apex extends _abstract_apex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
             'size': orderSize,
             'price': orderPrice,
             'direction': orderSide,
-            'makerFeeRate': maker.toString(),
-            'takerFeeRate': taker.toString(),
+            'makerFeeRate': maker,
+            'takerFeeRate': taker,
         };
+        if (triggerPrice !== undefined) {
+            orderToSign['triggerPrice'] = this.priceToPrecision(symbol, triggerPrice);
+        }
         const signature = await this.getZKContractSignatureObj(this.remove0xPrefix(this.getSeeds()), orderToSign);
         const request = {
             'symbol': market['id'],
@@ -4835,6 +4850,9 @@ class apex extends _abstract_apex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
             'clientId': clientOrderId,
             'brokerId': this.safeString(this.options, 'brokerId', '6956'),
         };
+        if (triggerPrice !== undefined) {
+            request['triggerPrice'] = this.priceToPrecision(symbol, triggerPrice);
+        }
         request['signature'] = signature;
         const response = await this.privatePostV3Order(this.extend(request, params));
         const data = this.safeDict(response, 'data', {});
@@ -425717,7 +425735,7 @@ SOFTWARE.
 
 //-----------------------------------------------------------------------------
 // this is updated by vss.js when building
-const ccxt_version = '4.5.16';
+const ccxt_version = '4.5.17';
 ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k.ccxtVersion = ccxt_version;
 //-----------------------------------------------------------------------------
 
