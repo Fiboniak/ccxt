@@ -5452,23 +5452,40 @@ class arkham extends _abstract_arkham_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'swap': true,
                 'future': false,
                 'option': false,
+                'borrowCrossMargin': false,
+                'borrowIsolatedMargin': false,
+                'borrowMargin': false,
                 'cancelAllOrders': true,
                 'cancelOrder': true,
                 'createDepositAddress': true,
                 'createOrder': true,
                 'fetchAccounts': true,
+                'fetchAllGreeks': false,
                 'fetchBalance': true,
+                'fetchBorrowInterest': false,
+                'fetchBorrowRate': false,
+                'fetchBorrowRateHistories': false,
+                'fetchBorrowRateHistory': false,
+                'fetchBorrowRates': false,
+                'fetchBorrowRatesPerSymbol': false,
                 'fetchClosedOrders': true,
+                'fetchCrossBorrowRate': false,
+                'fetchCrossBorrowRates': false,
                 'fetchCurrencies': true,
                 'fetchDepositAddress': false,
                 'fetchDepositAddressesByNetwork': true,
                 'fetchDeposits': true,
                 'fetchFundingHistory': true,
+                'fetchGreeks': false,
+                'fetchIsolatedBorrowRate': false,
+                'fetchIsolatedBorrowRates': false,
                 'fetchLeverage': true,
                 'fetchLeverageTiers': true,
                 'fetchMyTrades': true,
                 'fetchOHLCV': true,
                 'fetchOpenOrders': true,
+                'fetchOption': false,
+                'fetchOptionChain': false,
                 'fetchOrder': true,
                 'fetchOrderBook': true,
                 'fetchPositions': true,
@@ -5477,7 +5494,10 @@ class arkham extends _abstract_arkham_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'fetchTime': true,
                 'fetchTrades': true,
                 'fetchTradingFees': true,
+                'fetchVolatilityHistory': false,
                 'fetchWithdrawals': true,
+                'repayCrossMargin': false,
+                'repayIsolatedMargin': false,
                 'sandbox': false,
                 'setLeverage': true,
                 'withdraw': true,
@@ -15365,8 +15385,10 @@ class Exchange {
                 'cancelAllOrders': undefined,
                 'cancelAllOrdersWs': undefined,
                 'cancelOrder': true,
+                'cancelOrderWithClientOrderId': undefined,
                 'cancelOrderWs': undefined,
                 'cancelOrders': undefined,
+                'cancelOrdersWithClientOrderId': undefined,
                 'cancelOrdersWs': undefined,
                 'closeAllPositions': undefined,
                 'closePosition': undefined,
@@ -15416,6 +15438,7 @@ class Exchange {
                 'createTriggerOrderWs': undefined,
                 'deposit': undefined,
                 'editOrder': 'emulated',
+                'editOrderWithClientOrderId': undefined,
                 'editOrders': undefined,
                 'editOrderWs': undefined,
                 'fetchAccounts': undefined,
@@ -15494,6 +15517,7 @@ class Exchange {
                 'fetchOption': undefined,
                 'fetchOptionChain': undefined,
                 'fetchOrder': undefined,
+                'fetchOrderWithClientOrderId': undefined,
                 'fetchOrderBook': true,
                 'fetchOrderBooks': undefined,
                 'fetchOrderBookWs': undefined,
@@ -18677,6 +18701,9 @@ class Exchange {
         await this.cancelOrder(id, symbol);
         return await this.createOrder(symbol, type, side, amount, price, params);
     }
+    async editOrderWithClientOrderId(clientOrderId, symbol, type, side, amount = undefined, price = undefined, params = {}) {
+        return await this.editOrder('', symbol, type, side, amount, price, this.extend({ 'clientOrderId': clientOrderId }, params));
+    }
     async editOrderWs(id, symbol, type, side, amount = undefined, price = undefined, params = {}) {
         await this.cancelOrderWs(id, symbol);
         return await this.createOrderWs(symbol, type, side, amount, price, params);
@@ -18845,7 +18872,7 @@ class Exchange {
     }
     oath() {
         if (this.twofa !== undefined) {
-            return (0,_functions_totp_js__WEBPACK_IMPORTED_MODULE_19__/* ["default"] */ .A)(this.twofa);
+            return (0,_functions_totp_js__WEBPACK_IMPORTED_MODULE_19__/* .totp */ .O)(this.twofa);
         }
         else {
             throw new _errors_js__WEBPACK_IMPORTED_MODULE_4__.ExchangeError(this.id + ' exchange.twofa has not been set for 2FA Two-Factor Authentication');
@@ -19166,6 +19193,19 @@ class Exchange {
     }
     async fetchOrder(id, symbol = undefined, params = {}) {
         throw new _errors_js__WEBPACK_IMPORTED_MODULE_4__.NotSupported(this.id + ' fetchOrder() is not supported yet');
+    }
+    /**
+     * @method
+     * @name fetchOrderWithClientOrderId
+     * @description create a market order by providing the symbol, side and cost
+     * @param {string} clientOrderId client order Id
+     * @param {string} symbol unified symbol of the market to create an order in
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async fetchOrderWithClientOrderId(clientOrderId, symbol = undefined, params = {}) {
+        const extendedParams = this.extend(params, { 'clientOrderId': clientOrderId });
+        return await this.fetchOrder('', symbol, extendedParams);
     }
     async fetchOrderWs(id, symbol = undefined, params = {}) {
         throw new _errors_js__WEBPACK_IMPORTED_MODULE_4__.NotSupported(this.id + ' fetchOrderWs() is not supported yet');
@@ -19621,11 +19661,37 @@ class Exchange {
     async cancelOrder(id, symbol = undefined, params = {}) {
         throw new _errors_js__WEBPACK_IMPORTED_MODULE_4__.NotSupported(this.id + ' cancelOrder() is not supported yet');
     }
+    /**
+     * @method
+     * @name cancelOrderWithClientOrderId
+     * @description create a market order by providing the symbol, side and cost
+     * @param {string} clientOrderId client order Id
+     * @param {string} symbol unified symbol of the market to create an order in
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async cancelOrderWithClientOrderId(clientOrderId, symbol = undefined, params = {}) {
+        const extendedParams = this.extend(params, { 'clientOrderId': clientOrderId });
+        return await this.cancelOrder('', symbol, extendedParams);
+    }
     async cancelOrderWs(id, symbol = undefined, params = {}) {
         throw new _errors_js__WEBPACK_IMPORTED_MODULE_4__.NotSupported(this.id + ' cancelOrderWs() is not supported yet');
     }
     async cancelOrders(ids, symbol = undefined, params = {}) {
         throw new _errors_js__WEBPACK_IMPORTED_MODULE_4__.NotSupported(this.id + ' cancelOrders() is not supported yet');
+    }
+    /**
+     * @method
+     * @name cancelOrdersWithClientOrderIds
+     * @description create a market order by providing the symbol, side and cost
+     * @param {string[]} clientOrderIds client order Ids
+     * @param {string} symbol unified symbol of the market to create an order in
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async cancelOrdersWithClientOrderIds(clientOrderIds, symbol = undefined, params = {}) {
+        const extendedParams = this.extend(params, { 'clientOrderIds': clientOrderIds });
+        return await this.cancelOrders([], symbol, extendedParams);
     }
     async cancelOrdersWs(ids, symbol = undefined, params = {}) {
         throw new _errors_js__WEBPACK_IMPORTED_MODULE_4__.NotSupported(this.id + ' cancelOrdersWs() is not supported yet');
@@ -21696,7 +21762,6 @@ class Exchange {
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   Y: () => (/* binding */ Precise)
 /* harmony export */ });
 const zero = BigInt(0);
@@ -21966,7 +22031,7 @@ class Precise {
         return (new Precise(string1)).le(new Precise(string2));
     }
 }
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Precise);
+/* unused harmony default export */ var __WEBPACK_DEFAULT_EXPORT__ = ((/* unused pure expression or super */ null && (Precise)));
 
 
 
@@ -23745,7 +23810,6 @@ const timeout = async (ms, promise) => {
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   O: () => (/* binding */ totp)
 /* harmony export */ });
 /* harmony import */ var _static_dependencies_scure_base_index_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4710);
@@ -23769,7 +23833,7 @@ function totp(secret) {
 }
 ;
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (totp);
+/* unused harmony default export */ var __WEBPACK_DEFAULT_EXPORT__ = ((/* unused pure expression or super */ null && (totp)));
 
 
 /***/ }),
@@ -39655,6 +39719,9 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                     const orderidlist = this.safeList(extendedParams, 'orderidlist', []);
                     const origclientorderidlist = this.safeList2(extendedParams, 'origclientorderidlist', 'origClientOrderIdList', []);
                     extendedParams = this.omit(extendedParams, ['orderidlist', 'origclientorderidlist', 'origClientOrderIdList']);
+                    if ('symbol' in extendedParams) {
+                        extendedParams['symbol'] = this.encodeURIComponent(extendedParams['symbol']);
+                    }
                     query = this.rawencode(extendedParams);
                     const orderidlistLength = orderidlist.length;
                     const origclientorderidlistLength = origclientorderidlist.length;
@@ -59174,6 +59241,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             'commonCurrencies': {
                 'APX': 'AstroPepeX',
                 'DEGEN': 'DegenReborn',
+                'EVA': 'Evadore',
                 'JADE': 'Jade Protocol',
                 'OMNI': 'omni',
                 'TONCOIN': 'TON',
@@ -60236,11 +60304,12 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             const networks = {};
             let withdraw = undefined;
             let deposit = undefined;
-            if (chains.length === 0) {
+            const chainsLength = chains.length;
+            if (chainsLength === 0) {
                 withdraw = false;
                 deposit = false;
             }
-            for (let j = 0; j < chains.length; j++) {
+            for (let j = 0; j < chainsLength; j++) {
                 const chain = chains[j];
                 const networkId = this.safeString(chain, 'chain');
                 let network = this.networkIdToCode(networkId, code);
@@ -97957,18 +98026,20 @@ class blofin extends _abstract_blofin_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         [method, params] = this.handleOptionAndParams(params, 'createOrder', 'method', 'privatePostTradeOrder');
         const isStopLossPriceDefined = this.safeString(params, 'stopLossPrice') !== undefined;
         const isTakeProfitPriceDefined = this.safeString(params, 'takeProfitPrice') !== undefined;
-        const isTriggerOrder = this.safeString(params, 'triggerPrice') !== undefined;
+        const hasTriggerPrice = this.safeString(params, 'triggerPrice') !== undefined;
         const isType2Order = (isStopLossPriceDefined || isTakeProfitPriceDefined);
         let response = undefined;
         const reduceOnly = this.safeBool(params, 'reduceOnly');
         if (reduceOnly !== undefined) {
             params['reduceOnly'] = reduceOnly ? 'true' : 'false';
         }
-        if (tpsl || (method === 'privatePostTradeOrderTpsl') || isType2Order) {
+        const isTpslOrder = tpsl || (method === 'privatePostTradeOrderTpsl') || isType2Order;
+        const isTriggerOrder = hasTriggerPrice || (method === 'privatePostTradeOrderAlgo');
+        if (isTpslOrder) {
             const tpslRequest = this.createTpslOrderRequest(symbol, type, side, amount, price, params);
             response = await this.privatePostTradeOrderTpsl(tpslRequest);
         }
-        else if (isTriggerOrder || (method === 'privatePostTradeOrderAlgo')) {
+        else if (isTriggerOrder) {
             const triggerRequest = this.createOrderRequest(symbol, type, side, amount, price, params);
             response = await this.privatePostTradeOrderAlgo(triggerRequest);
         }
@@ -97976,10 +98047,9 @@ class blofin extends _abstract_blofin_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             const request = this.createOrderRequest(symbol, type, side, amount, price, params);
             response = await this.privatePostTradeOrder(request);
         }
-        if (isTriggerOrder || (method === 'privatePostTradeOrderAlgo')) {
+        if (isTpslOrder || isTriggerOrder) {
             const dataDict = this.safeDict(response, 'data', {});
-            const triggerOrder = this.parseOrder(dataDict, market);
-            return triggerOrder;
+            return this.parseOrder(dataDict, market);
         }
         const data = this.safeList(response, 'data', []);
         const first = this.safeDict(data, 0);
@@ -104078,6 +104148,7 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                         'v5/account/mmp-reset': 5,
                         'v5/account/borrow': 5,
                         'v5/account/repay': 5,
+                        'v5/account/no-convert-repay': 5,
                         // asset
                         'v5/asset/exchange/quote-apply': 1,
                         'v5/asset/exchange/convert-execute': 1,
@@ -107512,7 +107583,7 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
      * @param {string} [params.positionIdx] *contracts only* 0 for one-way mode, 1 buy side of hedged mode, 2 sell side of hedged mode
      * @param {bool} [params.hedged] *contracts only* true for hedged mode, false for one way mode, default is false
      * @param {int} [params.isLeverage] *unified spot only* false then spot trading true then margin trading
-     * @param {string} [params.tpslMode] *contract only* 'full' or 'partial'
+     * @param {string} [params.tpslMode] *contract only* 'Full' or 'Partial'
      * @param {string} [params.mmp] *option only* market maker protection
      * @param {string} [params.triggerDirection] *contract only* the direction for trigger orders, 'ascending' or 'descending'
      * @param {float} [params.triggerPrice] The price at which a trigger order is triggered at
@@ -107636,22 +107707,31 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                 throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder(this.id + ' the API endpoint used only supports contract trailingAmount, stopLossPrice and takeProfitPrice orders');
             }
             if (isStopLossTriggerOrder || isTakeProfitTriggerOrder) {
+                const tpslMode = this.safeString(params, 'tpslMode', 'Partial');
+                const isFullTpsl = tpslMode === 'Full';
+                const isPartialTpsl = tpslMode === 'Partial';
+                if (isLimit && isFullTpsl) {
+                    throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder(this.id + ' tpsl orders with "full" tpslMode only support "market" type');
+                }
+                request['tpslMode'] = tpslMode;
                 if (isStopLossTriggerOrder) {
                     request['stopLoss'] = this.getPrice(symbol, stopLossTriggerPrice);
+                    if (isPartialTpsl) {
+                        request['slSize'] = amountString;
+                    }
                     if (isLimit) {
-                        request['tpslMode'] = 'Partial';
                         request['slOrderType'] = 'Limit';
                         request['slLimitPrice'] = priceString;
-                        request['slSize'] = amountString;
                     }
                 }
                 else if (isTakeProfitTriggerOrder) {
                     request['takeProfit'] = this.getPrice(symbol, takeProfitTriggerPrice);
+                    if (isPartialTpsl) {
+                        request['tpSize'] = amountString;
+                    }
                     if (isLimit) {
-                        request['tpslMode'] = 'Partial';
                         request['tpOrderType'] = 'Limit';
                         request['tpLimitPrice'] = priceString;
-                        request['tpSize'] = amountString;
                     }
                 }
             }
@@ -107837,7 +107917,7 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
             }
             request['positionIdx'] = (side === 'buy') ? 1 : 2;
         }
-        params = this.omit(params, ['stopPrice', 'timeInForce', 'stopLossPrice', 'takeProfitPrice', 'postOnly', 'clientOrderId', 'triggerPrice', 'stopLoss', 'takeProfit', 'trailingAmount', 'trailingTriggerPrice', 'hedged']);
+        params = this.omit(params, ['stopPrice', 'timeInForce', 'stopLossPrice', 'takeProfitPrice', 'postOnly', 'clientOrderId', 'triggerPrice', 'stopLoss', 'takeProfit', 'trailingAmount', 'trailingTriggerPrice', 'hedged', 'tpslMode']);
         return this.extend(request, params);
     }
     /**
@@ -151684,6 +151764,7 @@ class delta extends _abstract_delta_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                 'fetchOpenOrders': true,
                 'fetchOption': true,
                 'fetchOptionChain': false,
+                'fetchOrder': true,
                 'fetchOrderBook': true,
                 'fetchPosition': true,
                 'fetchPositionMode': false,
@@ -151762,6 +151843,8 @@ class delta extends _abstract_delta_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                 'private': {
                     'get': [
                         'orders',
+                        'orders/{order_id}',
+                        'orders/client_order_id/{client_oid}',
                         'products/{product_id}/orders/leverage',
                         'positions/margined',
                         'positions',
@@ -151775,8 +151858,8 @@ class delta extends _abstract_delta_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                         'users/trading_preferences',
                         'sub_accounts',
                         'profile',
+                        'heartbeat',
                         'deposits/address',
-                        'orders/leverage',
                     ],
                     'post': [
                         'orders',
@@ -151786,6 +151869,8 @@ class delta extends _abstract_delta_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                         'positions/change_margin',
                         'positions/close_all',
                         'wallets/sub_account_balance_transfer',
+                        'heartbeat/create',
+                        'heartbeat',
                         'orders/cancel_after',
                         'orders/leverage',
                     ],
@@ -153502,9 +153587,40 @@ class delta extends _abstract_delta_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
         //         "user_id":22142
         //     }
         //
+        // fetchOrder
+        //
+        //     {
+        //         "id": 123,
+        //         "user_id": 453671,
+        //         "size": 10,
+        //         "unfilled_size": 2,
+        //         "side": "buy",
+        //         "order_type": "limit_order",
+        //         "limit_price": "59000",
+        //         "stop_order_type": "stop_loss_order",
+        //         "stop_price": "55000",
+        //         "paid_commission": "0.5432",
+        //         "commission": "0.5432",
+        //         "reduce_only": false,
+        //         "client_order_id": "my_signal_34521712",
+        //         "state": "open",
+        //         "created_at": "1725865012000000",
+        //         "product_id": 27,
+        //         "product_symbol": "BTCUSD"
+        //     }
+        //
         const id = this.safeString(order, 'id');
         const clientOrderId = this.safeString(order, 'client_order_id');
-        const timestamp = this.parse8601(this.safeString(order, 'created_at'));
+        const createdAt = this.safeString(order, 'created_at');
+        let timestamp = undefined;
+        if (createdAt !== undefined) {
+            if (createdAt.indexOf('-') >= 0) {
+                timestamp = this.parse8601(createdAt);
+            }
+            else {
+                timestamp = this.safeIntegerProduct(order, 'created_at', 0.001);
+            }
+        }
         const marketId = this.safeString(order, 'product_id');
         const marketsByNumericId = this.safeDict(this.options, 'marketsByNumericId', {});
         market = this.safeValue(marketsByNumericId, marketId, market);
@@ -153512,7 +153628,9 @@ class delta extends _abstract_delta_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
         const status = this.parseOrderStatus(this.safeString(order, 'state'));
         const side = this.safeString(order, 'side');
         let type = this.safeString(order, 'order_type');
-        type = type.replace('_order', '');
+        if (type !== undefined) {
+            type = type.replace('_order', '');
+        }
         const price = this.safeString(order, 'limit_price');
         const amount = this.safeString(order, 'size');
         const remaining = this.safeString(order, 'unfilled_size');
@@ -153776,6 +153894,63 @@ class delta extends _abstract_delta_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                 'info': response,
             }),
         ];
+    }
+    /**
+     * @method
+     * @name delta#fetchOrder
+     * @description fetches information on an order made by the user
+     * @see https://docs.delta.exchange/#get-order-by-id
+     * @see https://docs.delta.exchange/#get-order-by-client-oid
+     * @param {string} id the order id
+     * @param {string} [symbol] unified symbol of the market the order was made in
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.clientOrderId] client order id of the order
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async fetchOrder(id, symbol = undefined, params = {}) {
+        await this.loadMarkets();
+        let market = undefined;
+        if (symbol !== undefined) {
+            market = this.market(symbol);
+        }
+        const clientOrderId = this.safeStringN(params, ['clientOrderId', 'client_oid', 'clientOid']);
+        params = this.omit(params, ['clientOrderId', 'client_oid', 'clientOid']);
+        const request = {};
+        let response = undefined;
+        if (clientOrderId !== undefined) {
+            request['client_oid'] = clientOrderId;
+            response = await this.privateGetOrdersClientOrderIdClientOid(this.extend(request, params));
+        }
+        else {
+            request['order_id'] = id;
+            response = await this.privateGetOrdersOrderId(this.extend(request, params));
+        }
+        //
+        //     {
+        //         "success": true,
+        //         "result": {
+        //             "id": 123,
+        //             "user_id": 453671,
+        //             "size": 10,
+        //             "unfilled_size": 2,
+        //             "side": "buy",
+        //             "order_type": "limit_order",
+        //             "limit_price": "59000",
+        //             "stop_order_type": "stop_loss_order",
+        //             "stop_price": "55000",
+        //             "paid_commission": "0.5432",
+        //             "commission": "0.5432",
+        //             "reduce_only": false,
+        //             "client_order_id": "my_signal_34521712",
+        //             "state": "open",
+        //             "created_at": "1725865012000000",
+        //             "product_id": 27,
+        //             "product_symbol": "BTCUSD"
+        //         }
+        //     }
+        //
+        const result = this.safeDict(response, 'result', {});
+        return this.parseOrder(result, market);
     }
     /**
      * @method
@@ -159971,7 +160146,7 @@ class derive extends _abstract_derive_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             'last': undefined,
             'previousClose': undefined,
             'change': change,
-            'percentage': _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .A.stringMul(change, '100'),
+            'percentage': _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringMul(change, '100'),
             'average': undefined,
             'baseVolume': undefined,
             'quoteVolume': undefined,
@@ -160241,7 +160416,7 @@ class derive extends _abstract_derive_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         return this.signHash(this.hashMessage(message), privateKey.slice(-64));
     }
     parseUnits(num, dec = '1000000000000000000') {
-        return _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .A.stringMul(num, dec);
+        return _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringMul(num, dec);
     }
     /**
      * @method
@@ -161303,7 +161478,7 @@ class derive extends _abstract_derive_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         market = this.safeMarket(contract, market);
         let size = this.safeString(position, 'amount');
         let side = undefined;
-        if (_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .A.stringGt(size, '0')) {
+        if (_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringGt(size, '0')) {
             side = 'long';
         }
         else {
@@ -161313,8 +161488,8 @@ class derive extends _abstract_derive_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         const markPrice = this.safeString(position, 'mark_price');
         const timestamp = this.safeInteger(position, 'creation_timestamp');
         const unrealisedPnl = this.safeString(position, 'unrealized_pnl');
-        size = _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .A.stringAbs(size);
-        const notional = _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .A.stringMul(size, markPrice);
+        size = _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringAbs(size);
+        const notional = _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringMul(size, markPrice);
         return this.safePosition({
             'info': position,
             'id': undefined,
@@ -161533,7 +161708,7 @@ class derive extends _abstract_derive_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 }
                 else {
                     const amount = this.safeString(balance, 'amount');
-                    account['total'] = _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .A.stringAdd(account['total'], amount);
+                    account['total'] = _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringAdd(account['total'], amount);
                 }
                 result[code] = account;
             }
@@ -204060,7 +204235,7 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
      */
     async fetchCurrencies(params = {}) {
         if (this.checkRequiredCredentials(false)) {
-            await this.handleBuilderFeeApproval();
+            await this.initializeClient();
         }
         const request = {
             'type': 'meta',
@@ -205122,6 +205297,32 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
         };
         return this.signUserSignedAction(messageTypes, message);
     }
+    async setRef() {
+        if (this.safeBool(this.options, 'refSet', false)) {
+            return true;
+        }
+        this.options['refSet'] = true;
+        const action = {
+            'type': 'setReferrer',
+            'code': this.safeString(this.options, 'ref', 'CCXT1'),
+        };
+        const nonce = this.milliseconds();
+        const signature = this.signL1Action(action, nonce);
+        const request = {
+            'action': action,
+            'nonce': nonce,
+            'signature': signature,
+        };
+        let response = undefined;
+        try {
+            response = await this.privatePostExchange(request);
+            return response;
+        }
+        catch (e) {
+            response = undefined; // ignore this
+        }
+        return response;
+    }
     async approveBuilderFee(builder, maxFeeRate) {
         const nonce = this.milliseconds();
         const isSandboxMode = this.safeBool(this.options, 'sandboxMode', false);
@@ -205155,6 +205356,15 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
         // }
         //
         return await this.privatePostExchange(request);
+    }
+    async initializeClient() {
+        try {
+            await Promise.all([this.handleBuilderFeeApproval(), this.setRef()]);
+        }
+        catch (e) {
+            return false;
+        }
+        return true;
     }
     async handleBuilderFeeApproval() {
         const buildFee = this.safeBool(this.options, 'builderFee', true);
@@ -205214,7 +205424,7 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
      */
     async createOrders(orders, params = {}) {
         await this.loadMarkets();
-        await this.handleBuilderFeeApproval();
+        await this.initializeClient();
         const request = this.createOrdersRequest(orders, params);
         const response = await this.privatePostExchange(request);
         //
@@ -205466,6 +205676,7 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
             throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ArgumentsRequired(this.id + ' cancelOrders() requires a symbol argument');
         }
         await this.loadMarkets();
+        await this.initializeClient();
         const request = this.cancelOrdersRequest(ids, symbol, params);
         const response = await this.privatePostExchange(request);
         //
@@ -205569,6 +205780,7 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
     async cancelOrdersForSymbols(orders, params = {}) {
         this.checkRequiredCredentials();
         await this.loadMarkets();
+        await this.initializeClient();
         const nonce = this.milliseconds();
         const request = {
             'nonce': nonce,
@@ -205643,6 +205855,7 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
     async cancelAllOrdersAfter(timeout, params = {}) {
         this.checkRequiredCredentials();
         await this.loadMarkets();
+        await this.initializeClient();
         params = this.omit(params, ['clientOrderId', 'client_id']);
         const nonce = this.milliseconds();
         const request = {
@@ -205836,6 +206049,7 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
      */
     async editOrders(orders, params = {}) {
         await this.loadMarkets();
+        await this.initializeClient();
         const request = this.editOrdersRequest(orders, params);
         const response = await this.privatePostExchange(request);
         //
@@ -210378,6 +210592,7 @@ class kraken extends _abstract_kraken_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'createMarketOrderWithCost': false,
                 'createMarketSellOrderWithCost': false,
                 'createOrder': true,
+                'createOrders': true,
                 'createStopLimitOrder': true,
                 'createStopMarketOrder': true,
                 'createStopOrder': true,
@@ -210805,7 +211020,11 @@ class kraken extends _abstract_kraken_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                         'selfTradePrevention': true,
                         'iceberg': true, // todo implement
                     },
-                    'createOrders': undefined,
+                    'createOrders': {
+                        'min': 2,
+                        'max': 15,
+                        'sameSymbolOnly': true,
+                    },
                     'fetchMyTrades': {
                         'marginMode': false,
                         'limit': undefined,
@@ -212009,6 +212228,79 @@ class kraken extends _abstract_kraken_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         // becuase kraken only returns something like this: { order: 'buy 10.00000000 LTCUSD @ market' }
         // this usingCost flag is used to help the parsing but omited from the order
         return this.parseOrder(result);
+    }
+    /**
+     * @method
+     * @name kraken#createOrders
+     * @description create a list of trade orders
+     * @see https://docs.kraken.com/api/docs/rest-api/add-order-batch/
+     * @param {Array} orders list of orders to create, each object should contain the parameters required by createOrder, namely symbol, type, side, amount, price and params
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async createOrders(orders, params = {}) {
+        await this.loadMarkets();
+        const ordersRequests = [];
+        let orderSymbols = [];
+        let symbol = undefined;
+        let market = undefined;
+        for (let i = 0; i < orders.length; i++) {
+            const rawOrder = orders[i];
+            const marketId = this.safeString(rawOrder, 'symbol');
+            if (symbol === undefined) {
+                symbol = marketId;
+            }
+            else {
+                if (symbol !== marketId) {
+                    throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest(this.id + ' createOrders() requires all orders to have the same symbol');
+                }
+            }
+            market = this.market(marketId);
+            orderSymbols.push(marketId);
+            const type = this.safeString(rawOrder, 'type');
+            const side = this.safeString(rawOrder, 'side');
+            const amount = this.safeValue(rawOrder, 'amount');
+            const price = this.safeValue(rawOrder, 'price');
+            const orderParams = this.safeDict(rawOrder, 'params', {});
+            const req = {
+                'type': side,
+                'ordertype': type,
+                'volume': this.amountToPrecision(market['symbol'], amount),
+            };
+            const orderRequest = this.orderRequest('createOrders', marketId, type, req, amount, price, orderParams);
+            ordersRequests.push(orderRequest[0]);
+        }
+        orderSymbols = this.marketSymbols(orderSymbols, undefined, false, true, true);
+        let response = undefined;
+        let request = {
+            'orders': ordersRequests,
+            'pair': market['id'],
+        };
+        request = this.extend(request, params);
+        response = await this.privatePostAddOrderBatch(request);
+        //
+        //         {
+        //    "error":[
+        //    ],
+        //    "result":{
+        //       "orders":[
+        //          {
+        //             "txid":"OEPPJX-34RMM-OROGZE",
+        //             "descr":{
+        //                "order":"sell 6.000000 ADAUSDC @ limit 0.400000"
+        //             }
+        //          },
+        //          {
+        //             "txid":"OLQY7O-OYBXW-W23PGL",
+        //             "descr":{
+        //                "order":"sell 6.000000 ADAUSDC @ limit 0.400000"
+        //             }
+        //          }
+        //       ]
+        //     }
+        //
+        const result = this.safeDict(response, 'result', {});
+        return this.parseOrders(this.safeList(result, 'orders'));
     }
     findMarketByAltnameOrId(id) {
         const marketsByAltname = this.safeValue(this.options, 'marketsByAltname', {});
@@ -213802,10 +214094,11 @@ class kraken extends _abstract_kraken_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 isTriggerPercent = (price.endsWith('%')) ? true : false;
             }
             const isCancelOrderBatch = (path === 'CancelOrderBatch');
+            const isBatchOrder = (path === 'AddOrderBatch');
             this.checkRequiredCredentials();
             const nonce = this.nonce().toString();
             // urlencodeNested is used to address https://github.com/ccxt/ccxt/issues/12872
-            if (isCancelOrderBatch || isTriggerPercent) {
+            if (isCancelOrderBatch || isTriggerPercent || isBatchOrder) {
                 body = this.json(this.extend({ 'nonce': nonce }, params));
             }
             else {
@@ -213821,7 +214114,7 @@ class kraken extends _abstract_kraken_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'API-Key': this.apiKey,
                 'API-Sign': signature,
             };
-            if (isCancelOrderBatch || isTriggerPercent) {
+            if (isCancelOrderBatch || isTriggerPercent || isBatchOrder) {
                 headers['Content-Type'] = 'application/json';
             }
             else {
@@ -213846,16 +214139,32 @@ class kraken extends _abstract_kraken_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         }
         if (body[0] === '{') {
             if (typeof response !== 'string') {
+                const message = this.id + ' ' + body;
                 if ('error' in response) {
                     const numErrors = response['error'].length;
                     if (numErrors) {
-                        const message = this.id + ' ' + body;
                         for (let i = 0; i < response['error'].length; i++) {
                             const error = response['error'][i];
                             this.throwExactlyMatchedException(this.exceptions['exact'], error, message);
                             this.throwBroadlyMatchedException(this.exceptions['broad'], error, message);
                         }
                         throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.ExchangeError(message);
+                    }
+                }
+                // handleCreateOrdersErrors:
+                if ('result' in response) {
+                    const result = this.safeDict(response, 'result', {});
+                    if ('orders' in result) {
+                        const orders = this.safeList(result, 'orders', []);
+                        for (let i = 0; i < orders.length; i++) {
+                            const order = orders[i];
+                            const error = this.safeString(order, 'error');
+                            if (error !== undefined) {
+                                this.throwExactlyMatchedException(this.exceptions['exact'], error, message);
+                                this.throwBroadlyMatchedException(this.exceptions['broad'], error, message);
+                                throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.ExchangeError(message);
+                            }
+                        }
                     }
                 }
             }
@@ -217297,6 +217606,7 @@ class kucoin extends _abstract_kucoin_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             'precisionMode': _base_functions_number_js__WEBPACK_IMPORTED_MODULE_1__/* .TICK_SIZE */ .kb,
             'exceptions': {
                 'exact': {
+                    'Order not exist or not allow to be cancelled': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.OrderNotFound,
                     'The order does not exist.': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.OrderNotFound,
                     'order not exist': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.OrderNotFound,
                     'order not exist.': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.OrderNotFound,
@@ -233878,6 +234188,7 @@ class mexc extends _abstract_mexc_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                     '30029': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
                     '30032': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
                     '30041': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
+                    '30087': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
                     '60005': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.ExchangeError,
                     '700001': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.AuthenticationError,
                     '700002': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.AuthenticationError,
@@ -249228,6 +249539,12 @@ class okx extends _abstract_okx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
         //         "uly": "BTC-USD"
         //     }
         //
+        // for swap "preopen" markets, only `instId` and `instType` are present
+        //
+        //         instId: "ETH-USD_UM-SWAP",
+        //         instType: "SWAP",
+        //         state: "preopen",
+        //
         const id = this.safeString(market, 'instId');
         let type = this.safeStringLower(market, 'instType');
         if (type === 'futures') {
@@ -249257,6 +249574,10 @@ class okx extends _abstract_okx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
         const base = this.safeCurrencyCode(baseId);
         const quote = this.safeCurrencyCode(quoteId);
         let symbol = base + '/' + quote;
+        // handle preopen empty markets
+        if (base === '' || quote === '') {
+            symbol = id;
+        }
         let expiry = undefined;
         let strikePrice = undefined;
         let optionType = undefined;
@@ -317065,7 +317386,7 @@ class gate extends _gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         const timestamp = this.safeInteger(liquidation, 'time_ms');
         const originalSize = this.safeString(liquidation, 'size');
         const left = this.safeString(liquidation, 'left');
-        const amount = _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .A.stringAbs(_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .A.stringSub(originalSize, left));
+        const amount = _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringAbs(_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringSub(originalSize, left));
         return this.safeLiquidation({
             'info': liquidation,
             'symbol': this.safeSymbol(marketId, market),
@@ -318119,7 +318440,7 @@ class gemini extends _gemini_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
             const rawSide = this.safeString(entry, 'side');
             const price = this.safeNumber(entry, 'price');
             const sizeString = this.safeString(entry, 'remaining');
-            if (_base_Precise_js__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .A.stringEq(sizeString, '0')) {
+            if (_base_Precise_js__WEBPACK_IMPORTED_MODULE_2__/* .Precise */ .Y.stringEq(sizeString, '0')) {
                 continue;
             }
             const size = this.parseNumber(sizeString);
@@ -340320,7 +340641,7 @@ class onetrading extends _onetrading_js__WEBPACK_IMPORTED_MODULE_0__/* ["default
             symbol = previousOrder['symbol'];
             const filled = this.safeString(update, 'filled_amount');
             let status = this.parseWsOrderStatus(updateType);
-            if (updateType === 'ORDER_CLOSED' && _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .A.stringEq(filled, '0')) {
+            if (updateType === 'ORDER_CLOSED' && _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringEq(filled, '0')) {
                 status = 'canceled';
             }
             const orderObject = {
@@ -347798,12 +348119,36 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             'hostname': this.hostname,
         });
         url += '/private';
+        const client = this.client(url);
+        // Track private channel subscriptions to support multiple concurrent watches
+        const subscriptionsKey = 'upbitPrivateSubscriptions';
+        if (!(subscriptionsKey in client.subscriptions)) {
+            client.subscriptions[subscriptionsKey] = {};
+        }
+        let channelKey = channel;
+        if (symbol !== undefined) {
+            channelKey = channel + ':' + symbol;
+        }
+        const subscriptions = client.subscriptions[subscriptionsKey];
+        const isNewChannel = !(channelKey in subscriptions);
+        if (isNewChannel) {
+            subscriptions[channelKey] = request;
+        }
+        // Build subscription message with all requested private channels
+        // Format: [{'ticket': uuid}, {'type': 'myOrder'}, {'type': 'myAsset'}, ...]
+        const requests = [];
+        const channelKeys = Object.keys(subscriptions);
+        for (let i = 0; i < channelKeys.length; i++) {
+            requests.push(subscriptions[channelKeys[i]]);
+        }
         const message = [
             {
                 'ticket': this.uuid(),
             },
-            request,
         ];
+        for (let i = 0; i < requests.length; i++) {
+            message.push(requests[i]);
+        }
         return await this.watch(url, messageHash, message, messageHash);
     }
     /**
@@ -392001,9 +392346,7 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
                         'post': {
                             'order': 1,
                             'order/cancel_all_after': 1,
-                            'asset/main_sub_transfer': 30,
                             'asset/ltv': 30,
-                            'asset/withdraw': 30,
                             'asset/internal_withdraw': 30,
                             'interest/repay': 60,
                             'client/account_mode': 120,
@@ -392077,7 +392420,6 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
                             'spotMargin/maxMargin': 60,
                             'algo/order/{oid}': 1,
                             'algo/orders': 1,
-                            'balances': 1,
                             'positions': 3.33,
                             'buypower': 1,
                             'convert/exchangeInfo': 1,
@@ -394212,7 +394554,7 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
      */
     async fetchBalance(params = {}) {
         await this.loadMarkets();
-        const response = await this.v3PrivateGetBalances(params);
+        const response = await this.v3PrivateGetAssetBalances(params);
         //
         //     {
         //         "success": true,
@@ -394542,14 +394884,14 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
         const networkizedCode = this.safeString(transaction, 'token');
         const currencyDefined = this.getCurrencyFromChaincode(networkizedCode, currency);
         const code = currencyDefined['code'];
-        let movementDirection = this.safeStringLower2(transaction, 'token_side', 'tokenSide');
+        let movementDirection = this.safeStringLowerN(transaction, ['token_side', 'tokenSide', 'type']);
         if (movementDirection === 'withdraw') {
             movementDirection = 'withdrawal';
         }
         const fee = this.parseTokenAndFeeTemp(transaction, ['fee_token', 'feeToken'], ['fee_amount', 'feeAmount']);
-        const addressTo = this.safeString2(transaction, 'target_address', 'targetAddress');
+        const addressTo = this.safeStringN(transaction, ['target_address', 'targetAddress', 'addressTo']);
         const addressFrom = this.safeString2(transaction, 'source_address', 'sourceAddress');
-        const timestamp = this.safeTimestamp2(transaction, 'created_time', 'createdTime');
+        const timestamp = this.safeTimestampN(transaction, ['created_time', 'createdTime'], this.safeInteger(transaction, 'timestamp'));
         return {
             'info': transaction,
             'id': this.safeStringN(transaction, ['id', 'withdraw_id', 'withdrawId']),
@@ -394559,7 +394901,7 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
             'address': undefined,
             'addressFrom': addressFrom,
             'addressTo': addressTo,
-            'tag': this.safeString(transaction, 'extra'),
+            'tag': this.safeString2(transaction, 'extra', 'tag'),
             'tagFrom': undefined,
             'tagTo': undefined,
             'type': movementDirection,
@@ -394570,7 +394912,7 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
             'comment': undefined,
             'internal': undefined,
             'fee': fee,
-            'network': undefined,
+            'network': this.networkIdToCode(this.safeString(transaction, 'network')),
         };
     }
     parseTransactionStatus(status) {
@@ -394601,17 +394943,25 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
         const request = {
             'token': currency['id'],
             'amount': this.parseToNumeric(amount),
-            'from_application_id': fromAccount,
-            'to_application_id': toAccount,
+            'from': {
+                'applicationId': fromAccount,
+            },
+            'to': {
+                'applicationId': toAccount,
+            },
         };
-        const response = await this.v1PrivatePostAssetMainSubTransfer(this.extend(request, params));
+        const response = await this.v3PrivatePostAssetTransfer(this.extend(request, params));
         //
         //     {
         //         "success": true,
         //         "id": 200
         //     }
         //
-        const transfer = this.parseTransfer(response, currency);
+        const data = this.safeDict(response, 'data', {});
+        data['timestamp'] = this.safeInteger(response, 'timestamp');
+        data['token'] = currency['id'];
+        data['status'] = 'ok';
+        const transfer = this.parseTransfer(data, currency);
         const transferOptions = this.safeDict(this.options, 'transfer', {});
         const fillResponseFromRequest = this.safeBool(transferOptions, 'fillResponseFromRequest', true);
         if (fillResponseFromRequest) {
@@ -394725,7 +395075,7 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
         //        }
         //
         const code = this.safeCurrencyCode(this.safeString(transfer, 'token'), currency);
-        const timestamp = this.safeTimestamp(transfer, 'createdTime');
+        const timestamp = this.safeTimestamp2(transfer, 'createdTime', 'timestamp');
         const success = this.safeBool(transfer, 'success');
         let status = undefined;
         if (success !== undefined) {
@@ -394759,7 +395109,7 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
      * @method
      * @name woo#withdraw
      * @description make a withdrawal
-     * @see https://docs.woox.io/#token-withdraw
+     * @see https://docs.woox.io/#token-withdraw-v3
      * @param {string} code unified currency code
      * @param {float} amount the amount to withdraw
      * @param {string} address the address to withdraw to
@@ -394779,17 +395129,33 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
         if (tag !== undefined) {
             request['extra'] = tag;
         }
-        let specialNetworkId = undefined;
-        [specialNetworkId, params] = this.getDedicatedNetworkId(currency, params);
-        request['token'] = specialNetworkId;
-        const response = await this.v1PrivatePostAssetWithdraw(this.extend(request, params));
+        const network = this.safeString(params, 'network');
+        if (network === undefined) {
+            throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ArgumentsRequired(this.id + ' withdraw() requires a network parameter for ' + code);
+        }
+        params = this.omit(params, 'network');
+        request['token'] = currency['id'];
+        request['network'] = this.networkCodeToId(network);
+        const response = await this.v3PrivatePostAssetWalletWithdraw(this.extend(request, params));
         //
         //     {
         //         "success": true,
         //         "withdraw_id": "20200119145703654"
         //     }
         //
-        return this.parseTransaction(response, currency);
+        const data = this.safeDict(response, 'data', {});
+        const transactionData = this.extend(data, {
+            'id': this.safeString(data, 'withdrawId'),
+            'timestamp': this.safeInteger(response, 'timestamp'),
+            'currency': code,
+            'amount': amount,
+            'addressTo': address,
+            'tag': tag,
+            'network': network,
+            'type': 'withdrawal',
+            'status': 'pending',
+        });
+        return this.parseTransaction(transactionData, currency);
     }
     /**
      * @method
@@ -425351,7 +425717,7 @@ SOFTWARE.
 
 //-----------------------------------------------------------------------------
 // this is updated by vss.js when building
-const ccxt_version = '4.5.14';
+const ccxt_version = '4.5.16';
 ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k.ccxtVersion = ccxt_version;
 //-----------------------------------------------------------------------------
 
