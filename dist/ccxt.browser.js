@@ -97959,11 +97959,14 @@ class blofin extends _abstract_blofin_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             timeInForce = 'IOC';
             type = 'limit';
         }
+        else if (type === 'conditional') {
+            type = 'trigger';
+        }
         const marketId = this.safeString(order, 'instId');
         market = this.safeMarket(marketId, market);
         const symbol = this.safeSymbol(marketId, market, '-');
         const filled = this.safeString(order, 'filledSize');
-        const price = this.safeString2(order, 'px', 'price');
+        const price = this.safeStringN(order, ['px', 'price', 'orderPrice']);
         const average = this.safeString(order, 'averagePrice');
         const status = this.parseOrderStatus(this.safeString(order, 'state'));
         const feeCostString = this.safeString(order, 'fee');
@@ -282360,6 +282363,28 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
     }
     /**
      * @method
+     * @name binance#unWatchMarkPrices
+     * @description stops watching the mark price for all markets
+     * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream-for-All-market
+     * @param {string[]} symbols unified symbol of the market to fetch the ticker for
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {boolean} [params.use1sFreq] *default is true* if set to true, the mark price will be updated every second, otherwise every 3 seconds
+     * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/#/?id=ticker-structure}
+     */
+    async unWatchMarkPrices(symbols = undefined, params = {}) {
+        let channelName = undefined;
+        // for now watchmarkPrice uses the same messageHash as watchTicker
+        // so it's impossible to watch both at the same time
+        // refactor this to use different messageHashes
+        [channelName, params] = this.handleOptionAndParams(params, 'watchMarkPrices', 'name', 'markPrice');
+        const newTickers = await this.watchMultiTickerHelper('watchMarkPrices', channelName, symbols, params);
+        if (this.newUpdates) {
+            return newTickers;
+        }
+        return this.filterByArray(this.tickers, 'symbol', symbols);
+    }
+    /**
+     * @method
      * @name binance#watchTickers
      * @description watches a price ticker, a statistical calculation with the information calculated over the past 24 hours for all markets of a specific list
      * @see https://developers.binance.com/docs/binance-spot-api-docs/web-socket-streams#individual-symbol-mini-ticker-stream
@@ -282881,7 +282906,8 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         return extendedParams;
     }
     /**
-     * Ensures a User Data Stream WebSocket subscription is active for the specified scope
+     * @name binance#ensureUserDataStreamWsSubscribeSignature
+     * @description watches best bid & ask for symbols
      * @param marketType {string} only support on 'spot'
      * @see {@link https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/user-data-stream-requests#subscribe-to-user-data-stream-through-signature-subscription-user_data Binance User Data Stream Documentation}
      * @returns Promise<number> The subscription ID for the user data stream
@@ -299989,10 +300015,13 @@ class blofin extends _blofin_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
      * @method
      * @name biofin#watchOrders
      * @description watches information on multiple orders made by the user
+     * @see https://docs.blofin.com/index.html#ws-order-channel
+     * @see https://docs.blofin.com/index.html#ws-algo-orders-channel
      * @param {string} symbol unified market symbol of the market orders were made in
      * @param {int} [since] the earliest time in ms to fetch orders for
      * @param {int} [limit] the maximum number of order structures to retrieve
      * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {boolean} [params.trigger] set to true for trigger orders
      * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure
      */
     async watchOrders(symbol = undefined, since = undefined, limit = undefined, params = {}) {
@@ -300005,16 +300034,21 @@ class blofin extends _blofin_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
      * @name blofin#watchOrdersForSymbols
      * @description watches information on multiple orders made by the user across multiple symbols
      * @see https://docs.blofin.com/index.html#ws-order-channel
+     * @see https://docs.blofin.com/index.html#ws-algo-orders-channel
      * @param {string[]} symbols
      * @param {int} [since] the earliest time in ms to fetch orders for
      * @param {int} [limit] the maximum number of order structures to retrieve
      * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {boolean} [params.trigger] set to true for trigger orders
      * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure
      */
     async watchOrdersForSymbols(symbols, since = undefined, limit = undefined, params = {}) {
         await this.authenticate();
         await this.loadMarkets();
-        const orders = await this.watchMultipleWrapper(false, 'orders', 'watchOrdersForSymbols', symbols, params);
+        const trigger = this.safeValue2(params, 'stop', 'trigger');
+        params = this.omit(params, ['stop', 'trigger']);
+        const channel = trigger ? 'orders-algo' : 'orders';
+        const orders = await this.watchMultipleWrapper(false, channel, 'watchOrdersForSymbols', symbols, params);
         if (this.newUpdates) {
             const first = this.safeValue(orders, 0);
             const tradeSymbol = this.safeString(first, 'symbol');
@@ -300152,7 +300186,7 @@ class blofin extends _blofin_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
             messageHashes.push(channelName);
         }
         // private channel are difference, they only need plural channel name for multiple symbols
-        if (this.inArray(channelName, ['orders', 'positions'])) {
+        if (this.inArray(channelName, ['orders', 'orders-algo', 'positions'])) {
             rawSubscriptions = [{ 'channel': channelName }];
         }
         const request = this.getSubscriptionRequest(rawSubscriptions);
@@ -300190,6 +300224,7 @@ class blofin extends _blofin_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
             // private
             'account': this.handleBalance,
             'orders': this.handleOrders,
+            'orders-algo': this.handleOrders,
             'positions': this.handlePositions,
         };
         let method = undefined;
