@@ -326514,7 +326514,11 @@ class kraken extends _kraken_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
         //
         const data = this.safeList(message, 'data', []);
         const first = data[0];
-        const symbol = this.safeString(first, 'symbol');
+        const marketId = this.safeString(first, 'symbol');
+        const symbol = this.safeSymbol(marketId);
+        if (!(symbol in this.ohlcvs)) {
+            this.ohlcvs[symbol] = {};
+        }
         const interval = this.safeInteger(first, 'interval');
         const timeframe = this.findTimeframe(interval);
         const messageHash = this.getMessageHash('ohlcv', undefined, symbol);
