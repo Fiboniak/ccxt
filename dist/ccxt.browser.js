@@ -722,6 +722,22 @@ class Exchange extends _base_Exchange_js__WEBPACK_IMPORTED_MODULE_0__/* .Exchang
 
 /***/ }),
 
+/***/ 1786:
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _base_Exchange_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2961);
+// -------------------------------------------------------------------------------
+
+class Exchange extends _base_Exchange_js__WEBPACK_IMPORTED_MODULE_0__/* .Exchange */ .k {
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Exchange);
+
+
+/***/ }),
+
 /***/ 9872:
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -21750,7 +21766,7 @@ class Exchange {
                     }
                 }
             }
-            else if (topic === 'ticker' && (this.tickers !== undefined)) {
+            else if ((topic === 'ticker' || topic === 'markPrice') && (this.tickers !== undefined)) {
                 const tickerSymbols = Object.keys(this.tickers);
                 for (let i = 0; i < tickerSymbols.length; i++) {
                     const tickerSymbol = tickerSymbols[i];
@@ -104125,8 +104141,11 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                         'v5/broker/account-info': 5,
                         'v5/broker/asset/query-sub-member-deposit-record': 10,
                         // earn
+                        'v5/earn/product': 5,
                         'v5/earn/order': 5,
                         'v5/earn/position': 5,
+                        'v5/earn/yield': 5,
+                        'v5/earn/hourly-yield': 5,
                     },
                     'post': {
                         // spot
@@ -149604,6 +149623,3037 @@ class cryptomus extends _abstract_cryptomus_js__WEBPACK_IMPORTED_MODULE_0__/* ["
             this.throwExactlyMatchedException(this.exceptions['exact'], message, feedback);
             this.throwBroadlyMatchedException(this.exceptions['broad'], message, feedback);
             throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ExchangeError(feedback); // unknown message
+        }
+        return undefined;
+    }
+}
+
+
+/***/ }),
+
+/***/ 763:
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   A: () => (/* binding */ deepcoin)
+/* harmony export */ });
+/* harmony import */ var _abstract_deepcoin_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1786);
+/* harmony import */ var _base_functions_number_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1579);
+/* harmony import */ var _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(4852);
+/* harmony import */ var _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(5147);
+/* harmony import */ var _ccxt_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2079);
+// ---------------------------------------------------------------------------
+
+
+
+
+
+// ---------------------------------------------------------------------------
+/**
+ * @class deepcoin
+ * @augments Exchange
+ */
+class deepcoin extends _abstract_deepcoin_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
+    describe() {
+        return this.deepExtend(super.describe(), {
+            'id': 'deepcoin',
+            'name': 'DeepCoin',
+            'countries': ['SG'],
+            'rateLimit': 200,
+            'version': 'v1',
+            'certified': false,
+            'pro': true,
+            'has': {
+                'CORS': undefined,
+                'spot': true,
+                'margin': true,
+                'swap': true,
+                'future': false,
+                'option': false,
+                'addMargin': false,
+                'cancelAllOrders': true,
+                'cancelAllOrdersAfter': false,
+                'cancelOrder': true,
+                'cancelOrders': true,
+                'cancelWithdraw': false,
+                'closePosition': true,
+                'createConvertTrade': false,
+                'createDepositAddress': false,
+                'createLimitBuyOrder': true,
+                'createLimitOrder': true,
+                'createLimitSellOrder': true,
+                'createMarketBuyOrder': true,
+                'createMarketBuyOrderWithCost': true,
+                'createMarketOrder': true,
+                'createMarketOrderWithCost': true,
+                'createMarketSellOrder': true,
+                'createMarketSellOrderWithCost': true,
+                'createOrder': true,
+                'createOrders': false,
+                'createOrderWithTakeProfitAndStopLoss': true,
+                'createPostOnlyOrder': true,
+                'createReduceOnlyOrder': true,
+                'createStopLossOrder': false,
+                'createTakeProfitOrder': false,
+                'createTrailingAmountOrder': false,
+                'createTrailingPercentOrder': false,
+                'createTriggerOrder': true,
+                'editOrder': true,
+                'fetchAccounts': false,
+                'fetchBalance': true,
+                'fetchCanceledAndClosedOrders': true,
+                'fetchCanceledOrders': true,
+                'fetchClosedOrder': true,
+                'fetchClosedOrders': true,
+                'fetchConvertCurrencies': false,
+                'fetchConvertQuote': false,
+                'fetchConvertTrade': false,
+                'fetchConvertTradeHistory': false,
+                'fetchCurrencies': false,
+                'fetchDepositAddress': true,
+                'fetchDepositAddresses': true,
+                'fetchDeposits': true,
+                'fetchDepositsWithdrawals': false,
+                'fetchDepositWithdrawFees': false,
+                'fetchFundingHistory': false,
+                'fetchFundingRate': true,
+                'fetchFundingRateHistory': true,
+                'fetchFundingRates': true,
+                'fetchIndexOHLCV': true,
+                'fetchLedger': true,
+                'fetchLeverage': false,
+                'fetchLeverageTiers': false,
+                'fetchMarginAdjustmentHistory': false,
+                'fetchMarginMode': false,
+                'fetchMarkets': true,
+                'fetchMarkOHLCV': true,
+                'fetchMyTrades': true,
+                'fetchOHLCV': true,
+                'fetchOpenInterest': false,
+                'fetchOpenInterestHistory': false,
+                'fetchOpenOrder': true,
+                'fetchOpenOrders': true,
+                'fetchOrder': false,
+                'fetchOrderBook': true,
+                'fetchOrders': false,
+                'fetchOrderTrades': true,
+                'fetchPosition': true,
+                'fetchPositionHistory': false,
+                'fetchPositionMode': false,
+                'fetchPositions': true,
+                'fetchPositionsForSymbol': true,
+                'fetchPositionsHistory': true,
+                'fetchPremiumIndexOHLCV': false,
+                'fetchStatus': false,
+                'fetchTicker': false,
+                'fetchTickers': true,
+                'fetchTime': false,
+                'fetchTrades': true,
+                'fetchTradingFee': false,
+                'fetchTradingFees': false,
+                'fetchTransactions': false,
+                'fetchTransfers': false,
+                'fetchWithdrawals': true,
+                'reduceMargin': false,
+                'sandbox': false,
+                'setLeverage': true,
+                'setMargin': false,
+                'setMarginMode': false,
+                'setPositionMode': false,
+                'transfer': true,
+                'withdraw': false,
+            },
+            'timeframes': {
+                '1m': '1m',
+                '5m': '5m',
+                '15m': '15m',
+                '30m': '30m',
+                '1h': '1H',
+                '4h': '4H',
+                '12h': '12H',
+                '1d': '1D',
+                '1w': '1W',
+                '1M': '1M',
+                '1y': '1Y',
+            },
+            'urls': {
+                'logo': 'https://github.com/user-attachments/assets/671bd35c-770e-4935-9070-f8fb114f79c4',
+                'api': {
+                    'public': 'https://api.deepcoin.com',
+                    'private': 'https://api.deepcoin.com',
+                },
+                'www': 'https://www.deepcoin.com/',
+                'doc': 'https://www.deepcoin.com/docs',
+                'referral': {
+                    'url': 'https://s.deepcoin.com/UzkyODgy',
+                    'discount': 0.1,
+                },
+            },
+            'api': {
+                'public': {
+                    'get': {
+                        'deepcoin/market/books': 1,
+                        'deepcoin/market/candles': 1,
+                        'deepcoin/market/instruments': 1,
+                        'deepcoin/market/tickers': 1,
+                        'deepcoin/market/index-candles': 1,
+                        'deepcoin/market/trades': 1,
+                        'deepcoin/market/mark-price-candles': 1,
+                        'deepcoin/market/step-margin': 5,
+                    },
+                },
+                'private': {
+                    'get': {
+                        'deepcoin/account/balances': 5,
+                        'deepcoin/account/bills': 5,
+                        'deepcoin/account/positions': 5,
+                        'deepcoin/trade/fills': 5,
+                        'deepcoin/trade/orderByID': 5,
+                        'deepcoin/trade/finishOrderByID': 5,
+                        'deepcoin/trade/orders-history': 5,
+                        'deepcoin/trade/v2/orders-pending': 5,
+                        'deepcoin/trade/funding-rate': 5,
+                        'deepcoin/trade/fund-rate/current-funding-rate': 5,
+                        'deepcoin/trade/fund-rate/history': 5,
+                        'deepcoin/trade/trigger-orders-pending': 5,
+                        'deepcoin/trade/trigger-orders-history': 5,
+                        'deepcoin/copytrading/support-contracts': 5,
+                        'deepcoin/copytrading/leader-position': 5,
+                        'deepcoin/copytrading/estimate-profit': 5,
+                        'deepcoin/copytrading/history-profit': 5,
+                        'deepcoin/copytrading/follower-rank': 5,
+                        'deepcoin/internal-transfer/support': 5,
+                        'deepcoin/internal-transfer/history-order': 5,
+                        'deepcoin/rebate/config': 5,
+                        'deepcoin/agents/users': 5,
+                        'deepcoin/agents/users/rebate-list': 5,
+                        'deepcoin/agents/users/rebates': 5,
+                        'deepcoin/asset/deposit-list': 5,
+                        'deepcoin/asset/withdraw-list': 5,
+                        'deepcoin/asset/recharge-chain-list': 5,
+                        'deepcoin/listenkey/acquire': 5,
+                        'deepcoin/listenkey/extend': 5,
+                    },
+                    'post': {
+                        'deepcoin/account/set-leverage': 5,
+                        'deepcoin/trade/order': 5,
+                        'deepcoin/trade/replace-order': 5,
+                        'deepcoin/trade/cancel-order': 5,
+                        'deepcoin/trade/batch-cancel-order': 5,
+                        'deepcoin/trade/cancel-trigger-order': 1 / 6,
+                        'deepcoin/trade/swap/cancel-all': 5,
+                        'deepcoin/trade/trigger-order': 5,
+                        'deepcoin/trade/batch-close-position': 5,
+                        'deepcoin/trade/replace-order-sltp': 5,
+                        'deepcoin/trade/close-position-by-ids': 5,
+                        'deepcoin/copytrading/leader-settings': 5,
+                        'deepcoin/copytrading/set-contracts': 5,
+                        'deepcoin/internal-transfer': 5,
+                        'deepcoin/rebate/config': 5,
+                        'deepcoin/asset/transfer': 5,
+                    },
+                },
+            },
+            'fees': {
+                'trading': {
+                    'taker': this.parseNumber('0.0015'),
+                    'maker': this.parseNumber('0.0010'),
+                },
+            },
+            'features': {
+                'spot': {
+                    'sandbox': false,
+                    'createOrder': {
+                        'marginMode': true,
+                        'triggerPrice': true,
+                        'triggerPriceType': {
+                            'last': true,
+                            'mark': false,
+                            'index': false,
+                        },
+                        'triggerDirection': false,
+                        'stopLossPrice': true,
+                        'takeProfitPrice': true,
+                        'attachedStopLossTakeProfit': {
+                            'triggerPriceType': {
+                                'last': false,
+                                'mark': false,
+                                'index': false,
+                            },
+                            'price': true,
+                        },
+                        'timeInForce': {
+                            'IOC': true,
+                            'FOK': true,
+                            'PO': true,
+                            'GTD': false,
+                        },
+                        'hedged': true,
+                        'trailing': false,
+                        'marketBuyRequiresPrice': false,
+                    },
+                    'createOrders': undefined,
+                    'fetchMyTrades': {
+                        'marginMode': false,
+                        'limit': 100,
+                        'daysBack': 60,
+                        'untilDays': undefined,
+                        'symbolRequired': true,
+                    },
+                    'fetchOrder': undefined,
+                    'fetchOpenOrders': {
+                        'marginMode': false,
+                        'limit': 100,
+                        'trigger': true,
+                        'trailing': false,
+                        'symbolRequired': true,
+                    },
+                    'fetchOrders': undefined,
+                    'fetchClosedOrders': {
+                        'marginMode': false,
+                        'limit': 100,
+                        'daysBack': undefined,
+                        'daysBackCanceled': undefined,
+                        'untilDays': undefined,
+                        'trigger': true,
+                        'trailing': false,
+                        'symbolRequired': true,
+                    },
+                    'fetchOHLCV': {
+                        'limit': 300,
+                    },
+                },
+                'swap': {
+                    'linear': {
+                        'extends': 'spot',
+                    },
+                    'inverse': {
+                        'extends': 'spot',
+                    },
+                },
+            },
+            'requiredCredentials': {
+                'apiKey': true,
+                'secret': true,
+                'password': true,
+            },
+            'precisionMode': _base_functions_number_js__WEBPACK_IMPORTED_MODULE_1__/* .TICK_SIZE */ .kb,
+            'options': {
+                'recvWindow': 5000,
+                'defaultNetworks': {
+                    'ETH': 'ERC20',
+                    'USDT': 'TRC20',
+                    'USDC': 'ERC20',
+                },
+                'networks': {
+                    'ERC20': 'ERC20',
+                    'TRC20': 'TRC20',
+                    'ARB': 'ARBITRUM',
+                    'BSC': 'BSC(BEP20)',
+                    'SOL': 'SOL',
+                    'BTC': 'Bitcoin',
+                    'ADA': 'Cardano',
+                },
+                'networksById': {},
+                'fetchMarkets': {
+                    'types': ['spot', 'swap'], // spot, swap,
+                },
+                'timeInForce': {
+                    'GTC': 'GTC',
+                    'IOC': 'IOC',
+                    'PO': 'PO', // Post Only
+                },
+                'exchangeType': {
+                    'spot': 'SPOT',
+                    'swap': 'SWAP',
+                    'SPOT': 'SPOT',
+                    'SWAP': 'SWAP',
+                },
+                'accountsByType': {
+                    'spot': 1,
+                    'fund': 2,
+                    'rebate': 3,
+                    'inverse': 5,
+                    'linear': 7,
+                    'demo': 10,
+                },
+            },
+            'commonCurrencies': {},
+            'exceptions': {
+                'exact': {
+                    '24': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.OrderNotFound,
+                    '31': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.InsufficientFunds,
+                    '36': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.InsufficientFunds,
+                    '44': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
+                    '49': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
+                    '194': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
+                    '195': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
+                    '199': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
+                    '100010': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.InsufficientFunds,
+                    'unsupportedAction': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
+                    'localIDNotExist': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
+                },
+                'broad': {
+                    'no available': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.NotSupported,
+                    'field is required': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired,
+                    'not in acceptable range': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
+                    'subscription cluster does not "exist"': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
+                    'must be equal or lesser than': _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest, // {"code":"51","msg":"The Size value `100` must be equal or lesser than 50","data":null}
+                },
+            },
+        });
+    }
+    handleMarketTypeAndParams(methodName, market = undefined, params = {}, defaultValue = undefined) {
+        const instType = this.safeString(params, 'instType');
+        params = this.omit(params, 'instType');
+        const type = this.safeString(params, 'type');
+        if ((type === undefined) && (instType !== undefined)) {
+            params = this.extend(params, { 'type': instType });
+        }
+        return super.handleMarketTypeAndParams(methodName, market, params, defaultValue);
+    }
+    convertToInstrumentType(type) {
+        const exchangeTypes = this.safeDict(this.options, 'exchangeType', {});
+        return this.safeString(exchangeTypes, type, type);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchMarkets
+     * @see https://www.deepcoin.com/docs/DeepCoinMarket/getBaseInfo
+     * @description retrieves data on all markets for okcoin
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object[]} an array of objects representing market data
+     */
+    async fetchMarkets(params = {}) {
+        let types = ['spot', 'swap'];
+        const fetchMarketsOption = this.safeDict(this.options, 'fetchMarkets');
+        if (fetchMarketsOption !== undefined) {
+            types = this.safeList(fetchMarketsOption, 'types', types);
+        }
+        else {
+            types = this.safeList(this.options, 'fetchMarkets', types); // backward-support
+        }
+        let promises = [];
+        let result = [];
+        for (let i = 0; i < types.length; i++) {
+            promises.push(this.fetchMarketsByType(types[i], params));
+        }
+        promises = await Promise.all(promises);
+        for (let i = 0; i < promises.length; i++) {
+            result = this.arrayConcat(result, promises[i]);
+        }
+        return result;
+    }
+    async fetchMarketsByType(type, params = {}) {
+        const request = {
+            'instType': this.convertToInstrumentType(type),
+        };
+        const response = await this.publicGetDeepcoinMarketInstruments(this.extend(request, params));
+        //
+        // spot
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": [
+        //             {
+        //                 "instType": "SPOT",
+        //                 "instId": "A-USDT",
+        //                 "uly": "",
+        //                 "baseCcy": "A",
+        //                 "quoteCcy": "USDT",
+        //                 "ctVal": "1",
+        //                 "ctValCcy": "",
+        //                 "listTime": "0",
+        //                 "lever": "1",
+        //                 "tickSz": "0.0001",
+        //                 "lotSz": "0.001",
+        //                 "minSz": "0.5",
+        //                 "ctType": "",
+        //                 "alias": "",
+        //                 "state": "live",
+        //                 "maxLmtSz": "7692307",
+        //                 "maxMktSz": "7692307"
+        //             }
+        //         ]
+        //     }
+        //
+        const dataResponse = this.safeList(response, 'data', []);
+        return this.parseMarkets(dataResponse);
+    }
+    parseMarket(market) {
+        //
+        // spot markets
+        //
+        //     {
+        //         "instType": "SPOT",
+        //         "instId": "A-USDT",
+        //         "uly": "",
+        //         "baseCcy": "A",
+        //         "quoteCcy": "USDT",
+        //         "ctVal": "1",
+        //         "ctValCcy": "",
+        //         "listTime": "0",
+        //         "lever": "1",
+        //         "tickSz": "0.0001",
+        //         "lotSz": "0.001",
+        //         "minSz": "0.5",
+        //         "ctType": "",
+        //         "alias": "",
+        //         "state": "live",
+        //         "maxLmtSz": "7692307",
+        //         "maxMktSz": "7692307"
+        //     }
+        //
+        // swap markets
+        //
+        //     {
+        //         "instType": "SWAP",
+        //         "instId": "ZORA-USDT-SWAP",
+        //         "uly": "",
+        //         "baseCcy": "ZORA",
+        //         "quoteCcy": "USDT",
+        //         "ctVal": "1",
+        //         "ctValCcy": "",
+        //         "listTime": "0",
+        //         "lever": "20",
+        //         "tickSz": "0.00001",
+        //         "lotSz": "1",
+        //         "minSz": "1685",
+        //         "ctType": "",
+        //         "alias": "",
+        //         "state": "live",
+        //         "maxLmtSz": "10000000",
+        //         "maxMktSz": "10000000"
+        //     }
+        //
+        const id = this.safeString(market, 'instId');
+        const type = this.safeStringLower(market, 'instType');
+        const spot = (type === 'spot');
+        const swap = (type === 'swap');
+        const baseId = this.safeString(market, 'baseCcy');
+        const quoteId = this.safeString(market, 'quoteCcy', '');
+        let settleId = undefined;
+        let settle = undefined;
+        const base = this.safeCurrencyCode(baseId);
+        const quote = this.safeCurrencyCode(quoteId);
+        let symbol = base + '/' + quote;
+        let isLinear = undefined;
+        if (swap) {
+            isLinear = (quoteId !== 'USD');
+            settleId = isLinear ? quoteId : baseId;
+            settle = this.safeCurrencyCode(settleId);
+            symbol = symbol + ':' + settle;
+        }
+        const fees = this.safeDict2(this.fees, type, 'trading', {});
+        let maxLeverage = this.safeString(market, 'lever', '1');
+        maxLeverage = _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringMax(maxLeverage, '1');
+        const maxMarketSize = this.safeString(market, 'maxMktSz');
+        const maxLimitSize = this.safeString(market, 'maxLmtSz');
+        const maxAmount = this.parseNumber(_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringMax(maxMarketSize, maxLimitSize));
+        const state = this.safeString(market, 'state');
+        return this.extend(fees, {
+            'id': id,
+            'symbol': symbol,
+            'base': base,
+            'quote': quote,
+            'settle': settle,
+            'baseId': baseId,
+            'quoteId': quoteId,
+            'settleId': settleId,
+            'type': type,
+            'spot': spot,
+            'margin': spot && (_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringGt(maxLeverage, '1')),
+            'swap': swap,
+            'future': false,
+            'option': false,
+            'active': state === 'live',
+            'contract': swap,
+            'linear': isLinear,
+            'inverse': swap ? (!isLinear) : undefined,
+            'contractSize': swap ? this.safeNumber(market, 'ctVal') : undefined,
+            'expiry': undefined,
+            'expiryDatetime': undefined,
+            'strike': undefined,
+            'optionType': undefined,
+            'created': undefined,
+            'precision': {
+                'amount': this.safeNumber(market, 'lotSz'),
+                'price': this.safeNumber(market, 'tickSz'),
+            },
+            'limits': {
+                'leverage': {
+                    'min': this.parseNumber('1'),
+                    'max': this.parseNumber(maxLeverage),
+                },
+                'amount': {
+                    'min': this.safeNumber(market, 'minSz'),
+                    'max': maxAmount,
+                },
+                'price': {
+                    'min': undefined,
+                    'max': undefined,
+                },
+                'cost': {
+                    'min': undefined,
+                    'max': undefined,
+                },
+            },
+            'info': market,
+        });
+    }
+    setMarkets(markets, currencies = undefined) {
+        markets = super.setMarkets(markets, currencies);
+        const symbols = Object.keys(markets);
+        for (let i = 0; i < symbols.length; i++) {
+            const symbol = symbols[i];
+            const market = markets[symbol];
+            if (market['swap']) {
+                const additionalId = market['baseId'] + market['quoteId'];
+                this.markets_by_id[additionalId] = [market]; // some endpoints return swap market id as base+quote
+            }
+        }
+        return this.markets;
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchOrderBook
+     * @description fetches information on open orders with bid (buy) and ask (sell) prices, volumes and other data
+     * @see https://www.deepcoin.com/docs/DeepCoinMarket/marketBooks
+     * @param {string} symbol unified symbol of the market to fetch the order book for
+     * @param {int} [limit] the maximum amount of order book entries to return
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} A dictionary of [order book structures]{@link https://docs.ccxt.com/#/?id=order-book-structure} indexed by market symbols
+     */
+    async fetchOrderBook(symbol, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        if (limit === undefined) {
+            limit = 400;
+        }
+        const request = {
+            'instId': market['id'],
+            'sz': limit,
+        };
+        const response = await this.publicGetDeepcoinMarketBooks(this.extend(request, params));
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": {
+        //             "bids": [
+        //                 ["3732.21", "99.6"],
+        //                 ["3732.2", "54.7"]
+        //             ],
+        //             "asks": [
+        //                 ["3732.22", "85.1"],
+        //                 ["3732.23", "49.4"]
+        //             ]
+        //         }
+        //     }
+        //
+        const data = this.safeDict(response, 'data', {});
+        return this.parseOrderBook(data, symbol, undefined, 'bids', 'asks', 0, 1);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchOHLCV
+     * @description fetches historical candlestick data containing the open, high, low, and close price, and the volume of a market
+     * @see https://www.deepcoin.com/docs/DeepCoinMarket/getKlineData
+     * @see https://www.deepcoin.com/docs/DeepCoinMarket/getIndexKlineData
+     * @see https://www.deepcoin.com/docs/DeepCoinMarket/getMarkKlineData
+     * @param {string} symbol unified symbol of the market to fetch OHLCV data for
+     * @param {string} timeframe the length of time each candle represents
+     * @param {int} [since] timestamp in ms of the earliest candle to fetch
+     * @param {int} [limit] the maximum amount of candles to fetch
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {int} [params.until] timestamp in ms of the latest candle to fetch
+     * @param {string} [params.price] "mark" or "index" for mark price and index price candles
+     * @param {boolean} [params.paginate] default false, when true will automatically paginate by calling this endpoint multiple times. See in the docs all the [available parameters](https://github.com/ccxt/ccxt/wiki/Manual#pagination-params)
+     * @returns {int[][]} A list of candles ordered as timestamp, open, high, low, close, volume
+     */
+    async fetchOHLCV(symbol, timeframe = '1m', since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        const maxLimit = 300;
+        let paginate = false;
+        [paginate, params] = this.handleOptionAndParams(params, 'fetchOHLCV', 'paginate', false);
+        if (paginate) {
+            params = this.extend(params, { 'calculateUntil': true });
+            return await this.fetchPaginatedCallDeterministic('fetchOHLCV', symbol, since, limit, timeframe, params, maxLimit);
+        }
+        const market = this.market(symbol);
+        const price = this.safeString(params, 'price');
+        params = this.omit(params, 'price');
+        const bar = this.safeString(this.timeframes, timeframe, timeframe);
+        const request = {
+            'instId': market['id'],
+            'bar': bar,
+        };
+        if (limit !== undefined) {
+            request['limit'] = limit;
+        }
+        const until = this.safeInteger(params, 'until');
+        if (until !== undefined) {
+            request['after'] = until;
+            params = this.omit(params, 'until');
+        }
+        const calculateUntil = this.safeBool(params, 'calculateUntil', false);
+        if (calculateUntil) {
+            params = this.omit(params, 'calculateUntil');
+            if (since !== undefined) {
+                // the exchange do not have a since param for this endpoint
+                // we canlculate until (after) for correct pagination
+                const duration = this.parseTimeframe(timeframe);
+                const numberOfCandles = (limit === undefined) ? maxLimit : limit;
+                let endTime = since + (duration * numberOfCandles) * 1000;
+                if (until !== undefined) {
+                    endTime = Math.min(endTime, until);
+                }
+                const now = this.milliseconds();
+                request['after'] = Math.min(endTime, now);
+            }
+        }
+        let response = undefined;
+        if (price === 'mark') {
+            response = await this.publicGetDeepcoinMarketMarkPriceCandles(this.extend(request, params));
+        }
+        else if (price === 'index') {
+            response = await this.publicGetDeepcoinMarketIndexCandles(this.extend(request, params));
+        }
+        else {
+            response = await this.publicGetDeepcoinMarketCandles(this.extend(request, params));
+        }
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data":[
+        //             [
+        //                 "1760221800000",
+        //                 "3739.08",
+        //                 "3741.95",
+        //                 "3737.75",
+        //                 "3740.1",
+        //                 "2849",
+        //                 "1065583.744"
+        //             ],
+        //             [
+        //                 "1760221740000",
+        //                 "3742.36",
+        //                 "3743.01",
+        //                 "3736.83",
+        //                 "3739.08",
+        //                 "2723",
+        //                 "1018290.723"
+        //             ]
+        //         ]
+        //     }
+        //
+        const data = this.safeList(response, 'data', []);
+        return this.parseOHLCVs(data, market, timeframe, since, limit);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchTickers
+     * @description fetches price tickers for multiple markets, statistical information calculated over the past 24 hours for each market
+     * @see https://www.deepcoin.com/docs/DeepCoinMarket/getMarketTickers
+     * @param {string[]} [symbols] unified symbols of the markets to fetch the ticker for, all market tickers are returned if not assigned
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} a dictionary of [ticker structures]{@link https://docs.ccxt.com/#/?id=ticker-structure}
+     */
+    async fetchTickers(symbols = undefined, params = {}) {
+        await this.loadMarkets();
+        symbols = this.marketSymbols(symbols);
+        const market = this.getMarketFromSymbols(symbols);
+        let marketType = undefined;
+        [marketType, params] = this.handleMarketTypeAndParams('fetchTickers', market, params);
+        const request = {
+            'instType': this.convertToInstrumentType(marketType),
+        };
+        const response = await this.publicGetDeepcoinMarketTickers(this.extend(request, params));
+        const tickers = this.safeList(response, 'data', []);
+        return this.parseTickers(tickers, symbols);
+    }
+    parseTicker(ticker, market = undefined) {
+        //
+        //     {
+        //         "instType": "SWAP",
+        //         "instId": "BTC-USD-SWAP",
+        //         "last": "114113.3",
+        //         "lastSz": "",
+        //         "askPx": "114113.5",
+        //         "askSz": "56280",
+        //         "bidPx": "114113.2",
+        //         "bidSz": "63220",
+        //         "open24h": "113214.7",
+        //         "high24h": "116039.2",
+        //         "low24h": "113214.7",
+        //         "volCcy24h": "73.31475724",
+        //         "vol24h": "8406739",
+        //         "sodUtc0": "",
+        //         "sodUtc8": "",
+        //         "ts": "1760367816000"
+        //     }
+        //
+        const timestamp = this.safeInteger(ticker, 'ts');
+        const marketId = this.safeString(ticker, 'instId');
+        market = this.safeMarket(marketId, market, '-');
+        const symbol = market['symbol'];
+        const last = this.safeString(ticker, 'last');
+        const open = this.safeString(ticker, 'open24h');
+        let quoteVolume = this.safeString(ticker, 'volCcy24h');
+        let baseVolume = this.safeString(ticker, 'vol24h');
+        if (market['swap'] && market['inverse']) {
+            const temp = baseVolume;
+            baseVolume = quoteVolume;
+            quoteVolume = temp;
+        }
+        const high = this.safeString(ticker, 'high24h');
+        const low = this.safeString(ticker, 'low24h');
+        return this.safeTicker({
+            'symbol': symbol,
+            'timestamp': timestamp,
+            'datetime': this.iso8601(timestamp),
+            'high': high,
+            'low': low,
+            'bid': this.safeString(ticker, 'bidPx'),
+            'bidVolume': this.safeString(ticker, 'bidSz'),
+            'ask': this.safeString(ticker, 'askPx'),
+            'askVolume': this.safeString(ticker, 'askSz'),
+            'vwap': undefined,
+            'open': open,
+            'close': last,
+            'last': last,
+            'previousClose': undefined,
+            'change': undefined,
+            'percentage': undefined,
+            'average': undefined,
+            'baseVolume': baseVolume,
+            'quoteVolume': quoteVolume,
+            'markPrice': undefined,
+            'indexPrice': undefined,
+            'info': ticker,
+        }, market);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchTrades
+     * @description get the list of most recent trades for a particular symbol
+     * @see https://www.deepcoin.com/docs/DeepCoinMarket/getTrades
+     * @param {string} symbol unified symbol of the market to fetch trades for
+     * @param {int} [since] timestamp in ms of the earliest trade to fetch
+     * @param {int} [limit] the maximum amount of trades to fetch (default 100, max 500)
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {Trade[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=public-trades}
+     */
+    async fetchTrades(symbol, since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        const request = {
+            'instId': market['id'],
+        };
+        if (limit !== undefined) {
+            request['limit'] = limit; // default 100, max 500
+        }
+        const productGroup = this.getProductGroupFromMarket(market);
+        request['productGroup'] = productGroup;
+        const response = await this.publicGetDeepcoinMarketTrades(this.extend(request, params));
+        const data = this.safeList(response, 'data', []);
+        return this.parseTrades(data, market, since, limit);
+    }
+    getProductGroupFromMarket(market) {
+        let productGroup = 'Spot';
+        if (market['swap']) {
+            if (market['linear']) {
+                productGroup = 'SwapU';
+            }
+            else {
+                productGroup = 'Swap';
+            }
+        }
+        return productGroup;
+    }
+    parseTrade(trade, market = undefined) {
+        //
+        // public fetchTrades
+        //
+        //     {
+        //         "instId": "ETH-USDT",
+        //         "tradeId": "1001056388761321",
+        //         "px": "4095.66",
+        //         "sz": "0.01311251",
+        //         "side": "sell",
+        //         "ts": "1760367870000"
+        //     }
+        //
+        // private fetchMyTrades
+        //     {
+        //         "instType": "SPOT",
+        //         "instId": "ETH-USDT",
+        //         "tradeId": "1001056429613610",
+        //         "ordId": "1001435238208686",
+        //         "clOrdId": "",
+        //         "billId": "10010564296136101",
+        //         "tag": "",
+        //         "fillPx": "3791.15",
+        //         "fillSz": "0.004",
+        //         "side": "sell",
+        //         "posSide": "",
+        //         "execType": "",
+        //         "feeCcy": "USDT",
+        //         "fee": "0.0151646",
+        //         "ts": "1760704540000"
+        //     }
+        //
+        const marketId = this.safeString(trade, 'instId');
+        market = this.safeMarket(marketId, market);
+        const timestamp = this.safeInteger(trade, 'ts');
+        const side = this.safeString(trade, 'side');
+        const execType = this.safeString(trade, 'execType');
+        let fee = undefined;
+        const feeCost = this.safeString(trade, 'fee');
+        if (feeCost !== undefined) {
+            const feeCurrencyId = this.safeString(trade, 'feeCcy');
+            const feeCurrencyCode = this.safeCurrencyCode(feeCurrencyId);
+            fee = {
+                'cost': feeCost,
+                'currency': feeCurrencyCode,
+            };
+        }
+        return this.safeTrade({
+            'info': trade,
+            'timestamp': timestamp,
+            'datetime': this.iso8601(timestamp),
+            'symbol': market['symbol'],
+            'id': this.safeString(trade, 'tradeId'),
+            'order': this.safeString(trade, 'ordId'),
+            'type': undefined,
+            'takerOrMaker': this.parseTakerOrMaker(execType),
+            'side': side,
+            'price': this.safeString2(trade, 'fillPx', 'px'),
+            'amount': this.safeString2(trade, 'fillSz', 'sz'),
+            'cost': undefined,
+            'fee': fee,
+        }, market);
+    }
+    parseTakerOrMaker(execType) {
+        const types = {
+            'T': 'taker',
+            'M': 'maker',
+        };
+        return this.safeString(types, execType, execType);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchBalance
+     * @description query for balance and get the amount of funds available for trading or funds locked in orders
+     * @see https://www.deepcoin.com/docs/DeepCoinAccount/getAccountBalance
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.type] "spot" or "swap", the market type for the balance
+     * @returns {object} a [balance structure]{@link https://docs.ccxt.com/#/?id=balance-structure}
+     */
+    async fetchBalance(params = {}) {
+        await this.loadMarkets();
+        let marketType = 'spot';
+        [marketType, params] = this.handleMarketTypeAndParams('fetchBalance', undefined, params, marketType);
+        const request = {
+            'instType': this.convertToInstrumentType(marketType),
+        };
+        const response = await this.privateGetDeepcoinAccountBalances(this.extend(request, params));
+        return this.parseBalance(response);
+    }
+    parseBalance(response) {
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": [
+        //             {
+        //                 "ccy": "USDT",
+        //                 "bal": "74",
+        //                 "frozenBal": "0",
+        //                 "availBal": "74"
+        //             }
+        //         ]
+        //     }
+        //
+        const result = {
+            'info': response,
+            'timestamp': undefined,
+            'datetime': undefined,
+        };
+        const balances = this.safeList(response, 'data', []);
+        for (let i = 0; i < balances.length; i++) {
+            const balance = balances[i];
+            const symbol = this.safeString(balance, 'ccy');
+            const code = this.safeCurrencyCode(symbol);
+            const account = this.account();
+            account['total'] = this.safeString(balance, 'bal');
+            account['used'] = this.safeString(balance, 'frozenBal');
+            account['free'] = this.safeString(balance, 'availBal');
+            result[code] = account;
+        }
+        return this.safeBalance(result);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchDeposits
+     * @description fetch all deposits made to an account
+     * @see https://www.deepcoin.com/docs/assets/deposit
+     * @param {string} code unified currency code
+     * @param {int} [since] the earliest time in ms to fetch deposits for
+     * @param {int} [limit] the maximum number of deposits structures to retrieve
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {int} [params.until] the latest time in ms to fetch entries for
+     * @param {boolean} [params.paginate] default false, when true will automatically paginate by calling this endpoint multiple times. See in the docs all the [available parameters](https://github.com/ccxt/ccxt/wiki/Manual#pagination-params)
+     * @returns {object[]} a list of [transaction structures]{@link https://docs.ccxt.com/#/?id=transaction-structure}
+     */
+    async fetchDeposits(code = undefined, since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        let paginate = false;
+        [paginate, params] = this.handleOptionAndParams(params, 'fetchDeposits', 'paginate', false);
+        if (paginate) {
+            return await this.fetchPaginatedCallCursor('fetchDeposits', code, since, limit, params, 'code', undefined, 1, 50);
+        }
+        const request = {};
+        let currency = undefined;
+        if (code !== undefined) {
+            currency = this.currency(code);
+            request['coin'] = currency['id'];
+        }
+        if (since !== undefined) {
+            request['startTime'] = since;
+        }
+        if (limit !== undefined) {
+            request['size'] = limit;
+        }
+        const until = this.safeInteger(params, 'until');
+        if (until !== undefined) {
+            request['endTime'] = until;
+            params = this.omit(params, 'until');
+        }
+        const response = await this.privateGetDeepcoinAssetDepositList(this.extend(request, params));
+        const data = this.safeDict(response, 'data', {});
+        const items = this.safeList(data, 'data', []);
+        const transactionParams = {
+            'type': 'deposit',
+        };
+        return this.parseTransactions(items, currency, since, limit, transactionParams);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchWithdrawals
+     * @description fetch all withdrawals made from an account
+     * @see https://www.deepcoin.com/docs/assets/withdraw
+     * @param {string} code unified currency code of the currency transferred
+     * @param {int} [since] the earliest time in ms to fetch transfers for (default 24 hours ago)
+     * @param {int} [limit] the maximum number of transfer structures to retrieve (default 50, max 200)
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {int} [params.until] the latest time in ms to fetch transfers for (default time now)
+     * @param {boolean} [params.paginate] default false, when true will automatically paginate by calling this endpoint multiple times. See in the docs all the [available parameters](https://github.com/ccxt/ccxt/wiki/Manual#pagination-params)
+     * @returns {object[]} a list of [transaction structures]{@link https://docs.ccxt.com/#/?id=transaction-structure}
+     */
+    async fetchWithdrawals(code = undefined, since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        let paginate = false;
+        [paginate, params] = this.handleOptionAndParams(params, 'fetchDeposits', 'paginate', false);
+        if (paginate) {
+            return await this.fetchPaginatedCallCursor('fetchDeposits', code, since, limit, params, 'code', undefined, 1, 50);
+        }
+        const request = {};
+        let currency = undefined;
+        if (code !== undefined) {
+            currency = this.currency(code);
+            request['coin'] = currency['id'];
+        }
+        if (since !== undefined) {
+            request['startTime'] = since;
+        }
+        if (limit !== undefined) {
+            request['size'] = limit;
+        }
+        const until = this.safeInteger(params, 'until');
+        if (until !== undefined) {
+            request['endTime'] = until;
+            params = this.omit(params, 'until');
+        }
+        const response = await this.privateGetDeepcoinAssetWithdrawList(this.extend(request, params));
+        const data = this.safeDict(response, 'data', {});
+        const items = this.safeList(data, 'data', []);
+        const transactionParams = {
+            'type': 'withdrawal',
+        };
+        return this.parseTransactions(items, currency, since, limit, transactionParams);
+    }
+    parseTransaction(transaction, currency = undefined) {
+        //
+        // fetchDeposits
+        //     {
+        //         "createTime": 1760368656,
+        //         "txHash": "03fe3244d89e794586222413c61779380da9e9fe5baaa253c38d01a4199a3499",
+        //         "chainName": "TRC20",
+        //         "amount": "149",
+        //         "coin": "USDT",
+        //         "status": "succeed"
+        //     }
+        //
+        const txid = this.safeString(transaction, 'txHash');
+        const currencyId = this.safeString(transaction, 'coin');
+        const code = this.safeCurrencyCode(currencyId, currency);
+        const amount = this.safeNumber(transaction, 'amount');
+        const timestamp = this.safeTimestamp(transaction, 'createTime');
+        const networkId = this.safeString(transaction, 'chainName');
+        const network = this.networkIdToCode(networkId);
+        const status = this.parseTransactionStatus(this.safeString(transaction, 'status'));
+        return {
+            'info': transaction,
+            'id': undefined,
+            'currency': code,
+            'amount': amount,
+            'network': network,
+            'addressFrom': undefined,
+            'addressTo': undefined,
+            'address': this.safeString(transaction, 'address'),
+            'tagFrom': undefined,
+            'tagTo': undefined,
+            'tag': undefined,
+            'status': status,
+            'type': undefined,
+            'updated': undefined,
+            'txid': txid,
+            'timestamp': timestamp,
+            'datetime': this.iso8601(timestamp),
+            'internal': undefined,
+            'comment': undefined,
+            'fee': {
+                'currency': undefined,
+                'cost': undefined,
+            },
+        };
+    }
+    parseTransactionStatus(status) {
+        const statuses = {
+            'confirming': 'pending',
+            'succeed': 'ok',
+        };
+        return this.safeString(statuses, status, status);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchDepositAddresses
+     * @description fetch deposit addresses for multiple currencies and chain types
+     * @see https://www.deepcoin.com/docs/assets/chainlist
+     * @param {string[]|undefined} codes list of unified currency codes, default is undefined
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} a list of [address structures]{@link https://docs.ccxt.com/#/?id=address-structure}
+     */
+    async fetchDepositAddresses(codes = undefined, params = {}) {
+        await this.loadMarkets();
+        if (codes === undefined) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' fetchDepositAddresses requires a list with one currency code');
+        }
+        const length = codes.length;
+        if (length !== 1) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.NotSupported(this.id + ' fetchDepositAddresses requires a list with one currency code');
+        }
+        const code = codes[0];
+        const currency = this.currency(code);
+        const request = {
+            'currency_id': currency['id'],
+            'lang': 'en',
+        };
+        const response = await this.privateGetDeepcoinAssetRechargeChainList(this.extend(request, params));
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": {
+        //             "list": [
+        //                 {
+        //                     "chain": "TRC20",
+        //                     "state": 1,
+        //                     "remind": "Only support deposits and withdrawals via TRC20 network. If you send it via other address by mistake, it will not be credited and will result in the permanent loss of your deposit.",
+        //                     "inNotice": "",
+        //                     "actLogo": "",
+        //                     "address": "TNJYDW9Bk87VwfA6s7FtxURLEMHesQbYgF",
+        //                     "hasMemo": false,
+        //                     "memo": "",
+        //                     "estimatedTime": 1,
+        //                     "fastConfig": {
+        //                         "fastLimitNum": 0,
+        //                         "fastBlock": 10,
+        //                         "realBlock": 1
+        //                     }
+        //                 }
+        //             ]
+        //         }
+        //     }
+        //
+        const data = this.safeDict(response, 'data', {});
+        const list = this.safeList(data, 'list', []);
+        const additionalParams = {
+            'currency': code,
+        };
+        return this.parseDepositAddresses(list, codes, false, additionalParams);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchDepositAddress
+     * @description fetch the deposit address for a currency associated with this account
+     * @see https://www.deepcoin.com/docs/assets/chainlist
+     * @param {string} code unified currency code
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.network] unified network code for deposit chain
+     * @returns {object} an [address structure]{@link https://docs.ccxt.com/#/?id=address-structure}
+     */
+    async fetchDepositAddress(code, params = {}) {
+        await this.loadMarkets();
+        let network = this.safeString(params, 'network');
+        const defaultNetworks = this.safeDict(this.options, 'defaultNetworks', {});
+        const defaultNetwork = this.safeString(defaultNetworks, code);
+        network = network ? network : defaultNetwork;
+        if (network !== undefined) {
+            params = this.omit(params, 'network');
+        }
+        const addressess = await this.fetchDepositAddresses([code], params);
+        const length = addressess.length;
+        let address = this.safeDict(addressess, 0, {});
+        if ((network !== undefined) && (length > 1)) {
+            for (let i = 0; i < length; i++) {
+                const entry = addressess[i];
+                if (entry['network'] === network) {
+                    address = entry;
+                }
+            }
+        }
+        return address;
+    }
+    parseDepositAddress(response, currency = undefined) {
+        //
+        //     {
+        //         "chain": "TRC20",
+        //         "state": 1,
+        //         "remind": "Only support deposits and withdrawals via TRC20 network. If you send it via other address by mistake, it will not be credited and will result in the permanent loss of your deposit.",
+        //         "inNotice": "",
+        //         "actLogo": "",
+        //         "address": "TNJYDW9Bk87VwfA6s7FtxURLEMHesQbYgF",
+        //         "hasMemo": false,
+        //         "memo": "",
+        //         "estimatedTime": 1,
+        //         "fastConfig": {
+        //             "fastLimitNum": 0,
+        //             "fastBlock": 10,
+        //             "realBlock": 1
+        //         }
+        //     }
+        //
+        const chain = this.safeString(response, 'chain');
+        const address = this.safeString(response, 'address');
+        this.checkAddress(address);
+        return {
+            'info': response,
+            'currency': undefined,
+            'network': this.networkIdToCode(chain),
+            'address': address,
+            'tag': this.safeString(response, 'memo'),
+        };
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchLedger
+     * @description fetch the history of changes, actions done by the user or operations that altered the balance of the user
+     * @see https://www.deepcoin.com/docs/DeepCoinAccount/getAccountBills
+     * @param {string} [code] unified currency code
+     * @param {int} [since] timestamp in ms of the earliest ledger entry
+     * @param {int} [limit] max number of ledger entries to return
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {int} [params.until] timestamp in ms of the latest ledger entry
+     * @param {string} [params.type] 'spot' or 'swap', the market type for the ledger (default 'spot')
+     * @returns {object[]} a list of [ledger structures]{@link https://docs.ccxt.com/#/?id=ledger}
+     */
+    async fetchLedger(code = undefined, since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        let marketType = 'spot';
+        [marketType, params] = this.handleMarketTypeAndParams('fetchLedger', undefined, params, marketType);
+        const request = {
+            'instType': this.convertToInstrumentType(marketType),
+        };
+        let currency = undefined;
+        if (code !== undefined) {
+            currency = this.currency(code);
+            request['ccy'] = currency['id'];
+        }
+        if (since !== undefined) {
+            request['after'] = since;
+        }
+        if (limit !== undefined) {
+            request['limit'] = limit;
+        }
+        const until = this.safeInteger(params, 'until');
+        if (until !== undefined) {
+            request['before'] = until;
+            params = this.omit(params, 'until');
+        }
+        const response = await this.privateGetDeepcoinAccountBills(this.extend(request, params));
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": [
+        //             {
+        //                 "billId": "1001044652247714",
+        //                 "ccy": "USDT",
+        //                 "clientId": "",
+        //                 "balChg": "-0.03543537",
+        //                 "bal": "72.41881427",
+        //                 "type": "5",
+        //                 "ts": "1761047448000"
+        //             },
+        //             {
+        //                 "billId": "1001044652258368",
+        //                 "ccy": "DOGE",
+        //                 "clientId": "",
+        //                 "balChg": "76",
+        //                 "bal": "76",
+        //                 "type": "2",
+        //                 "ts": "1761051006000"
+        //             }
+        //         ]
+        //     }
+        //
+        const data = this.safeList(response, 'data', []);
+        return this.parseLedger(data, currency, since, limit);
+    }
+    parseLedgerEntry(item, currency = undefined) {
+        //
+        //     {
+        //         "billId": "1001044652247714",
+        //         "ccy": "USDT",
+        //         "clientId": "",
+        //         "balChg": "-0.03543537",
+        //         "bal": "72.41881427",
+        //         "type": "5",
+        //         "ts": "1761047448000"
+        //     }
+        //
+        const timestamp = this.safeInteger(item, 'ts');
+        const change = this.safeString(item, 'balChg');
+        const amount = _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringAbs(change);
+        const direction = _base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringLt(change, '0') ? 'out' : 'in';
+        const currencyId = this.safeString(item, 'ccy');
+        currency = this.safeCurrency(currencyId, currency);
+        const type = this.safeString(item, 'type');
+        return this.safeLedgerEntry({
+            'info': item,
+            'id': this.safeString(item, 'billId'),
+            'direction': direction,
+            'account': undefined,
+            'referenceAccount': undefined,
+            'referenceId': undefined,
+            'type': this.parseLedgerEntryType(type),
+            'currency': currency['code'],
+            'amount': amount,
+            'timestamp': timestamp,
+            'datetime': this.iso8601(timestamp),
+            'before': undefined,
+            'after': this.safeString(item, 'bal'),
+            'status': undefined,
+            'fee': undefined,
+        }, currency);
+    }
+    parseLedgerEntryType(type) {
+        const ledgerType = {
+            '1': 'trade',
+            '2': 'trade',
+            '3': 'transfer',
+            '4': 'transfer',
+            '5': 'fee',
+        };
+        return this.safeString(ledgerType, type, type);
+    }
+    /**
+     * @method
+     * @name deepcoin#transfer
+     * @description transfer currency internally between wallets on the same account
+     * @see https://www.deepcoin.com/docs/assets/transfer
+     * @param {string} code unified currency code
+     * @param {float} amount amount to transfer
+     * @param {string} fromAccount account to transfer from ('spot', 'inverse', 'linear', 'fund', 'rebate' or 'demo')
+     * @param {string} toAccount account to transfer to ('spot', 'inverse', 'linear', 'fund', 'rebate' or 'demo')
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.userId] user id
+     * @returns {object} a [transfer structure]{@link https://docs.ccxt.com/#/?id=transfer-structure}
+     */
+    async transfer(code, amount, fromAccount, toAccount, params = {}) {
+        let userId = undefined;
+        [userId, params] = this.handleOptionAndParams(params, 'transfer', 'userId');
+        userId = userId ? userId : this.safeString(params, 'uid');
+        if (userId === undefined) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' transfer() requires a userId parameter');
+        }
+        await this.loadMarkets();
+        const currency = this.currency(code);
+        const accountsByType = this.safeDict(this.options, 'accountsByType', {});
+        const fromId = this.safeString(accountsByType, fromAccount, fromAccount);
+        const toId = this.safeString(accountsByType, toAccount, toAccount);
+        const request = {
+            'currency_id': currency['id'],
+            'amount': this.currencyToPrecision(code, amount),
+            'from_id': fromId,
+            'to_id': toId,
+            'uid': userId,
+        };
+        const response = await this.privatePostDeepcoinAssetTransfer(this.extend(request, params));
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": {
+        //             "retCode": 0,
+        //             "retMsg": "",
+        //             "retData": {}
+        //         }
+        //     }
+        //
+        const data = this.safeDict(response, 'data', {});
+        const transfer = this.parseTransfer(data, currency);
+        const transferOptions = this.safeDict(this.options, 'transfer', {});
+        const fillResponseFromRequest = this.safeBool(transferOptions, 'fillResponseFromRequest', true);
+        if (fillResponseFromRequest) {
+            transfer['fromAccount'] = fromAccount;
+            transfer['toAccount'] = toAccount;
+            transfer['amount'] = amount;
+        }
+        return transfer;
+    }
+    parseTransfer(transfer, currency = undefined) {
+        //
+        //     {
+        //         "retCode": 0,
+        //         "retMsg": "",
+        //         "retData": {}
+        //     }
+        //
+        const status = this.safeString(transfer, 'retCode');
+        const currencyCode = this.safeCurrencyCode(undefined, currency);
+        return {
+            'info': transfer,
+            'id': undefined,
+            'timestamp': undefined,
+            'datetime': undefined,
+            'currency': currencyCode,
+            'amount': undefined,
+            'fromAccount': undefined,
+            'toAccount': undefined,
+            'status': this.parseTransferStatus(status),
+        };
+    }
+    parseTransferStatus(status) {
+        if (status === '0') {
+            return 'ok';
+        }
+        return 'failed';
+    }
+    /**
+     * @method
+     * @name deepcoin#createOrder
+     * @description create a trade order
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/order
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/triggerOrder
+     * @param {string} symbol unified symbol of the market to create an order in
+     * @param {string} type 'market' or 'limit'
+     * @param {string} side 'buy' or 'sell'
+     * @param {float} amount how much of currency you want to trade in units of base currency
+     * @param {float} [price] the price at which the order is to be fulfilled, in units of the quote currency, ignored in market orders
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.clientOrderId] a unique id for the order
+     * @param {string} [params.timeInForce] *non trigger orders only* 'GTC' (Good Till Cancel), 'IOC' (Immediate Or Cancel) or 'PO' (Post Only)
+     * @param {bool} [params.postOnly] *non trigger orders only* true to place a post only order
+     * @param {bool} [params.reduceOnly] *non trigger orders only* a mark to reduce the position size for margin, swap and future orders
+     * @param {float} [params.triggerPrice] the price a trigger order is triggered at
+     * @param {float} [params.stopLoss.triggerPrice] the price that a stop loss order is triggered at
+     * @param {float} [params.takeProfit.triggerPrice] the price that a take profit order is triggered at
+     * @param {string} [params.positionSide] if position mode is one-way: set to 'net', if position mode is hedge-mode: set to 'long' or 'short'
+     * @param {bool} [params.hedged] *swap only* true for hedged mode, false for one way mode
+     * @param {string} [params.marginMode] *swap only*'cross' or 'isolated', the default is 'cash' for spot and 'cross' for swap
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async createOrder(symbol, type, side, amount, price = undefined, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        const triggerPrice = this.safeString(params, 'triggerPrice');
+        const request = this.createOrderRequest(symbol, type, side, amount, price, params);
+        let response = undefined;
+        if (triggerPrice !== undefined) {
+            // trigger orders
+            response = await this.privatePostDeepcoinTradeTriggerOrder(request);
+        }
+        else {
+            // regular orders
+            //
+            //     {
+            //         "code": "0",
+            //         "msg": "",
+            //         "data": {
+            //             "ordId": "1001434570213727",
+            //             "clOrdId": "",
+            //             "tag": "",
+            //             "sCode": "0",
+            //             "sMsg": ""
+            //         }
+            //     }
+            //
+            response = await this.privatePostDeepcoinTradeOrder(request);
+        }
+        const data = this.safeDict(response, 'data', {});
+        return this.parseOrder(data, market);
+    }
+    createOrderRequest(symbol, type, side, amount, price = undefined, params = {}) {
+        /**
+         * @method
+         * @ignore
+         * @name deepcoin#createOrderRequest
+         * @description helper function to build request
+         */
+        const market = this.market(symbol);
+        const triggerPrice = this.safeString(params, 'triggerPrice');
+        // const isTriggerOrder = (triggerPrice !== undefined) || this.safeString2 (params, 'stopLossPrice', 'takeProfitPrice') !== undefined;
+        const isTriggerOrder = (triggerPrice !== undefined);
+        const cost = this.safeString(params, 'cost');
+        if (cost !== undefined) {
+            if (!market['spot'] || (triggerPrice !== undefined)) {
+                throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest(this.id + ' createOrder() accepts a cost parameter for spot non-trigger market orders only');
+            }
+        }
+        if (isTriggerOrder) {
+            return this.createTriggerOrderRequest(symbol, type, side, amount, price, params);
+        }
+        else {
+            return this.createRegularOrderRequest(symbol, type, side, amount, price, params);
+        }
+    }
+    createRegularOrderRequest(symbol, type, side, amount, price = undefined, params = {}) {
+        /**
+         * @method
+         * @ignore
+         * @name deepcoin#createRegularOrderRequest
+         * @description helper function to build request
+         * @param {string} symbol unified symbol of the market to create an order in
+         * @param {string} type 'market' or 'limit'
+         * @param {string} side 'buy' or 'sell'
+         * @param {float} amount how much you want to trade in units of the base currency
+         * @param {float} [price] the price at which the order is to be fulfilled, in units of the quote currency, ignored in market orders
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @param {float} [params.cost] *spot only* the cost of the order in units of the quote currency, for market orders only
+         * @param {string} [params.clientOrderId] a unique id for the order
+         * @param {string} [params.timeInForce] 'GTC' (Good Till Cancel), 'IOC' (Immediate Or Cancel) or 'PO' (Post Only)
+         * @param {bool} [params.postOnly] true to place a post only order
+         * @param {bool} [params.reduceOnly] a mark to reduce the position size for margin and swap orders
+         * @param {float} [params.stopLossPrice] the price that a stop loss order is triggered at
+         * @param {float} [params.takeProfitPrice] the price that a take profit order is triggered at
+         * @param {string} [params.marginMode] *swap only* 'cross' or 'isolated', the default is 'cash' for spot and 'cross' for swap
+         * @param {string} [params.mrgPosition] *swap only* 'merge' or 'split', the default is 'merge'
+         */
+        const market = this.market(symbol);
+        let orderType = type;
+        [orderType, params] = this.handleTypePostOnlyAndTimeInForce(type, params);
+        const request = {
+            'instId': market['id'],
+            // 'tdMode': 'cash', // 'cash' for spot, 'cross' or 'isolated' for swap
+            // 'ccy': currency['id'], // only applicable to cross MARGIN orders in single-currency margin
+            // 'clOrdId': clientOrderId,
+            'side': side,
+            'ordType': orderType,
+            // 'sz': amount or cost
+            // 'px': price, // limit orders only
+            // 'reduceOnly': false, // a mark to reduce the position size for margin and swap orders
+            // 'tgtCcy': 'base_ccy', // spot only 'base_ccy' or 'quote_ccy', the default is 'base_ccy' for spot orders
+            // 'tpTriggerPx': takeProfitPrice, // take profit trigger price
+            // 'slTriggerPx': stopLossPrice, // stop loss trigger price
+            // 'posSide': 'long', // swap only 'long' or 'short'
+            // 'mrgPosition': 'merge', // swap only 'merge' or 'split'
+            // 'closePosId': 'id', // swap only position ID to close, required in split mode
+        };
+        const clientOrderId = this.safeString(params, 'clientOrderId');
+        if (clientOrderId !== undefined) {
+            request['clOrdId'] = clientOrderId;
+            params = this.omit(params, 'clientOrderId');
+        }
+        const stopLoss = this.safeDict(params, 'stopLoss', {});
+        const stopLossPrice = this.safeString(stopLoss, 'triggerPrice');
+        if (stopLossPrice !== undefined) {
+            params = this.omit(params, ['stopLoss']);
+            request['slTriggerPx'] = this.priceToPrecision(symbol, stopLossPrice);
+        }
+        const takeProfit = this.safeDict(params, 'takeProfit', {});
+        const takeProfitPrice = this.safeString(takeProfit, 'triggerPrice');
+        if (takeProfitPrice !== undefined) {
+            params = this.omit(params, ['takeProfit']);
+            request['tpTriggerPx'] = this.priceToPrecision(symbol, takeProfitPrice);
+        }
+        const isMarketOrder = (type === 'market');
+        if (price !== undefined) {
+            if (isMarketOrder) {
+                throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest(this.id + ' createOrder() does not require a price argument for market orders');
+            }
+            request['px'] = this.priceToPrecision(symbol, price);
+        }
+        else if (!isMarketOrder) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest(this.id + ' createOrder() requires a price argument for limit orders');
+        }
+        if (market['spot']) {
+            const cost = this.safeString(params, 'cost');
+            if (cost !== undefined) {
+                if (!isMarketOrder) {
+                    throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest(this.id + ' createOrder() accepts a cost parameter for spot market orders only');
+                }
+                params = this.omit(params, 'cost');
+                request['sz'] = this.costToPrecision(symbol, cost);
+                request['tgtCcy'] = 'quote_ccy';
+            }
+            else {
+                request['sz'] = this.amountToPrecision(symbol, amount);
+                request['tgtCcy'] = 'base_ccy';
+            }
+            request['side'] = side;
+            request['tdMode'] = 'cash';
+        }
+        else {
+            request['sz'] = this.amountToPrecision(symbol, amount);
+            let marginMode = 'cross';
+            [marginMode, params] = this.handleMarginModeAndParams('createOrder', params, marginMode);
+            request['tdMode'] = marginMode;
+            let mrgPosition = 'merge';
+            [mrgPosition, params] = this.handleOptionAndParams(params, 'createOrder', 'mrgPosition', mrgPosition);
+            request['mrgPosition'] = mrgPosition;
+            let posSide = undefined;
+            const reduceOnly = this.safeBool(params, 'reduceOnly', false);
+            if (reduceOnly) {
+                if (side === 'buy') {
+                    posSide = 'short';
+                }
+                else if (side === 'sell') {
+                    posSide = 'long';
+                }
+            }
+            else {
+                if (side === 'buy') {
+                    posSide = 'long';
+                }
+                else if (side === 'sell') {
+                    posSide = 'short';
+                }
+            }
+            request['posSide'] = posSide;
+        }
+        return this.extend(request, params);
+    }
+    createTriggerOrderRequest(symbol, type, side, amount, price = undefined, params = {}) {
+        /**
+         * @method
+         * @ignore
+         * @name deepcoin#createTriggerOrderRequest
+         * @description helper function to build request
+         * @param {string} symbol unified symbol of the market to create an order in
+         * @param {string} type 'market' or 'limit'
+         * @param {string} side 'buy' or 'sell'
+         * @param {float} amount how much you want to trade in units of the base currency
+         * @param {float} [price] the price at which the order is to be fulfilled, in units of the quote currency, ignored in market orders
+         * @param {object} [params] extra parameters specific to the exchange API endpoint
+         * @param {bool} [params.reduceOnly] a mark to reduce the position size for margin orders
+         * @param {string} [params.marginMode] *swap only* 'cross' or 'isolated', the default is 'cash' for spot and 'cross' for swap
+         */
+        const market = this.market(symbol);
+        const request = {
+            'instId': market['id'],
+            'productGroup': this.capitalize(market['type']),
+            'sz': this.amountToPrecision(symbol, amount),
+            'side': side,
+            // 'posSide': 'long', // 'long' or 'short' - required when product type is SWAP
+            // 'price': price,
+            // 'isCrossMargin': 1, // 1 for cross margin, 0 for isolated margin
+            'orderType': type,
+            // 'triggerPrice': triggerPrice,
+            // 'mrgPosition': 'merge', // 'merge' or 'split', the default is 'merge' - required when product type is SWAP
+            // 'tdMode': 'cash', // 'cash' for spot, 'cross' or 'isolated' for swap
+        };
+        const triggerPrice = this.safeString(params, 'triggerPrice');
+        // const takeProfitPrice = this.safeString (params, 'takeProfitPrice');
+        // const stopLossPrice = this.safeString (params, 'stopLossPrice');
+        // const isTpOrSlOrder = (takeProfitPrice !== undefined) || (stopLossPrice !== undefined);
+        // if (isTpOrSlOrder) {
+        //     if (takeProfitPrice !== undefined) {
+        //         request['triggerPrice'] = this.priceToPrecision (symbol, takeProfitPrice);
+        //     } else {
+        //         request['triggerPrice'] = this.priceToPrecision (symbol, stopLossPrice);
+        //     }
+        // } else {
+        request['triggerPrice'] = this.priceToPrecision(symbol, triggerPrice);
+        // }
+        if (price !== undefined) {
+            request['price'] = this.priceToPrecision(symbol, price);
+        }
+        else if (type === 'limit') {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' createOrder() requires a price argument for limit trigger orders');
+        }
+        let marginMode = 'cross';
+        [marginMode, params] = this.handleMarginModeAndParams('createOrder', params, marginMode);
+        let isCrossMargin = 1;
+        if (marginMode === 'isolated') {
+            isCrossMargin = 0;
+        }
+        const reduceOnly = this.safeBool(params, 'reduceOnly', false);
+        params = this.omit(params, 'reduceOnly');
+        request['isCrossMargin'] = isCrossMargin;
+        request['tdMode'] = marginMode;
+        if (market['swap']) {
+            if (reduceOnly) {
+                if (side === 'buy') {
+                    request['posSide'] = 'short';
+                }
+                else if (side === 'sell') {
+                    request['posSide'] = 'long';
+                }
+            }
+            else {
+                if (side === 'buy') {
+                    request['posSide'] = 'long';
+                }
+                else if (side === 'sell') {
+                    request['posSide'] = 'short';
+                }
+            }
+        }
+        let mrgPosition = 'merge';
+        [mrgPosition, params] = this.handleOptionAndParams(params, 'createOrder', 'mrgPosition', mrgPosition);
+        request['mrgPosition'] = mrgPosition;
+        return this.extend(request, params);
+    }
+    handleTypePostOnlyAndTimeInForce(type, params) {
+        let postOnly = false;
+        [postOnly, params] = this.handlePostOnly(type === 'market', type === 'post_only', params);
+        if (postOnly) {
+            type = 'post_only';
+        }
+        const timeInForce = this.handleTimeInForce(params);
+        params = this.omit(params, 'timeInForce');
+        if ((timeInForce !== undefined) && (timeInForce === 'IOC')) {
+            type = 'ioc';
+        }
+        return [type, params];
+    }
+    /**
+     * @method
+     * @name deepcoin#createMarketOrderWithCost
+     * @description create a market order by providing the symbol, side and cost
+     * @param {string} symbol unified symbol of the market to create an order in
+     * @param {string} side 'buy' or 'sell'
+     * @param {float} cost how much you want to trade in units of the quote currency
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async createMarketOrderWithCost(symbol, side, cost, params = {}) {
+        params = this.extend(params, { 'cost': cost });
+        return await this.createOrder(symbol, 'market', side, 0, undefined, params);
+    }
+    /**
+     * @method
+     * @name deepcoin#createMarketBuyOrderWithCost
+     * @description create a market buy order by providing the symbol and cost
+     * @param {string} symbol unified symbol of the market to create an order in
+     * @param {float} cost how much you want to trade in units of the quote currency
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async createMarketBuyOrderWithCost(symbol, cost, params = {}) {
+        params = this.extend(params, { 'cost': cost });
+        return await this.createOrder(symbol, 'market', 'buy', 0, undefined, params);
+    }
+    /**
+     * @method
+     * @name deepcoin#createMarketSellOrderWithCost
+     * @description create a market sell order by providing the symbol and cost
+     * @param {string} symbol unified symbol of the market to create an order in
+     * @param {float} cost how much you want to trade in units of the quote currency
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async createMarketSellOrderWithCost(symbol, cost, params = {}) {
+        params = this.extend(params, { 'cost': cost });
+        return await this.createOrder(symbol, 'market', 'sell', 0, undefined, params);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchClosedOrder
+     * @description fetches information on a closed order made by the user
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/finishOrderByID
+     * @param {string} id order id
+     * @param {string} symbol unified symbol of the market the order was made in
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async fetchClosedOrder(id, symbol = undefined, params = {}) {
+        await this.loadMarkets();
+        if (symbol === undefined) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' fetchClosedOrder() requires a symbol argument');
+        }
+        const market = this.market(symbol);
+        const request = {
+            'instId': market['id'],
+            'ordId': id,
+        };
+        const response = await this.privateGetDeepcoinTradeFinishOrderByID(this.extend(request, params));
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": [
+        //             {
+        //                 "instType": "SPOT",
+        //                 "instId": "ETH-USDT",
+        //                 "tgtCcy": "",
+        //                 "ccy": "",
+        //                 "ordId": "1001434573319675",
+        //                 "clOrdId": "",
+        //                 "tag": "",
+        //                 "px": "4056.620000000000",
+        //                 "sz": "0.004000",
+        //                 "pnl": "0.000000",
+        //                 "ordType": "market",
+        //                 "side": "buy",
+        //                 "posSide": "",
+        //                 "tdMode": "cash",
+        //                 "accFillSz": "0.004000",
+        //                 "fillPx": "",
+        //                 "tradeId": "",
+        //                 "fillSz": "0.004000",
+        //                 "fillTime": "1760619119000",
+        //                 "avgPx": "",
+        //                 "state": "filled",
+        //                 "lever": "1.000000",
+        //                 "tpTriggerPx": "",
+        //                 "tpTriggerPxType": "",
+        //                 "tpOrdPx": "",
+        //                 "slTriggerPx": "",
+        //                 "slTriggerPxType": "",
+        //                 "slOrdPx": "",
+        //                 "feeCcy": "USDT",
+        //                 "fee": "0.000004",
+        //                 "rebateCcy": "",
+        //                 "source": "",
+        //                 "rebate": "",
+        //                 "category": "normal",
+        //                 "uTime": "1760619119000",
+        //                 "cTime": "1760619119000"
+        //             }
+        //         ]
+        //     }
+        //
+        const data = this.safeList(response, 'data', []);
+        const entry = this.safeDict(data, 0, {});
+        return this.parseOrder(entry, market);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchOpenOrder
+     * @description fetch an open order by it's id
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/orderByID
+     * @param {string} id order id
+     * @param {string} symbol unified market symbol, default is undefined
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async fetchOpenOrder(id, symbol = undefined, params = {}) {
+        await this.loadMarkets();
+        if (symbol === undefined) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' fetchClosedOrder() requires a symbol argument');
+        }
+        const market = this.market(symbol);
+        const request = {
+            'instId': market['id'],
+            'ordId': id,
+        };
+        const response = await this.privateGetDeepcoinTradeOrderByID(this.extend(request, params));
+        const data = this.safeList(response, 'data', []);
+        const length = data.length;
+        if (length === 0) {
+            return undefined;
+        }
+        const entry = this.safeDict(data, 0, {});
+        return this.parseOrder(entry, market);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchCanceledAndClosedOrders
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/ordersHistory
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/triggerOrdersHistory
+     * @description fetches information on multiple canceled and closed orders made by the user
+     * @param {string} [symbol] unified market symbol of the market orders were made in
+     * @param {int} [since] the earliest time in ms to fetch orders for
+     * @param {int} [limit] the maximum number of order structures to retrieve
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {bool} [params.trigger] whether to fetch trigger/algo orders (default false)
+     * @param {string} [params.type] *non trigger orders only* 'spot' or 'swap', the market type for the orders
+     * @param {string} [params.state] *non trigger orders only* 'canceled' or 'filled', the order state to filter by
+     * @param {string} [params.OrderType] *trigger orders only* 'limit' or 'market'
+     * @param {boolean} [params.paginate] default false, when true will automatically paginate by calling this endpoint multiple times. See in the docs all the [available parameters](https://github.com/ccxt/ccxt/wiki/Manual#pagination-params)
+     * @returns {Order[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async fetchCanceledAndClosedOrders(symbol = undefined, since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        let paginate = false;
+        [paginate, params] = this.handleOptionAndParams(params, 'fetchCanceledAndClosedOrders', 'paginate');
+        if (paginate) {
+            return await this.fetchPaginatedCallDynamic('fetchCanceledAndClosedOrders', symbol, since, limit, params);
+        }
+        const trigger = this.safeBool(params, 'trigger', false);
+        let methodName = 'fetchCanceledAndClosedOrders';
+        [methodName, params] = this.handleParamString(params, 'methodName', methodName);
+        let market = undefined;
+        const request = {};
+        if (symbol !== undefined) {
+            market = this.market(symbol);
+            request['instId'] = market['id'];
+        }
+        let marketType = 'spot';
+        [marketType, params] = this.handleMarketTypeAndParams(methodName, market, params, marketType);
+        request['instType'] = this.convertToInstrumentType(marketType);
+        if (limit !== undefined) {
+            request['limit'] = limit; // default 100
+        }
+        let response = undefined;
+        if (trigger) {
+            if (methodName !== 'fetchCanceledAndClosedOrders') {
+                throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest(this.id + ' ' + methodName + '() does not support trigger orders');
+            }
+            if (market === undefined) {
+                throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' fetchCanceledAndClosedOrders() requires a symbol argument for trigger orders');
+            }
+            params = this.omit(params, 'trigger');
+            //
+            //     {
+            //         "code": "0",
+            //         "msg": "",
+            //         "data": [
+            //             {
+            //                 "instType": "SWAP",
+            //                 "instId": "DOGE-USDT-SWAP",
+            //                 "ordId": "1001110510915416",
+            //                 "px": "0",
+            //                 "sz": "76",
+            //                 "triggerPx": "0",
+            //                 "triggerPxType": "last",
+            //                 "ordType": "TPSL",
+            //                 "side": "sell",
+            //                 "posSide": "long",
+            //                 "tdMode": "cross",
+            //                 "lever": "2",
+            //                 "triggerTime": "0",
+            //                 "uTime": "1761059366000",
+            //                 "cTime": "1761059218",
+            //                 "errorCode": "0",
+            //                 "errorMsg": ""
+            //             }
+            //         ]
+            //     }
+            //
+            response = await this.privateGetDeepcoinTradeTriggerOrdersHistory(this.extend(request, params));
+        }
+        else {
+            //
+            //     {
+            //         "code": "0",
+            //         "msg": "",
+            //         "data": [
+            //             {
+            //                 "instType": "SPOT",
+            //                 "instId": "ETH-USDT",
+            //                 "tgtCcy": "",
+            //                 "ccy": "",
+            //                 "ordId": "1001434573319675",
+            //                 "clOrdId": "",
+            //                 "tag": "",
+            //                 "px": "4056.620000000000",
+            //                 "sz": "0.004000",
+            //                 "pnl": "0.000000",
+            //                 "ordType": "market",
+            //                 "side": "buy",
+            //                 "posSide": "",
+            //                 "tdMode": "cash",
+            //                 "accFillSz": "0.004000",
+            //                 "fillPx": "",
+            //                 "tradeId": "",
+            //                 "fillSz": "0.004000",
+            //                 "fillTime": "1760619119000",
+            //                 "avgPx": "",
+            //                 "state": "filled",
+            //                 "lever": "1.000000",
+            //                 "tpTriggerPx": "",
+            //                 "tpTriggerPxType": "",
+            //                 "tpOrdPx": "",
+            //                 "slTriggerPx": "",
+            //                 "slTriggerPxType": "",
+            //                 "slOrdPx": "",
+            //                 "feeCcy": "USDT",
+            //                 "fee": "0.000004",
+            //                 "rebateCcy": "",
+            //                 "source": "",
+            //                 "rebate": "",
+            //                 "category": "normal",
+            //                 "uTime": "1760619119000",
+            //                 "cTime": "1760619119000"
+            //             }
+            //         ]
+            //     }
+            //
+            response = await this.privateGetDeepcoinTradeOrdersHistory(this.extend(request, params));
+        }
+        // todo handle with since, until and pagination
+        const data = this.safeList(response, 'data', []);
+        return this.parseOrders(data, market, since, limit);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchCanceledOrders
+     * @description fetches information on multiple canceled orders made by the user
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/ordersHistory
+     * @param {string} symbol unified market symbol of the market the orders were made in
+     * @param {int} [since] the earliest time in ms to fetch orders for
+     * @param {int} [limit] the maximum number of order structures to retrieve
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.type] 'spot' or 'swap', the market type for the orders
+     * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async fetchCanceledOrders(symbol = undefined, since = undefined, limit = undefined, params = {}) {
+        const methodName = 'fetchCanceledOrders';
+        params = this.extend(params, { 'methodName': methodName });
+        params = this.extend(params, { 'state': 'canceled' });
+        return await this.fetchCanceledAndClosedOrders(symbol, since, limit, params);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchClosedOrders
+     * @description fetches information on multiple closed orders made by the user
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/ordersHistory
+     * @param {string} symbol unified market symbol of the market the orders were made in
+     * @param {int} [since] the earliest time in ms to fetch orders for
+     * @param {int} [limit] the maximum number of order structures to retrieve
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.type] 'spot' or 'swap', the market type for the orders
+     * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async fetchClosedOrders(symbol = undefined, since = undefined, limit = undefined, params = {}) {
+        const methodName = 'fetchClosedOrders';
+        params = this.extend(params, { 'methodName': methodName });
+        params = this.extend(params, { 'state': 'filled' });
+        return await this.fetchCanceledAndClosedOrders(symbol, since, limit, params);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchOpenOrders
+     * @description fetch all unfilled currently open orders
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/ordersPendingV2
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/triggerOrdersPending
+     * @param {string} symbol unified market symbol of the market orders were made in
+     * @param {int} [since] the earliest time in ms to fetch orders for
+     * @param {int} [limit] the maximum number of order structures to retrieve
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {bool} [params.trigger] whether to fetch trigger/algo orders (default false)
+     * @param {int} [params.index] *non trigger orders only* pagination index, default is 1
+     * @param {string} [params.orderType] *trigger orders only* 'limit' or 'market'
+     * @returns {Order[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async fetchOpenOrders(symbol = undefined, since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        if (symbol === undefined) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' fetchOpenOrders() requires a symbol argument');
+        }
+        const market = this.market(symbol);
+        const index = this.safeInteger(params, 'index', 1); // todo add pagination handling
+        const request = {
+            'instId': market['id'],
+        };
+        if (limit !== undefined) {
+            request['limit'] = limit;
+        }
+        const trigger = this.safeBool(params, 'trigger', false);
+        let response = undefined;
+        if (trigger) {
+            params = this.omit(params, 'trigger');
+            request['instType'] = this.convertToInstrumentType(market['type']);
+            //
+            //     {
+            //         "code": "0",
+            //         "msg": "",
+            //         "data": [
+            //             {
+            //                 "instType": "SPOT",
+            //                 "instId": "DOGE-USDT",
+            //                 "ordId": "1001442305797142",
+            //                 "triggerPx": "0.01",
+            //                 "ordPx": "0.01",
+            //                 "sz": "20",
+            //                 "ordType": "",
+            //                 "side": "buy",
+            //                 "posSide": "",
+            //                 "tdMode": "cash",
+            //                 "triggerOrderType": "Conditional",
+            //                 "triggerPxType": "last",
+            //                 "lever": "",
+            //                 "slPrice": "",
+            //                 "slTriggerPrice": "",
+            //                 "tpPrice": "",
+            //                 "tpTriggerPrice": "",
+            //                 "closeSLTriggerPrice": "",
+            //                 "closeTPTriggerPrice": "",
+            //                 "cTime": "1761814167000",
+            //                 "uTime": "1761814167000"
+            //             }
+            //         ]
+            //     }
+            //
+            response = await this.privateGetDeepcoinTradeTriggerOrdersPending(this.extend(request, params));
+        }
+        else {
+            request['index'] = index;
+            //
+            //     {
+            //         "code": "0",
+            //         "msg": "",
+            //         "data": [
+            //             {
+            //                 "instType": "SPOT",
+            //                 "instId": "ETH-USDT",
+            //                 "tgtCcy": "",
+            //                 "ccy": "",
+            //                 "ordId": "1001435158096314",
+            //                 "clOrdId": "",
+            //                 "tag": "",
+            //                 "px": "1000.000000000000",
+            //                 "sz": "0.004000",
+            //                 "pnl": "0.000000",
+            //                 "ordType": "limit",
+            //                 "side": "buy",
+            //                 "posSide": "",
+            //                 "tdMode": "cash",
+            //                 "accFillSz": "0.000000",
+            //                 "fillPx": "",
+            //                 "tradeId": "",
+            //                 "fillSz": "0.000000",
+            //                 "fillTime": "1760695267000",
+            //                 "avgPx": "",
+            //                 "state": "live",
+            //                 "lever": "1",
+            //                 "tpTriggerPx": "",
+            //                 "tpTriggerPxType": "",
+            //                 "tpOrdPx": "",
+            //                 "slTriggerPx": "",
+            //                 "slTriggerPxType": "",
+            //                 "slOrdPx": "",
+            //                 "feeCcy": "USDT",
+            //                 "fee": "0.000000",
+            //                 "rebateCcy": "",
+            //                 "source": "",
+            //                 "rebate": "",
+            //                 "category": "normal",
+            //                 "uTime": "1760695267000",
+            //                 "cTime": "1760695267000"
+            //             }
+            //         ]
+            //     }
+            //
+            response = await this.privateGetDeepcoinTradeV2OrdersPending(this.extend(request, params));
+        }
+        const data = this.safeList(response, 'data', []);
+        return this.parseOrders(data, market, since, limit, { 'status': 'open' });
+    }
+    /**
+     * @method
+     * @name deepcoin#cancelOrder
+     * @description cancels an open order
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/cancelOrder
+     * @param {string} id order id
+     * @param {string} symbol unified symbol of the market the order was made in
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {bool} [params.trigger] whether the order is a trigger/algo order (default false)
+     * @returns {object} An [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async cancelOrder(id, symbol = undefined, params = {}) {
+        await this.loadMarkets();
+        if (symbol === undefined) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' cancelOrder() requires a symbol argument');
+        }
+        const market = this.market(symbol);
+        const request = {
+            'instId': market['id'],
+            'ordId': id,
+        };
+        let response = undefined;
+        const trigger = this.safeBool(params, 'trigger', false);
+        if (trigger) {
+            params = this.omit(params, 'trigger');
+            response = await this.privatePostDeepcoinTradeCancelTriggerOrder(this.extend(request, params));
+        }
+        else {
+            response = await this.privatePostDeepcoinTradeCancelOrder(this.extend(request, params));
+        }
+        const data = this.safeDict(response, 'data', {});
+        return this.parseOrder(data, market);
+    }
+    /**
+     * @method
+     * @name deepcoin#cancelAllOrders
+     * @description cancel all open orders in a market
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/cancelAllOrder
+     * @param {string} symbol unified market symbol of the market to cancel orders in
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.marginMode] *swap only* 'cross' or 'isolated', the default is 'cash' for spot and 'cross' for swap
+     * @param {bool} [params.merged] *swap only* true for merged positions, false for split positions (default true)
+     * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async cancelAllOrders(symbol = undefined, params = {}) {
+        await this.loadMarkets();
+        if (symbol === undefined) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' cancelAllOrders() requires a symbol argument');
+        }
+        const market = this.market(symbol);
+        if (market['spot']) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.NotSupported(this.id + ' cancelAllOrders() is not supported for spot markets');
+        }
+        const productGroup = this.getProductGroupFromMarket(market);
+        const marginMode = this.safeString(params, 'marginMode');
+        let encodedMarginMode = 1;
+        if (marginMode !== undefined) {
+            params = this.omit(params, 'marginMode');
+            if (marginMode === 'isolated') {
+                encodedMarginMode = 0;
+            }
+        }
+        let merged = true;
+        [merged, params] = this.handleOptionAndParams(params, 'cancelAllOrders', 'merged', merged);
+        const request = {
+            'InstrumentID': market['id'],
+            'ProductGroup': productGroup,
+            'IsCrossMargin': encodedMarginMode,
+            'IsMergeMode': merged ? 1 : 0,
+        };
+        const response = await this.privatePostDeepcoinTradeSwapCancelAll(this.extend(request, params));
+        const data = this.safeList(response, 'data', []);
+        return this.parseOrders(data, market);
+    }
+    /**
+     * @method
+     * @name deepcoin#editOrder
+     * @description edit a trade order
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/replaceOrder
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/replaceTPSL
+     * @param {string} id cancel order id
+     * @param {string} [symbol] unified symbol of the market to create an order in (not used in deepcoin editOrder)
+     * @param {string} [type] 'market' or 'limit' (not used in deepcoin editOrder)
+     * @param {string} [side] 'buy' or 'sell' (not used in deepcoin editOrder)
+     * @param {float} [amount] how much of currency you want to trade in units of base currency
+     * @param {float} [price] the price at which the order is to be fulfilled, in units of the quote currency, ignored in market orders
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {float} [params.stopLossPrice] the price that a stop loss order is triggered at
+     * @param {float} [params.takeProfitPrice] the price that a take profit order is triggered at
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async editOrder(id, symbol, type, side, amount = undefined, price = undefined, params = {}) {
+        await this.loadMarkets();
+        const request = {
+            'OrderSysID': id,
+        };
+        let market = undefined;
+        if (symbol !== undefined) {
+            market = this.market(symbol);
+            if (market['spot']) {
+                throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.NotSupported(this.id + ' editOrder() is not supported for spot markets');
+            }
+            symbol = market['symbol'];
+        }
+        const stopLossPrice = this.safeNumber(params, 'stopLossPrice');
+        const takeProfitPrice = this.safeNumber(params, 'takeProfitPrice');
+        const isTPSL = (stopLossPrice !== undefined) || (takeProfitPrice !== undefined);
+        let response = undefined;
+        if (isTPSL) {
+            if ((price !== undefined) || (amount !== undefined)) {
+                throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest(this.id + ' editOrder() with stopLossPrice or takeProfitPrice cannot have price or amount. Either use stopLossPrice/takeProfitPrice or price/amount to edit order.');
+            }
+            if (stopLossPrice !== undefined) {
+                request['slTriggerPx'] = symbol ? this.priceToPrecision(symbol, stopLossPrice) : this.numberToString(stopLossPrice);
+            }
+            if (takeProfitPrice !== undefined) {
+                request['tpTriggerPx'] = symbol ? this.priceToPrecision(symbol, takeProfitPrice) : this.numberToString(takeProfitPrice);
+            }
+            params = this.omit(params, ['stopLossPrice', 'takeProfitPrice']);
+            response = await this.privatePostDeepcoinTradeReplaceOrderSltp(this.extend(request, params));
+        }
+        else {
+            if (price !== undefined) {
+                if (symbol !== undefined) {
+                    request['price'] = this.priceToPrecision(symbol, price);
+                }
+                else {
+                    request['price'] = this.numberToString(price);
+                }
+            }
+            if (amount !== undefined) {
+                if (symbol !== undefined) {
+                    request['volume'] = this.amountToPrecision(symbol, amount);
+                }
+                else {
+                    request['volume'] = this.numberToString(amount);
+                }
+            }
+            response = await this.privatePostDeepcoinTradeReplaceOrder(this.extend(request, params));
+        }
+        const data = this.safeDict(response, 'data', {});
+        return this.parseOrder(data);
+    }
+    /**
+     * @method
+     * @name deepcoin#cancelOrders
+     * @description cancel multiple orders
+     * @param {string[]} ids order ids
+     * @param {string} [symbol] unified market symbol, default is undefined
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} an list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async cancelOrders(ids, symbol = undefined, params = {}) {
+        await this.loadMarkets();
+        let market = undefined;
+        if (symbol !== undefined) {
+            market = this.market(symbol);
+            if (market['spot']) {
+                throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.NotSupported(this.id + ' cancelOrders() is not supported for spot markets');
+            }
+        }
+        const request = {
+            'OrderSysIDs': ids,
+        };
+        const response = await this.privatePostDeepcoinTradeBatchCancelOrder(this.extend(request, params));
+        const data = this.safeList(response, 'data', []);
+        return this.parseOrders(data, market);
+    }
+    parseOrder(order, market = undefined) {
+        //
+        // regular order
+        //     {
+        //         "instType": "SPOT",
+        //         "instId": "ETH-USDT",
+        //         "tgtCcy": "",
+        //         "ccy": "",
+        //         "ordId": "1001434573319675",
+        //         "clOrdId": "",
+        //         "tag": "",
+        //         "px": "4056.620000000000",
+        //         "sz": "0.004000",
+        //         "pnl": "0.000000",
+        //         "ordType": "market",
+        //         "side": "buy",
+        //         "posSide": "",
+        //         "tdMode": "cash",
+        //         "accFillSz": "0.004000",
+        //         "fillPx": "",
+        //         "tradeId": "",
+        //         "fillSz": "0.004000",
+        //         "fillTime": "1760619119000",
+        //         "avgPx": "",
+        //         "state": "filled",
+        //         "lever": "1.000000",
+        //         "tpTriggerPx": "",
+        //         "tpTriggerPxType": "",
+        //         "tpOrdPx": "",
+        //         "slTriggerPx": "",
+        //         "slTriggerPxType": "",
+        //         "slOrdPx": "",
+        //         "feeCcy": "USDT",
+        //         "fee": "0.000004",
+        //         "rebateCcy": "",
+        //         "source": "",
+        //         "rebate": "",
+        //         "category": "normal",
+        //         "uTime": "1760619119000",
+        //         "cTime": "1760619119000"
+        //     }
+        //
+        // trigger order
+        //     {
+        //         "instType": "SPOT",
+        //         "instId": "DOGE-USDT",
+        //         "ordId": "1001442305797142",
+        //         "triggerPx": "0.01",
+        //         "ordPx": "0.01",
+        //         "sz": "20",
+        //         "ordType": "",
+        //         "side": "buy",
+        //         "posSide": "",
+        //         "tdMode": "cash",
+        //         "triggerOrderType": "Conditional",
+        //         "triggerPxType": "last",
+        //         "lever": "",
+        //         "slPrice": "",
+        //         "slTriggerPrice": "",
+        //         "tpPrice": "",
+        //         "tpTriggerPrice": "",
+        //         "closeSLTriggerPrice": "",
+        //         "closeTPTriggerPrice": "",
+        //         "cTime": "1761814167000",
+        //         "uTime": "1761814167000"
+        //     }
+        //
+        const marketId = this.safeString(order, 'instId');
+        market = this.safeMarket(marketId, market);
+        let timestamp = this.safeInteger(order, 'cTime');
+        const timestampString = this.safeString(order, 'cTime', '');
+        if (timestampString.length < 13) {
+            timestamp = this.safeTimestamp(order, 'cTime');
+        }
+        const state = this.safeString(order, 'state');
+        const orderType = this.safeString(order, 'ordType');
+        let average = this.safeString(order, 'avgPx');
+        if (average === '') {
+            average = undefined;
+        }
+        const feeCurrencyId = this.safeString(order, 'feeCcy');
+        let fee = undefined;
+        if (feeCurrencyId !== undefined) {
+            const feeCost = this.safeString(order, 'fee');
+            fee = {
+                'cost': this.parseNumber(feeCost),
+                'currency': this.safeCurrencyCode(feeCurrencyId),
+            };
+        }
+        return this.safeOrder({
+            'id': this.safeString(order, 'ordId'),
+            'clientOrderId': this.safeString(order, 'clOrdId'),
+            'datetime': this.iso8601(timestamp),
+            'timestamp': timestamp,
+            'lastTradeTimestamp': undefined,
+            'lastUpdateTimestamp': this.safeInteger(order, 'uTime'),
+            'status': this.parseOrderStatus(state),
+            'symbol': market['symbol'],
+            'type': this.parseOrderType(orderType),
+            'timeInForce': this.parseOrderTimeInForce(orderType),
+            'side': this.safeString(order, 'side'),
+            'price': this.safeString2(order, 'px', 'ordPx'),
+            'average': average,
+            'amount': this.safeString(order, 'sz'),
+            'filled': this.safeString(order, 'accFillSz'),
+            'remaining': undefined,
+            'triggerPrice': this.omitZero(this.safeString(order, 'triggerPx')),
+            'takeProfitPrice': this.safeString2(order, 'tpTriggerPx', 'tpTriggerPrice'),
+            'stopLossPrice': this.safeString2(order, 'slTriggerPx', 'slTriggerPrice'),
+            'cost': undefined,
+            'trades': undefined,
+            'fee': fee,
+            'reduceOnly': undefined,
+            'postOnly': orderType ? (orderType === 'post_only') : undefined,
+            'info': order,
+        }, market);
+    }
+    parseOrderStatus(status) {
+        const statuses = {
+            'live': 'open',
+            'filled': 'closed',
+            'canceled': 'canceled',
+            'partially_filled': 'open',
+        };
+        return this.safeString(statuses, status, status);
+    }
+    parseOrderType(type) {
+        const types = {
+            'limit': 'limit',
+            'market': 'market',
+            'post_only': 'limit',
+            'ioc': 'market',
+            'TPSL': 'market',
+        };
+        return this.safeString(types, type, type);
+    }
+    parseOrderTimeInForce(type) {
+        const timeInForces = {
+            'post_only': 'PO',
+            'ioc': 'IOC',
+            'limit': 'GTC',
+            'market': 'GTC',
+        };
+        return this.safeString(timeInForces, type, type);
+    }
+    /**
+     * @method
+     * @description fetch open positions for a single market
+     * @name deepcoin#fetchPositionsForSymbol
+     * @see https://www.deepcoin.com/docs/DeepCoinAccount/accountPositions
+     * @description fetch all open positions for specific symbol
+     * @param {string} symbol unified market symbol
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object[]} a list of [position structure]{@link https://docs.ccxt.com/#/?id=position-structure}
+     */
+    async fetchPositionsForSymbol(symbol, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        const instrumentType = this.convertToInstrumentType(market['type']);
+        const request = {
+            'instType': instrumentType,
+            'instId': market['id'],
+        };
+        const response = await this.privateGetDeepcoinAccountPositions(this.extend(request, params));
+        const data = this.safeList(response, 'data', []);
+        return this.parsePositions(data, [market['symbol']]);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchPositions
+     * @description fetch all open positions
+     * @see https://www.deepcoin.com/docs/DeepCoinAccount/accountPositions
+     * @param {string[]} [symbols] list of unified market symbols
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object[]} a list of [position structure]{@link https://docs.ccxt.com/#/?id=position-structure}
+     */
+    async fetchPositions(symbols = undefined, params = {}) {
+        await this.loadMarkets();
+        symbols = this.marketSymbols(symbols, undefined, true, true);
+        let marketType = 'swap';
+        let market = undefined;
+        if (symbols !== undefined) {
+            const firstSymbol = this.safeString(symbols, 0);
+            market = this.market(firstSymbol);
+        }
+        [marketType, params] = this.handleMarketTypeAndParams('fetchPositions', market, params, marketType);
+        const instrumentType = this.convertToInstrumentType(marketType);
+        const request = {
+            'instType': instrumentType,
+        };
+        const response = await this.privateGetDeepcoinAccountPositions(this.extend(request, params));
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": [
+        //             {
+        //                 "instType": "SWAP",
+        //                 "mgnMode": "cross",
+        //                 "instId": "DOGE-USDT-SWAP",
+        //                 "posId": "1001110099878275",
+        //                 "posSide": "long",
+        //                 "pos": "20",
+        //                 "avgPx": "0.18408",
+        //                 "lever": "75",
+        //                 "liqPx": "0.00001",
+        //                 "useMargin": "0.049088",
+        //                 "mrgPosition": "merge",
+        //                 "ccy": "USDT",
+        //                 "uTime": "1760709419000",
+        //                 "cTime": "1760709419000"
+        //             }
+        //         ]
+        //     }
+        //
+        const data = this.safeList(response, 'data', []);
+        return this.parsePositions(data, symbols);
+    }
+    parsePosition(position, market = undefined) {
+        //
+        //     {
+        //         "instType": "SWAP",
+        //         "mgnMode": "cross",
+        //         "instId": "DOGE-USDT-SWAP",
+        //         "posId": "1001110099878275",
+        //         "posSide": "long",
+        //         "pos": "20",
+        //         "avgPx": "0.18408",
+        //         "lever": "75",
+        //         "liqPx": "0.00001",
+        //         "useMargin": "0.049088",
+        //         "mrgPosition": "merge",
+        //         "ccy": "USDT",
+        //         "uTime": "1760709419000",
+        //         "cTime": "1760709419000"
+        //     }
+        //
+        const marketId = this.safeString(position, 'instId');
+        market = this.safeMarket(marketId, market);
+        const timestamp = this.safeInteger(position, 'cTime');
+        return this.safePosition({
+            'symbol': market['symbol'],
+            'id': this.safeString(position, 'posId'),
+            'timestamp': timestamp,
+            'datetime': this.iso8601(timestamp),
+            'contracts': this.safeString(position, 'pos'),
+            'contractSize': undefined,
+            'side': this.safeString(position, 'posSide'),
+            'notional': undefined,
+            'leverage': this.omitZero(this.safeString(position, 'lever')),
+            'unrealizedPnl': undefined,
+            'realizedPnl': undefined,
+            'collateral': undefined,
+            'entryPrice': this.safeString(position, 'avgPx'),
+            'markPrice': undefined,
+            'liquidationPrice': this.safeString(position, 'liqPx'),
+            'marginMode': this.safeString(position, 'mgnMode'),
+            'hedged': true,
+            'maintenanceMargin': this.safeString(position, 'useMargin'),
+            'maintenanceMarginPercentage': undefined,
+            'initialMargin': undefined,
+            'initialMarginPercentage': undefined,
+            'marginRatio': undefined,
+            'lastUpdateTimestamp': this.safeInteger(position, 'uTime'),
+            'lastPrice': undefined,
+            'stopLossPrice': undefined,
+            'takeProfitPrice': undefined,
+            'percentage': undefined,
+            'info': position,
+        });
+    }
+    /**
+     * @method
+     * @name deepcoin#setLeverage
+     * @description set the level of leverage for a market
+     * @see https://www.deepcoin.com/docs/DeepCoinAccount/accountSetLeverage
+     * @param {float} leverage the rate of leverage
+     * @param {string} symbol unified market symbol
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.marginMode] 'cross' or 'isolated' (default is cross)
+     * @param {string} [params.mrgPosition] 'merge' or 'split', default is merge
+     * @returns {object} response from the exchange
+     */
+    async setLeverage(leverage, symbol = undefined, params = {}) {
+        if (symbol === undefined) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' setLeverage() requires a symbol argument');
+        }
+        // WARNING: THIS WILL INCREASE LIQUIDATION PRICE FOR OPEN ISOLATED LONG POSITIONS
+        // AND DECREASE LIQUIDATION PRICE FOR OPEN ISOLATED SHORT POSITIONS
+        if (leverage < 1) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest(this.id + ' setLeverage() leverage should be minimum 1');
+        }
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        let marginMode = 'cross';
+        [marginMode, params] = this.handleMarginModeAndParams('setLeverage', params, marginMode);
+        if ((marginMode !== 'cross') && (marginMode !== 'isolated')) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest(this.id + ' setLeverage() requires a marginMode parameter that must be either cross or isolated');
+        }
+        let mrgPosition = 'merge';
+        [mrgPosition, params] = this.handleOptionAndParams(params, 'setLeverage', 'mrgPosition', mrgPosition);
+        if (mrgPosition !== 'merge' && mrgPosition !== 'split') {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest(this.id + ' setLeverage() mrgPosition parameter must be either merge or split');
+        }
+        const request = {
+            'lever': leverage,
+            'mgnMode': marginMode,
+            'instId': market['id'],
+            'mrgPosition': mrgPosition,
+        };
+        const response = await this.privatePostDeepcoinAccountSetLeverage(this.extend(request, params));
+        //
+        //     {
+        //         code: '0',
+        //         msg: '',
+        //         data: {
+        //             instId: 'ETH-USDT-SWAP',
+        //             lever: '2',
+        //             mgnMode: 'cross',
+        //             mrgPosition: 'merge',
+        //             sCode: '0',
+        //             sMsg: ''
+        //         }
+        //     }
+        //
+        return response;
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchFundingRates
+     * @description fetch the funding rate for multiple markets
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/currentFundRate
+     * @param {string[]|undefined} symbols list of unified market symbols
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.subType] "linear" or "inverse"
+     * @returns {object[]} a list of [funding rate structures]{@link https://docs.ccxt.com/#/?id=funding-rates-structure}, indexed by market symbols
+     */
+    async fetchFundingRates(symbols = undefined, params = {}) {
+        await this.loadMarkets();
+        symbols = this.marketSymbols(symbols, 'swap', true, true, true);
+        let subType = 'linear';
+        let firstMarket = undefined;
+        if (symbols !== undefined) {
+            const firstSymbol = this.safeString(symbols, 0);
+            firstMarket = this.market(firstSymbol);
+        }
+        [subType, params] = this.handleSubTypeAndParams('fetchFundingRates', firstMarket, params, subType);
+        let instType = 'SwapU';
+        if (subType === 'inverse') {
+            instType = 'Swap';
+        }
+        else if (subType !== 'linear') {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest(this.id + ' fetchFundingRates() subType parameter must be either linear or inverse');
+        }
+        const request = {
+            'instType': instType,
+        };
+        const response = await this.privateGetDeepcoinTradeFundRateCurrentFundingRate(this.extend(request, params));
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": {
+        //             "current_fund_rates": [
+        //                 {
+        //                     "instrumentId": "SPKUSDT",
+        //                     "fundingRate": 0.00005
+        //                 },
+        //                 {
+        //                     "instrumentId": "LAUNCHCOINUSDT",
+        //                     "fundingRate": 0.00005
+        //                 }
+        //             ]
+        //         }
+        //     }
+        //
+        const data = this.safeDict(response, 'data', {});
+        const rates = this.safeList(data, 'current_fund_rates', []);
+        return this.parseFundingRates(rates, symbols);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchFundingRate
+     * @description fetch the current funding rate
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/currentFundRate
+     * @param {string} symbol unified market symbol
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} a [funding rate structure]{@link https://docs.ccxt.com/#/?id=funding-rate-structure}
+     */
+    async fetchFundingRate(symbol, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        if (!market['swap']) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ExchangeError(this.id + ' fetchFundingRate() is only valid for swap markets');
+        }
+        const request = {
+            'instId': market['id'],
+            'instType': this.getProductGroupFromMarket(market),
+        };
+        const response = await this.privateGetDeepcoinTradeFundRateCurrentFundingRate(this.extend(request, params));
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": {
+        //             "current_fund_rates": [
+        //                 {
+        //                     "instrumentId": "ETHUSDT",
+        //                     "fundingRate": 0.0000402356250176
+        //                 }
+        //             ]
+        //         }
+        //     }
+        //
+        const data = this.safeDict(response, 'data', {});
+        const rates = this.safeList(data, 'current_fund_rates', []);
+        const entry = this.safeDict(rates, 0, {});
+        return this.parseFundingRate(entry, market);
+    }
+    parseFundingRate(contract, market = undefined) {
+        //
+        //     {
+        //         "instrumentId": "ETHUSDT",
+        //         "fundingRate": 0.0000402356250176
+        //     }
+        //
+        const marketId = this.safeString2(contract, 'instrumentId', 'instrumentID');
+        const symbol = this.safeSymbol(marketId, market);
+        return {
+            'info': contract,
+            'symbol': symbol,
+            'markPrice': undefined,
+            'indexPrice': undefined,
+            'interestRate': undefined,
+            'estimatedSettlePrice': undefined,
+            'timestamp': undefined,
+            'datetime': undefined,
+            'fundingRate': this.safeNumber(contract, 'fundingRate'),
+            'fundingTimestamp': undefined,
+            'fundingDatetime': undefined,
+            'nextFundingRate': undefined,
+            'nextFundingTimestamp': undefined,
+            'nextFundingDatetime': undefined,
+            'previousFundingRate': undefined,
+            'previousFundingTimestamp': undefined,
+            'previousFundingDatetime': undefined,
+            'interval': undefined,
+        };
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchFundingRateHistory
+     * @description fetches historical funding rate prices
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/fundingRateHistory
+     * @param {string} symbol unified symbol of the market to fetch the funding rate history for
+     * @param {int} [since] timestamp in ms of the earliest funding rate to fetch
+     * @param {int} [limit] the maximum amount of [funding rate structures]{@link https://docs.ccxt.com/#/?id=funding-rate-history-structure} to fetch
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {int} [params.page] pagination page number
+     * @returns {object[]} a list of [funding rate structures]{@link https://docs.ccxt.com/#/?id=funding-rate-history-structure}
+     */
+    async fetchFundingRateHistory(symbol = undefined, since = undefined, limit = undefined, params = {}) {
+        if (symbol === undefined) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' fetchFundingRateHistory() requires a symbol argument');
+        }
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        const request = {
+            'instId': market['id'],
+        };
+        if (limit !== undefined) {
+            request['size'] = limit; // default 20, max 100
+        }
+        const response = await this.privateGetDeepcoinTradeFundRateHistory(this.extend(request, params));
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": {
+        //             "rows": [
+        //                 {
+        //                     "instrumentID": "ETHUSD",
+        //                     "rate": "0.00046493",
+        //                     "CreateTime": 1760860800,
+        //                     "ratePeriodSec": 0
+        //                 },
+        //                 {
+        //                     "instrumentID": "ETHUSD",
+        //                     "rate": "0.00047949",
+        //                     "CreateTime": 1760832000,
+        //                     "ratePeriodSec": 0
+        //                 }
+        //             ]
+        //         }
+        //     }
+        //
+        const data = this.safeDict(response, 'data', {});
+        const rows = this.safeList(data, 'rows', []);
+        return this.parseFundingRateHistories(rows, market, since, limit);
+    }
+    parseFundingRateHistory(info, market = undefined) {
+        //
+        //     {
+        //         "instrumentID": "ETHUSD",
+        //         "rate": "0.00047949",
+        //         "CreateTime": 1760832000,
+        //         "ratePeriodSec": 0
+        //     }
+        //
+        const timestamp = this.safeTimestamp(info, 'CreateTime');
+        const instrumentID = this.safeString2(info, 'instrumentID', 'instrumentId');
+        market = this.safeMarket(instrumentID, market, undefined, 'swap');
+        return {
+            'info': info,
+            'symbol': market['symbol'],
+            'fundingRate': this.safeNumber(info, 'rate'),
+            'timestamp': timestamp,
+            'datetime': this.iso8601(timestamp),
+        };
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchMyTrades
+     * @description fetch all trades made by the user
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/tradeFills
+     * @param {string} symbol unified market symbol
+     * @param {int} [since] the earliest time in ms to fetch trades for
+     * @param {int} [limit] the maximum number of trades structures to retrieve
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {int} [params.until] timestamp in ms of the latest trade to fetch
+     * @param {string} [params.type] 'spot' or 'swap', the market type for the trades (default is 'spot')
+     * @param {boolean} [params.paginate] default false, when true will automatically paginate by calling this endpoint multiple times. See in the docs all the [available parameters](https://github.com/ccxt/ccxt/wiki/Manual#pagination-params)
+     * @returns {Trade[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=trade-structure}
+     */
+    async fetchMyTrades(symbol = undefined, since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        let paginate = false;
+        [paginate, params] = this.handleOptionAndParams(params, 'fetchMyTrades', 'paginate');
+        if (paginate) {
+            return await this.fetchPaginatedCallDynamic('fetchMyTrades', symbol, since, limit, params);
+        }
+        let market = undefined;
+        if (symbol !== undefined) {
+            market = this.market(symbol);
+        }
+        let marketType = 'spot';
+        [marketType, params] = this.handleMarketTypeAndParams('fetchMyTrades', market, params, marketType);
+        const request = {
+            'instType': this.convertToInstrumentType(marketType),
+        };
+        if (market !== undefined) {
+            request['instId'] = market['id'];
+        }
+        if (since !== undefined) {
+            request['begin'] = since;
+        }
+        if (limit !== undefined) {
+            request['limit'] = limit; // default 100, max 100
+        }
+        const until = this.safeInteger(params, 'until');
+        if (until !== undefined) {
+            params = this.omit(params, 'until');
+            request['end'] = until;
+        }
+        const response = await this.privateGetDeepcoinTradeFills(this.extend(request, params));
+        //
+        //     {
+        //         "code": "0",
+        //         "msg": "",
+        //         "data": [
+        //             {
+        //                 "instType": "SPOT",
+        //                 "instId": "ETH-USDT",
+        //                 "tradeId": "1001056429613610",
+        //                 "ordId": "1001435238208686",
+        //                 "clOrdId": "",
+        //                 "billId": "10010564296136101",
+        //                 "tag": "",
+        //                 "fillPx": "3791.15",
+        //                 "fillSz": "0.004",
+        //                 "side": "sell",
+        //                 "posSide": "",
+        //                 "execType": "",
+        //                 "feeCcy": "USDT",
+        //                 "fee": "0.0151646",
+        //                 "ts": "1760704540000"
+        //             }
+        //         ]
+        //     }
+        //
+        const data = this.safeList(response, 'data', []);
+        return this.parseTrades(data, market, since, limit);
+    }
+    /**
+     * @method
+     * @name deepcoin#fetchOrderTrades
+     * @description fetch all the trades made from a single order
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/tradeFills
+     * @param {string} id order id
+     * @param {string} symbol unified market symbol
+     * @param {int} [since] the earliest time in ms to fetch trades for
+     * @param {int} [limit] the maximum number of trades to retrieve
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.type] 'spot' or 'swap', the market type for the trades
+     * @returns {object[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=trade-structure}
+     */
+    async fetchOrderTrades(id, symbol = undefined, since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        const marketType = this.safeString(params, 'type');
+        if (symbol === undefined && marketType === undefined) {
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' fetchOrderTrades requires a symbol argument or a market type in the params');
+        }
+        params = this.extend({ 'ordId': id }, params);
+        return await this.fetchMyTrades(symbol, since, limit, params);
+    }
+    /**
+     * @method
+     * @name deepcoin#closePosition
+     * @description closes open positions for a market
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/batchClosePosition
+     * @see https://www.deepcoin.com/docs/DeepCoinTrade/closePositionByIds
+     * @param {string} symbol Unified CCXT market symbol
+     * @param {string} [side] not used by deepcoin
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string|undefined} [params.positionId] the id of the position you would like to close
+     * @param {string[]|undefined} [params.positionIds] list of position ids to close (for batch closing)
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async closePosition(symbol, side = undefined, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        const productGroup = this.getProductGroupFromMarket(market);
+        const positionId = this.safeString(params, 'positionId');
+        const positionIds = this.safeList(params, 'positionIds');
+        const request = {
+            'instId': market['id'],
+            'productGroup': productGroup,
+        };
+        let response = undefined;
+        if (positionId === undefined && positionIds === undefined) {
+            response = await this.privatePostDeepcoinTradeBatchClosePosition(this.extend(request, params));
+        }
+        else {
+            if (positionId !== undefined) {
+                params = this.omit(params, 'positionId');
+                request['positionIds'] = [positionId];
+            }
+            response = await this.privatePostDeepcoinTradeClosePositionByIds(this.extend(request, params));
+        }
+        const data = this.safeList(response, 'data', []);
+        return this.parseOrder(data, market);
+    }
+    sign(path, api = 'public', method = 'GET', params = {}, headers = undefined, body = undefined) {
+        let requestPath = path;
+        if (method === 'GET') {
+            const query = this.urlencode(params);
+            if (query.length) {
+                requestPath += '?' + query;
+            }
+        }
+        const url = this.urls['api'][api] + '/' + requestPath;
+        if (api === 'private') {
+            this.checkRequiredCredentials();
+            const timestamp = this.milliseconds();
+            const dateTime = this.iso8601(timestamp);
+            let payload = dateTime + method + '/' + requestPath;
+            headers = {
+                'DC-ACCESS-KEY': this.apiKey,
+                'DC-ACCESS-TIMESTAMP': dateTime,
+                'DC-ACCESS-PASSPHRASE': this.password,
+                'appid': '200103',
+            };
+            if (method !== 'GET') {
+                body = this.json(params);
+                headers['Content-Type'] = 'application/json';
+                payload += body;
+            }
+            const signature = this.hmac(this.encode(payload), this.encode(this.secret), _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_4__/* .sha256 */ .s, 'base64');
+            headers['DC-ACCESS-SIGN'] = signature;
+        }
+        return { 'url': url, 'method': method, 'body': body, 'headers': headers };
+    }
+    handleErrors(code, reason, url, method, headers, body, response, requestHeaders, requestBody) {
+        const data = this.safeDict(response, 'data', {});
+        let msg = this.safeString(response, 'msg');
+        const messageCode = this.safeString(response, 'code');
+        let sCode = this.safeString(data, 'sCode');
+        const sMsg = this.safeString(data, 'sMsg');
+        let errorCode = this.safeString(data, 'errorCode');
+        if ((msg !== undefined) && (msg === '') && (sMsg !== undefined)) {
+            msg = sMsg;
+        }
+        const errorList = this.safeList(data, 'errorList');
+        if (errorList !== undefined) {
+            for (let i = 0; i < errorList.length; i++) {
+                const entry = this.safeDict(errorList, i, {});
+                errorCode = this.safeString(entry, 'errorCode');
+            }
+        }
+        const feedback = this.id + ' ' + body;
+        if ((sCode === undefined) && (errorCode !== undefined)) {
+            sCode = errorCode;
+        }
+        const retCode = this.safeString(data, 'retCode');
+        if ((sCode === undefined) && (retCode !== undefined)) {
+            sCode = retCode;
+        }
+        if ((code !== 200) || (messageCode !== '0') || (sCode !== undefined && sCode !== '0')) {
+            this.throwExactlyMatchedException(this.exceptions['exact'], messageCode, feedback);
+            this.throwExactlyMatchedException(this.exceptions['exact'], sCode, feedback);
+            this.throwExactlyMatchedException(this.exceptions['exact'], msg, feedback);
+            this.throwBroadlyMatchedException(this.exceptions['broad'], msg, feedback);
+            throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.ExchangeError(feedback);
+        }
+        else {
+            const list = this.safeList(data, 'list', []);
+            if (('list' in data) && (list === undefined)) {
+                throw new _ccxt_js__WEBPACK_IMPORTED_MODULE_2__.NullResponse(feedback);
+            }
         }
         return undefined;
     }
@@ -280626,6 +283676,19 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
                 'fetchTradesWs': true,
                 'fetchTradingFeesWs': false,
                 'fetchWithdrawalsWs': false,
+                'unWatchTicker': true,
+                'unWatchTickers': true,
+                'unWatchOHLCV': true,
+                'unWatchOHLCVForSymbols': true,
+                'unWatchOrderBook': true,
+                'unWatchOrderBookForSymbols': true,
+                'unWatchTrades': true,
+                'unWatchTradesForSymbols': true,
+                'unWatchMyTrades': false,
+                'unWatchOrders': false,
+                'unWatchPositions': false,
+                'unWatchMarkPrices': true,
+                'unWatchMarkPrice': true,
             },
             'urls': {
                 'test': {
@@ -282394,28 +285457,6 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
     }
     /**
      * @method
-     * @name binance#unWatchMarkPrices
-     * @description stops watching the mark price for all markets
-     * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream-for-All-market
-     * @param {string[]} symbols unified symbol of the market to fetch the ticker for
-     * @param {object} [params] extra parameters specific to the exchange API endpoint
-     * @param {boolean} [params.use1sFreq] *default is true* if set to true, the mark price will be updated every second, otherwise every 3 seconds
-     * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/#/?id=ticker-structure}
-     */
-    async unWatchMarkPrices(symbols = undefined, params = {}) {
-        let channelName = undefined;
-        // for now watchmarkPrice uses the same messageHash as watchTicker
-        // so it's impossible to watch both at the same time
-        // refactor this to use different messageHashes
-        [channelName, params] = this.handleOptionAndParams(params, 'watchMarkPrices', 'name', 'markPrice');
-        const newTickers = await this.watchMultiTickerHelper('watchMarkPrices', channelName, symbols, params);
-        if (this.newUpdates) {
-            return newTickers;
-        }
-        return this.filterByArray(this.tickers, 'symbol', symbols);
-    }
-    /**
-     * @method
      * @name binance#watchTickers
      * @description watches a price ticker, a statistical calculation with the information calculated over the past 24 hours for all markets of a specific list
      * @see https://developers.binance.com/docs/binance-spot-api-docs/web-socket-streams#individual-symbol-mini-ticker-stream
@@ -282526,11 +285567,91 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             'unsubscribe': true,
             'id': requestId.toString(),
             'subMessageHashes': subMessageHashes,
-            'messageHashes': subMessageHashes,
+            'messageHashes': messageHashes,
             'symbols': symbols,
             'topic': 'ticker',
         };
-        return await this.watchMultiple(url, subMessageHashes, this.extend(request, params), subMessageHashes, subscription);
+        return await this.watchMultiple(url, messageHashes, this.extend(request, params), messageHashes, subscription);
+    }
+    /**
+     * @method
+     * @name binance#unWatchMarkPrices
+     * @description unWatches a price ticker, a statistical calculation with the information calculated over the past 24 hours for all markets of a specific list
+     * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream
+     * @param {string[]} symbols unified symbol of the market to fetch the ticker for
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/#/?id=ticker-structure}
+     */
+    async unWatchMarkPrices(symbols = undefined, params = {}) {
+        let channelName = undefined;
+        [channelName, params] = this.handleOptionAndParams(params, 'watchMarkPrices', 'name', 'markPrice');
+        await this.loadMarkets();
+        const use1sFreq = this.safeBool(params, 'use1sFreq', true);
+        const suffix = (use1sFreq) ? '@1s' : '';
+        const methodName = 'watchMarkPrices';
+        symbols = this.marketSymbols(symbols, undefined, true, false, true);
+        let firstMarket = undefined;
+        let marketType = undefined;
+        const symbolsDefined = (symbols !== undefined);
+        if (symbolsDefined) {
+            firstMarket = this.market(symbols[0]);
+        }
+        [marketType, params] = this.handleMarketTypeAndParams(methodName, firstMarket, params);
+        if (marketType !== 'swap' && marketType !== 'future') {
+            throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NotSupported(this.id + ' ' + methodName + '() only supports swap markets');
+        }
+        const rawMarketType = 'future';
+        const subscriptionArgs = [];
+        const subMessageHashes = [];
+        const messageHashes = [];
+        if (symbolsDefined) {
+            for (let i = 0; i < symbols.length; i++) {
+                const symbol = symbols[i];
+                const market = this.market(symbol);
+                const msgHash = this.getMessageHash(channelName, market['symbol'], false);
+                subscriptionArgs.push(market['lowercaseId'] + '@' + channelName + suffix);
+                subMessageHashes.push(msgHash);
+                messageHashes.push('unsubscribe:' + msgHash);
+            }
+        }
+        else {
+            const msgHashNoSymbol = this.getMessageHash(channelName, undefined, false);
+            subscriptionArgs.push('!' + channelName + '@arr');
+            subMessageHashes.push(msgHashNoSymbol);
+            messageHashes.push('unsubscribe:' + msgHashNoSymbol);
+        }
+        let streamHash = channelName;
+        if (symbolsDefined) {
+            streamHash = channelName + '::' + symbols.join(',');
+        }
+        const url = this.urls['api']['ws'][rawMarketType] + '/' + this.stream(rawMarketType, streamHash);
+        const requestId = this.requestId(url);
+        const request = {
+            'method': 'UNSUBSCRIBE',
+            'params': subscriptionArgs,
+            'id': requestId,
+        };
+        const subscription = {
+            'unsubscribe': true,
+            'id': requestId.toString(),
+            'subMessageHashes': subMessageHashes,
+            'messageHashes': messageHashes,
+            'symbols': symbols,
+            'topic': 'ticker',
+        };
+        return await this.watchMultiple(url, messageHashes, this.extend(request, params), messageHashes, subscription);
+    }
+    /**
+     * @method
+     * @name binance#unWatchMarkPrice
+     * @description unWatches a price ticker, a statistical calculation with the information calculated over the past 24 hours for all markets of a specific list
+     * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream
+     * @param {string} symbol unified symbol of the market to fetch the ticker for
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/#/?id=ticker-structure}
+     */
+    async unWatchMarkPrice(symbol, params = {}) {
+        return await this.unWatchMarkPrices([symbol], params);
     }
     /**
      * @method
@@ -312306,6 +315427,1237 @@ class cryptocom extends _cryptocom_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"]
                 }
                 this.cleanCache(subscription);
             }
+        }
+    }
+}
+
+
+/***/ }),
+
+/***/ 4811:
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   A: () => (/* binding */ deepcoin)
+/* harmony export */ });
+/* harmony import */ var _deepcoin_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(763);
+/* harmony import */ var _base_errors_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2079);
+/* harmony import */ var _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2931);
+//  ---------------------------------------------------------------------------
+
+
+
+//  ---------------------------------------------------------------------------
+class deepcoin extends _deepcoin_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
+    describe() {
+        return this.deepExtend(super.describe(), {
+            'has': {
+                'ws': true,
+                'watchTicker': true,
+                'watchMarkPrice': false,
+                'watchMarkPrices': false,
+                'watchTickers': false,
+                'watchBidsAsks': false,
+                'watchOrderBook': true,
+                'watchTrades': true,
+                'watchTradesForSymbols': false,
+                'watchOrderBookForSymbols': false,
+                'watchBalance': false,
+                'watchLiquidations': false,
+                'watchLiquidationsForSymbols': false,
+                'watchMyLiquidations': false,
+                'watchMyLiquidationsForSymbols': false,
+                'watchOHLCV': true,
+                'watchOHLCVForSymbols': false,
+                'watchOrders': true,
+                'watchMyTrades': true,
+                'watchPositions': true,
+                'watchFundingRate': false,
+                'watchFundingRates': false,
+                'createOrderWs': false,
+                'editOrderWs': false,
+                'cancelOrderWs': false,
+                'cancelOrdersWs': false,
+                'cancelAllOrdersWs': false,
+                'unWatchTicker': true,
+                'unWatchTrades': true,
+                'unWatchOHLCV': true,
+                'unWatchOrderBook': true,
+            },
+            'urls': {
+                'api': {
+                    'ws': {
+                        'public': {
+                            'spot': 'wss://stream.deepcoin.com/streamlet/trade/public/spot?platform=api',
+                            'swap': 'wss://stream.deepcoin.com/streamlet/trade/public/swap?platform=api',
+                        },
+                        'private': 'wss://stream.deepcoin.com/v1/private',
+                    },
+                },
+            },
+            'options': {
+                'lastRequestId': undefined,
+                'listenKey': undefined,
+                'listenKeyExpiryTimestamp': undefined,
+                'authenticate': {
+                    'method': 'privateGetDeepcoinListenkeyExtend', // refresh existing listen key or 'privateGetDeepcoinListenkeyAcquire' - get a new one
+                },
+                'timeframes': {
+                    '1m': '1m',
+                    '5m': '5m',
+                    '15m': '15m',
+                    '30m': '30m',
+                    '1h': '1h',
+                    '4h': '4h',
+                    '12h': '12h',
+                    '1d': '1d',
+                    '1w': '1w',
+                    '1M': '1o',
+                    '1y': '1y',
+                },
+            },
+            'streaming': {
+                'ping': this.ping,
+            },
+        });
+    }
+    ping(client) {
+        const url = client.url;
+        if (url.indexOf('private') >= 0) {
+            client.lastPong = this.milliseconds();
+            // prevent automatic disconnects on private channel
+        }
+        return 'ping';
+    }
+    handlePong(client, message) {
+        client.lastPong = this.milliseconds();
+        return message;
+    }
+    requestId() {
+        const previousValue = this.safeInteger(this.options, 'lastRequestId', 0);
+        const newValue = this.sum(previousValue, 1);
+        this.options['lastRequestId'] = newValue;
+        return newValue;
+    }
+    createPublicRequest(market, requestId, topicID, suffix = '', unWatch = false) {
+        let marketId = market['symbol']; // spot markets use symbol with slash
+        if (market['type'] === 'swap') {
+            marketId = market['baseId'] + market['quoteId']; // swap markets use symbol without slash
+        }
+        let action = '1'; // subscribe
+        if (unWatch) {
+            action = '0'; // unsubscribe
+        }
+        const request = {
+            'sendTopicAction': {
+                'Action': action,
+                'FilterValue': 'DeepCoin_' + marketId + suffix,
+                'LocalNo': requestId,
+                'ResumeNo': -1,
+                'TopicID': topicID,
+            },
+        };
+        return request;
+    }
+    async watchPublic(market, messageHash, topicID, params = {}, suffix = '') {
+        const url = this.urls['api']['ws']['public'][market['type']];
+        const requestId = this.requestId();
+        const request = this.createPublicRequest(market, requestId, topicID, suffix);
+        const subscription = {
+            'subHash': messageHash,
+            'id': requestId,
+        };
+        return await this.watch(url, messageHash, this.deepExtend(request, params), messageHash, subscription);
+    }
+    async unWatchPublic(market, messageHash, topicID, params = {}, subscription = {}, suffix = '') {
+        const url = this.urls['api']['ws']['public'][market['type']];
+        const requestId = this.requestId();
+        const client = this.client(url);
+        const existingSubscription = this.safeDict(client.subscriptions, messageHash);
+        if (existingSubscription === undefined) {
+            throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.BadRequest(this.id + ' no subscription for ' + messageHash);
+        }
+        const subId = this.safeInteger(existingSubscription, 'id');
+        const request = this.createPublicRequest(market, subId, topicID, suffix, true); // unsubscribe message uses the same id as the original subscribe message
+        const unsubHash = 'unsubscribe::' + messageHash;
+        subscription = this.extend(subscription, {
+            'subHash': messageHash,
+            'unsubHash': unsubHash,
+            'symbols': [market['symbol']],
+            'id': requestId,
+        });
+        return await this.watch(url, unsubHash, this.deepExtend(request, params), unsubHash, subscription);
+    }
+    async watchPrivate(messageHash, params = {}) {
+        const listenKey = await this.authenticate();
+        const url = this.urls['api']['ws']['private'] + '?listenKey=' + listenKey;
+        return await this.watch(url, messageHash, undefined, 'private', params);
+    }
+    async authenticate(params = {}) {
+        this.checkRequiredCredentials();
+        const time = this.milliseconds();
+        let listenKeyExpiryTimestamp = this.safeInteger(this.options, 'listenKeyExpiryTimestamp', time);
+        const expired = (time - listenKeyExpiryTimestamp) > 60000; // 1 minute before expiry
+        let listenKey = this.safeString(this.options, 'listenKey');
+        let response = undefined;
+        if (listenKey === undefined) {
+            response = await this.privateGetDeepcoinListenkeyAcquire(params);
+        }
+        else if (expired) {
+            const method = this.safeString(this.options, 'method', 'privateGetDeepcoinListenkeyExtend');
+            const getNewKey = (method === 'privateGetDeepcoinListenkeyAcquire');
+            if (getNewKey) {
+                response = await this.privateGetDeepcoinListenkeyAcquire(params);
+            }
+            else {
+                const request = {
+                    'listenkey': listenKey,
+                };
+                response = await this.privateGetDeepcoinListenkeyExtend(this.extend(request, params));
+            }
+        }
+        if (response !== undefined) {
+            const data = this.safeDict(response, 'data', {});
+            listenKey = this.safeString(data, 'listenkey');
+            listenKeyExpiryTimestamp = this.safeTimestamp(data, 'expire_time');
+            this.options['listenKey'] = listenKey;
+            this.options['listenKeyExpiryTimestamp'] = listenKeyExpiryTimestamp;
+        }
+        return listenKey;
+    }
+    /**
+     * @method
+     * @name deepcoin#watchTicker
+     * @description watches a price ticker, a statistical calculation with the information calculated over the past 24 hours for a specific market
+     * @see https://www.deepcoin.com/docs/publicWS/latestMarketData
+     * @param {string} symbol unified symbol of the market to fetch the ticker for
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/#/?id=ticker-structure}
+     */
+    async watchTicker(symbol, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        const messageHash = 'ticker' + '::' + market['symbol'];
+        return await this.watchPublic(market, messageHash, '7', params);
+    }
+    /**
+     * @method
+     * @name deepcoin#unWatchTicker
+     * @description unWatches a price ticker, a statistical calculation with the information calculated over the past 24 hours for a specific market
+     * @see https://www.deepcoin.com/docs/publicWS/latestMarketData
+     * @param {string} symbol unified symbol of the market to fetch the ticker for
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/#/?id=ticker-structure}
+     */
+    async unWatchTicker(symbol, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        const messageHash = 'ticker' + '::' + market['symbol'];
+        const subscription = {
+            'topic': 'ticker',
+        };
+        return await this.unWatchPublic(market, messageHash, '7', params, subscription);
+    }
+    handleTicker(client, message) {
+        //
+        //     a: 'PO',
+        //     m: 'Success',
+        //     tt: 1760913034780,
+        //     mt: 1760913034780,
+        //     r: [
+        //         {
+        //             d: {
+        //                 I: 'BTC/USDT',
+        //                 U: 1760913034742,
+        //                 PF: 0,
+        //                 E: 0,
+        //                 O: 108479.9,
+        //                 H: 109449.9,
+        //                 L: 108238,
+        //                 V: 789.3424915,
+        //                 T: 43003872.3705223,
+        //                 N: 109345,
+        //                 M: 87294.7,
+        //                 D: 0,
+        //                 V2: 3086.4496105,
+        //                 T2: 332811624.339836,
+        //                 F: 0,
+        //                 C: 0,
+        //                 BP1: 109344.9,
+        //                 AP1: 109345.2
+        //             }
+        //         }
+        //     ]
+        //
+        const response = this.safeList(message, 'r', []);
+        const first = this.safeDict(response, 0, {});
+        const data = this.safeDict(first, 'd', {});
+        const marketId = this.safeString(data, 'I');
+        const market = this.safeMarket(marketId, undefined, '/');
+        const symbol = this.safeSymbol(marketId, market);
+        const parsedTicker = this.parseWsTicker(data, market);
+        const messageHash = 'ticker' + '::' + symbol;
+        this.tickers[symbol] = parsedTicker;
+        client.resolve(parsedTicker, messageHash);
+    }
+    parseWsTicker(ticker, market = undefined) {
+        //
+        //     {
+        //         I: 'BTC/USDT',
+        //         U: 1760913034742,
+        //         PF: 0,
+        //         E: 0,
+        //         O: 108479.9,
+        //         H: 109449.9,
+        //         L: 108238,
+        //         V: 789.3424915,
+        //         T: 43003872.3705223,
+        //         N: 109345,
+        //         M: 87294.7,
+        //         D: 0,
+        //         V2: 3086.4496105,
+        //         T2: 332811624.339836,
+        //         F: 0,
+        //         C: 0,
+        //         BP1: 109344.9,
+        //         AP1: 109345.2
+        //     }
+        //
+        const timestamp = this.safeInteger(ticker, 'U');
+        const high = this.safeNumber(ticker, 'H');
+        const low = this.safeNumber(ticker, 'L');
+        const open = this.safeNumber(ticker, 'O');
+        const last = this.safeNumber(ticker, 'N');
+        const bid = this.safeNumber(ticker, 'BP1');
+        const ask = this.safeNumber(ticker, 'AP1');
+        let baseVolume = this.safeNumber(ticker, 'V');
+        let quoteVolume = this.safeNumber(ticker, 'T');
+        if (market['inverse']) {
+            const temp = baseVolume;
+            baseVolume = quoteVolume;
+            quoteVolume = temp;
+        }
+        return this.safeTicker({
+            'symbol': market['symbol'],
+            'timestamp': timestamp,
+            'datetime': this.iso8601(timestamp),
+            'high': high,
+            'low': low,
+            'bid': bid,
+            'bidVolume': undefined,
+            'ask': ask,
+            'askVolume': undefined,
+            'vwap': undefined,
+            'open': open,
+            'close': last,
+            'last': last,
+            'previousClose': undefined,
+            'change': undefined,
+            'percentage': undefined,
+            'average': undefined,
+            'baseVolume': baseVolume,
+            'quoteVolume': quoteVolume,
+            'info': ticker,
+        }, market);
+    }
+    /**
+     * @method
+     * @name deepcoin#watchTrades
+     * @description watches information on multiple trades made in a market
+     * @see https://www.deepcoin.com/docs/publicWS/lastTransactions
+     * @param {string} symbol unified market symbol of the market trades were made in
+     * @param {int} [since] the earliest time in ms to fetch orders for
+     * @param {int} [limit] the maximum number of trade structures to retrieve
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=trade-structure}
+     */
+    async watchTrades(symbol, since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        const messageHash = 'trades' + '::' + market['symbol'];
+        const trades = await this.watchPublic(market, messageHash, '2', params);
+        if (this.newUpdates) {
+            limit = trades.getLimit(symbol, limit);
+        }
+        return this.filterBySinceLimit(trades, since, limit, 'timestamp', true);
+    }
+    /**
+     * @method
+     * @name deepcoin#unWatchTrades
+     * @description unWatches the list of most recent trades for a particular symbol
+     * @see https://www.deepcoin.com/docs/publicWS/lastTransactions
+     * @param {string} symbol unified symbol of the market to fetch trades for
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=public-trades}
+     */
+    async unWatchTrades(symbol, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        const messageHash = 'trades' + '::' + market['symbol'];
+        const subscription = {
+            'topic': 'trades',
+        };
+        return await this.unWatchPublic(market, messageHash, '2', params, subscription);
+    }
+    handleTrades(client, message) {
+        //
+        //     {
+        //         "a": "PMT",
+        //         "b": 0,
+        //         "tt": 1760968672380,
+        //         "mt": 1760968672380,
+        //         "r": [
+        //             {
+        //                 "d": {
+        //                     "TradeID": "1001056452325378",
+        //                     "I": "BTC/USDT",
+        //                     "D": "1",
+        //                     "P": 111061,
+        //                     "V": 0.00137,
+        //                     "T": 1760968672
+        //                 }
+        //             }
+        //         ]
+        //     }
+        //
+        const response = this.safeList(message, 'r', []);
+        const first = this.safeDict(response, 0, {});
+        const data = this.safeDict(first, 'd', {});
+        const marketId = this.safeString(data, 'I');
+        const market = this.safeMarket(marketId, undefined, '/');
+        const symbol = this.safeSymbol(marketId, market);
+        if (!(symbol in this.trades)) {
+            const limit = this.safeInteger(this.options, 'tradesLimit', 1000);
+            this.trades[symbol] = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__/* .ArrayCache */ .I3(limit);
+        }
+        const strored = this.trades[symbol];
+        if (data !== undefined) {
+            const trade = this.parseWsTrade(data, market);
+            strored.append(trade);
+        }
+        const messageHash = 'trades' + '::' + symbol;
+        client.resolve(strored, messageHash);
+    }
+    parseWsTrade(trade, market = undefined) {
+        //
+        // watchTrades
+        //     {
+        //         "TradeID": "1001056452325378",
+        //         "I": "BTC/USDT",
+        //         "D": "1",
+        //         "P": 111061,
+        //         "V": 0.00137,
+        //         "T": 1760968672
+        //     }
+        //
+        // watchMyTrades
+        //     {
+        //         "A": "9256245",
+        //         "CC": "USDT",
+        //         "CP": 0,
+        //         "D": "0",
+        //         "F": 0.152,
+        //         "I": "DOGE/USDT",
+        //         "IT": 1761048103,
+        //         "M": "9256245",
+        //         "OS": "1001437462198486",
+        //         "P": 0.19443,
+        //         "T": 14.77668,
+        //         "TI": "1001056459096708",
+        //         "TT": 1761048103,
+        //         "V": 76,
+        //         "f": "DOGE",
+        //         "l": 1,
+        //         "m": "1",
+        //         "o": "0"
+        //     }
+        //
+        const direction = this.safeString(trade, 'D');
+        const timestamp = this.safeTimestamp2(trade, 'TT', 'T');
+        const matchRole = this.safeString(trade, 'm');
+        let fee = undefined;
+        const feeCost = this.safeString(trade, 'F');
+        if (feeCost !== undefined) {
+            fee = {
+                'cost': feeCost,
+                'currency': this.safeCurrencyCode(this.safeString(trade, 'f')),
+            };
+        }
+        return this.safeTrade({
+            'info': trade,
+            'timestamp': timestamp,
+            'datetime': this.iso8601(timestamp),
+            'symbol': market['symbol'],
+            'id': this.safeString2(trade, 'TradeID', 'TI'),
+            'order': this.safeString(trade, 'OS'),
+            'type': undefined,
+            'takerOrMaker': this.handleTakerOrMaker(matchRole),
+            'side': this.parseTradeSide(direction),
+            'price': this.safeString(trade, 'P'),
+            'amount': this.safeString(trade, 'V'),
+            'cost': this.safeString(trade, 'T'),
+            'fee': fee,
+        }, market);
+    }
+    parseTradeSide(direction) {
+        const sides = {
+            '0': 'buy',
+            '1': 'sell',
+        };
+        return this.safeString(sides, direction, direction);
+    }
+    handleTakerOrMaker(matchRole) {
+        const roles = {
+            '0': 'maker',
+            '1': 'taker',
+        };
+        return this.safeString(roles, matchRole, matchRole);
+    }
+    /**
+     * @method
+     * @name deepcoin#watchOHLCV
+     * @description watches historical candlestick data containing the open, high, low, and close price, and the volume of a market
+     * @see https://www.deepcoin.com/docs/publicWS/KLines
+     * @param {string} symbol unified symbol of the market to fetch OHLCV data for
+     * @param {string} [timeframe] the length of time each candle represents
+     * @param {int} [since] timestamp in ms of the earliest candle to fetch
+     * @param {int} [limit] the maximum amount of candles to fetch
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {int[][]} A list of candles ordered as timestamp, open, high, low, close, volume
+     */
+    async watchOHLCV(symbol, timeframe = '1m', since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        symbol = market['symbol'];
+        const timeframes = this.safeDict(this.options, 'timeframes', {});
+        const interval = this.safeString(timeframes, timeframe, timeframe);
+        const messageHash = 'ohlcv' + '::' + symbol + '::' + timeframe;
+        const suffix = '_' + interval;
+        const ohlcv = await this.watchPublic(market, messageHash, '11', params, suffix);
+        if (this.newUpdates) {
+            limit = ohlcv.getLimit(symbol, limit);
+        }
+        return this.filterBySinceLimit(ohlcv, since, limit, 0, true);
+    }
+    /**
+     * @method
+     * @name deepcoin#unWatchOHLCV
+     * @description watches historical candlestick data containing the open, high, low, and close price, and the volume of a market
+     * @see https://docs.backpack.exchange/#tag/Streams/Public/K-Line
+     * @param {string} symbol unified symbol of the market to fetch OHLCV data for
+     * @param {string} [timeframe] the length of time each candle represents
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {int[][]} A list of candles ordered as timestamp, open, high, low, close, volume
+     */
+    async unWatchOHLCV(symbol, timeframe = '1m', params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        symbol = market['symbol'];
+        const timeframes = this.safeDict(this.options, 'timeframes', {});
+        const interval = this.safeString(timeframes, timeframe, timeframe);
+        const messageHash = 'ohlcv' + '::' + symbol + '::' + timeframe;
+        const suffix = '_' + interval;
+        const subscription = {
+            'topic': 'ohlcv',
+            'symbolsAndTimeframes': [[symbol, timeframe]],
+        };
+        return await this.unWatchPublic(market, messageHash, '11', params, subscription, suffix);
+    }
+    handleOHLCV(client, message) {
+        //
+        //     {
+        //         "a": "PK",
+        //         "tt": 1760972831580,
+        //         "mt": 1760972831580,
+        //         "r": [
+        //             {
+        //                 "d": {
+        //                     "I": "BTC/USDT",
+        //                     "P": "1m",
+        //                     "B": 1760972820,
+        //                     "O": 111373,
+        //                     "C": 111382.9,
+        //                     "H": 111382.9,
+        //                     "L": 111373,
+        //                     "V": 0.2414172,
+        //                     "M": 26888.19693324
+        //                 },
+        //                 "t": "LK"
+        //             }
+        //         ]
+        //     }
+        //
+        const response = this.safeList(message, 'r', []);
+        const first = this.safeDict(response, 0, {});
+        const data = this.safeDict(first, 'd', {});
+        const marketId = this.safeString(data, 'I');
+        const market = this.safeMarket(marketId, undefined, '/');
+        const symbol = this.safeSymbol(marketId, market);
+        const interval = this.safeString(data, 'P');
+        const timeframe = this.findTimeframe(interval);
+        if (!(symbol in this.ohlcvs)) {
+            this.ohlcvs[symbol] = {};
+        }
+        if (!(timeframe in this.ohlcvs[symbol])) {
+            const limit = this.safeInteger(this.options, 'OHLCVLimit', 1000);
+            this.ohlcvs[symbol][timeframe] = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__/* .ArrayCacheByTimestamp */ .TG(limit);
+        }
+        const stored = this.ohlcvs[symbol][timeframe];
+        if (data !== undefined) {
+            const ohlcv = this.parseWsOHLCV(data, market);
+            stored.append(ohlcv);
+        }
+        const messageHash = 'ohlcv' + '::' + symbol + '::' + timeframe;
+        client.resolve(stored, messageHash);
+    }
+    parseWsOHLCV(ohlcv, market = undefined) {
+        //
+        //     {
+        //         "I": "BTC/USDT",
+        //         "P": "1m",
+        //         "B": 1760972820,
+        //         "O": 111373,
+        //         "C": 111382.9,
+        //         "H": 111382.9,
+        //         "L": 111373,
+        //         "V": 0.2414172,
+        //         "M": 26888.19693324
+        //     }
+        //
+        return [
+            this.safeTimestamp(ohlcv, 'B'),
+            this.safeNumber(ohlcv, 'O'),
+            this.safeNumber(ohlcv, 'H'),
+            this.safeNumber(ohlcv, 'L'),
+            this.safeNumber(ohlcv, 'C'),
+            this.safeNumber(ohlcv, 'V'),
+        ];
+    }
+    /**
+     * @method
+     * @name deepcoin#watchOrderBook
+     * @description watches information on open orders with bid (buy) and ask (sell) prices, volumes and other data
+     * @see https://www.deepcoin.com/docs/publicWS/25LevelIncrementalMarketData
+     * @param {string} symbol unified symbol of the market to fetch the order book for
+     * @param {int} [limit] the maximum amount of order book entries to return.
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} A dictionary of [order book structures]{@link https://docs.ccxt.com/#/?id=order-book-structure} indexed by market symbols
+     */
+    async watchOrderBook(symbol, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        const messageHash = 'orderbook' + '::' + market['symbol'];
+        const suffix = '_0.1';
+        const orderbook = await this.watchPublic(market, messageHash, '25', params, suffix);
+        return orderbook.limit();
+    }
+    /**
+     * @method
+     * @name deepcoin#unWatchOrderBook
+     * @description unWatches information on open orders with bid (buy) and ask (sell) prices, volumes and other data
+     * @see https://www.deepcoin.com/docs/publicWS/25LevelIncrementalMarketData
+     * @param {string} symbol unified array of symbols
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} A dictionary of [order book structures]{@link https://docs.ccxt.com/#/?id=order-book-structure} indexed by market symbols
+     */
+    async unWatchOrderBook(symbol, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        const messageHash = 'orderbook' + '::' + market['symbol'];
+        const suffix = '_0.1';
+        const subscription = {
+            'topic': 'orderbook',
+        };
+        return await this.unWatchPublic(market, messageHash, '25', params, subscription, suffix);
+    }
+    handleOrderBook(client, message) {
+        //
+        //     {
+        //         "a": "PMO",
+        //         "t": "i", // i - update, f - snapshot
+        //         "r": [
+        //             {
+        //                 "d": { "I": "ETH/USDT", "D": "1", "P": 4021, "V": 54.39979 }
+        //             },
+        //             {
+        //                 "d": { "I": "ETH/USDT", "D": "0", "P": 4021.1, "V": 49.56724 }
+        //             }
+        //         ],
+        //         "tt": 1760975816446,
+        //         "mt": 1760975816446
+        //     }
+        //
+        const response = this.safeList(message, 'r', []);
+        const first = this.safeDict(response, 0, {});
+        const data = this.safeDict(first, 'd', {});
+        const marketId = this.safeString(data, 'I');
+        const market = this.safeMarket(marketId, undefined, '/');
+        const symbol = this.safeSymbol(marketId, market);
+        if (!(symbol in this.orderbooks)) {
+            this.orderbooks[symbol] = this.orderBook();
+        }
+        const orderbook = this.orderbooks[symbol];
+        const type = this.safeString(message, 't');
+        if (orderbook['timestamp'] === undefined) {
+            if (type === 'f') {
+                // snapshot
+                this.handleOrderBookSnapshot(client, message);
+            }
+            else {
+                // cache the updates until the snapshot is received
+                orderbook.cache.push(message);
+            }
+        }
+        else {
+            this.handleOrderBookMessage(client, message, orderbook);
+            const messageHash = 'orderbook' + '::' + symbol;
+            client.resolve(orderbook, messageHash);
+        }
+    }
+    handleOrderBookSnapshot(client, message) {
+        const entries = this.safeList(message, 'r', []);
+        const first = this.safeDict(entries, 0, {});
+        const data = this.safeDict(first, 'd', {});
+        const marketId = this.safeString(data, 'I');
+        const market = this.safeMarket(marketId, undefined, '/');
+        const symbol = this.safeSymbol(marketId, market);
+        const orderbook = this.orderbooks[symbol];
+        const orderedEntries = {
+            'bids': [],
+            'asks': [],
+        };
+        for (let i = 0; i < entries.length; i++) {
+            const entry = entries[i];
+            const entryData = this.safeDict(entry, 'd', {});
+            const side = this.safeString(entryData, 'D');
+            const price = this.safeNumber(entryData, 'P');
+            const volume = this.safeNumber(entryData, 'V');
+            if (side === '0') {
+                // bid
+                orderedEntries['bids'].push([price, volume]);
+            }
+            else if (side === '1') {
+                // ask
+                orderedEntries['asks'].push([price, volume]);
+            }
+        }
+        const timestamp = this.safeInteger(message, 'mt');
+        const snapshot = this.parseOrderBook(orderedEntries, symbol, timestamp);
+        orderbook.reset(snapshot);
+        const cachedMessages = orderbook.cache;
+        for (let j = 0; j < cachedMessages.length; j++) {
+            const cachedMessage = cachedMessages[j];
+            this.handleOrderBookMessage(client, cachedMessage, orderbook);
+        }
+        orderbook.cache = [];
+        const messageHash = 'orderbook' + '::' + symbol;
+        client.resolve(orderbook, messageHash);
+    }
+    handleOrderBookMessage(client, message, orderbook) {
+        //     {
+        //         "a": "PMO",
+        //         "t": "i", // i - update, f - snapshot
+        //         "r": [
+        //             {
+        //                 "d": { "I": "ETH/USDT", "D": "1", "P": 4021, "V": 54.39979 }
+        //             },
+        //             {
+        //                 "d": { "I": "ETH/USDT", "D": "0", "P": 4021.1, "V": 49.56724 }
+        //             }
+        //         ],
+        //         "tt": 1760975816446,
+        //         "mt": 1760975816446
+        //     }
+        //
+        const timestamp = this.safeInteger(message, 'mt');
+        if (timestamp > orderbook['timestamp']) {
+            const response = this.safeList(message, 'r', []);
+            this.handleDeltas(orderbook, response);
+            orderbook['timestamp'] = timestamp;
+            orderbook['datetime'] = this.iso8601(timestamp);
+        }
+    }
+    handleDelta(orderbook, entry) {
+        const data = this.safeDict(entry, 'd', {});
+        const bids = orderbook['bids'];
+        const asks = orderbook['asks'];
+        const side = this.safeString(data, 'D');
+        const price = this.safeNumber(data, 'P');
+        const volume = this.safeNumber(data, 'V');
+        if (side === '0') {
+            // bid
+            bids.store(price, volume);
+        }
+        else if (side === '1') {
+            // ask
+            asks.store(price, volume);
+        }
+    }
+    /**
+     * @method
+     * @name deepcoin#watchMyTrades
+     * @description watches information on multiple trades made by the user
+     * @see https://www.deepcoin.com/docs/privateWS/Trade
+     * @param {string} symbol unified market symbol of the market orders were made in
+     * @param {int} [since] the earliest time in ms to fetch orders for
+     * @param {int} [limit] the maximum number of order structures to retrieve
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async watchMyTrades(symbol = undefined, since = undefined, limit = undefined, params = {}) {
+        let messageHash = 'myTrades';
+        await this.loadMarkets();
+        if (symbol !== undefined) {
+            symbol = this.symbol(symbol);
+            messageHash += '::' + symbol;
+        }
+        const trades = await this.watchPrivate(messageHash, params);
+        if (this.newUpdates) {
+            limit = trades.getLimit(symbol, limit);
+        }
+        return this.filterBySymbolSinceLimit(trades, symbol, since, limit, true);
+    }
+    handleMyTrade(client, message) {
+        //
+        //     {
+        //         "action": "PushTrade",
+        //         "result": [
+        //             {
+        //                 "table": "Trade",
+        //                 "data": {
+        //                     "A": "9256245",
+        //                     "CC": "USDT",
+        //                     "CP": 0,
+        //                     "D": "0",
+        //                     "F": 0.152,
+        //                     "I": "DOGE/USDT",
+        //                     "IT": 1761048103,
+        //                     "M": "9256245",
+        //                     "OS": "1001437462198486",
+        //                     "P": 0.19443,
+        //                     "T": 14.77668,
+        //                     "TI": "1001056459096708",
+        //                     "TT": 1761048103,
+        //                     "V": 76,
+        //                     "f": "DOGE",
+        //                     "l": 1,
+        //                     "m": "1",
+        //                     "o": "0"
+        //                 }
+        //             }
+        //         ]
+        //     }
+        //
+        const result = this.safeList(message, 'result', []);
+        const first = this.safeDict(result, 0, {});
+        const data = this.safeDict(first, 'data', {});
+        const marketId = this.safeString(data, 'I');
+        const market = this.safeMarket(marketId, undefined, '/');
+        const symbol = this.safeSymbol(marketId, market);
+        const messageHash = 'myTrades';
+        const symbolMessageHash = messageHash + '::' + symbol;
+        if ((messageHash in client.futures) || (symbolMessageHash in client.futures)) {
+            if (this.myTrades === undefined) {
+                const limit = this.safeInteger(this.options, 'tradesLimit', 1000);
+                this.myTrades = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__/* .ArrayCacheBySymbolById */ .Pt(limit);
+            }
+            const stored = this.myTrades;
+            const parsed = this.parseWsTrade(data, market);
+            stored.append(parsed);
+            client.resolve(stored, messageHash);
+            client.resolve(stored, symbolMessageHash);
+        }
+    }
+    /**
+     * @method
+     * @name deepcoin#watchOrders
+     * @description watches information on multiple orders made by the user
+     * @see https://www.deepcoin.com/docs/privateWS/order
+     * @param {string} symbol unified market symbol of the market orders were made in
+     * @param {int} [since] the earliest time in ms to fetch orders for
+     * @param {int} [limit] the maximum number of order structures to retrieve
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async watchOrders(symbol = undefined, since = undefined, limit = undefined, params = {}) {
+        let messageHash = 'orders';
+        await this.loadMarkets();
+        if (symbol !== undefined) {
+            symbol = this.symbol(symbol);
+            messageHash += '::' + symbol;
+        }
+        const orders = await this.watchPrivate(messageHash, params);
+        if (this.newUpdates) {
+            limit = orders.getLimit(symbol, limit);
+        }
+        return this.filterBySymbolSinceLimit(orders, symbol, since, limit, true);
+    }
+    handleOrder(client, message) {
+        //
+        //     {
+        //         "action": "PushOrder",
+        //         "result": [
+        //             {
+        //                 "table": "Order",
+        //                 "data": {
+        //                     "D": "0",
+        //                     "I": "DOGE/USDT",
+        //                     "IT": 1761051006,
+        //                     "L": "1001437480817468",
+        //                     "OPT": "4",
+        //                     "OS": "1001437480817468",
+        //                     "OT": "0",
+        //                     "Or": "1",
+        //                     "P": 0.19537,
+        //                     "T": 14.84128,
+        //                     "U": 1761051006,
+        //                     "V": 76,
+        //                     "VT": 76,
+        //                     "i": 1,
+        //                     "l": 1,
+        //                     "o": "0",
+        //                     "p": "0",
+        //                     "t": 0.19528
+        //                 }
+        //             }
+        //         ]
+        //     }
+        //
+        const result = this.safeList(message, 'result', []);
+        const first = this.safeDict(result, 0, {});
+        const data = this.safeDict(first, 'data', {});
+        const marketId = this.safeString(data, 'I');
+        const market = this.safeMarket(marketId, undefined, '/');
+        const symbol = this.safeSymbol(marketId, market);
+        const messageHash = 'orders';
+        const symbolMessageHash = messageHash + '::' + symbol;
+        if ((messageHash in client.futures) || (symbolMessageHash in client.futures)) {
+            if (this.orders === undefined) {
+                const limit = this.safeInteger(this.options, 'ordersLimit', 1000);
+                this.orders = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__/* .ArrayCacheBySymbolById */ .Pt(limit);
+            }
+            const parsed = this.parseWsOrder(data, market);
+            this.orders.append(parsed);
+            client.resolve(this.orders, messageHash);
+            client.resolve(this.orders, symbolMessageHash);
+        }
+    }
+    parseWsOrder(order, market = undefined) {
+        //
+        //     {
+        //         "D": "0",
+        //         "I": "DOGE/USDT",
+        //         "IT": 1761051006,
+        //         "L": "1001437480817468",
+        //         "OPT": "4",
+        //         "OS": "1001437480817468",
+        //         "OT": "0",
+        //         "Or": "1",
+        //         "P": 0.19537,
+        //         "T": 14.84128,
+        //         "U": 1761051006,
+        //         "V": 76,
+        //         "VT": 76,
+        //         "i": 1,
+        //         "l": 1,
+        //         "o": "0",
+        //         "p": "0",
+        //         "t": 0.19528
+        //     }
+        //
+        const state = this.safeString(order, 'Or');
+        const timestamp = this.safeTimestamp(order, 'IT');
+        const direction = this.safeString(order, 'D');
+        return this.safeOrder({
+            'id': this.safeString(order, 'OS'),
+            'clientOrderId': undefined,
+            'datetime': this.iso8601(timestamp),
+            'timestamp': timestamp,
+            'lastTradeTimestamp': undefined,
+            'lastUpdateTimestamp': this.safeTimestamp(order, 'U'),
+            'status': this.parseWsOrderStatus(state),
+            'symbol': market['symbol'],
+            'type': undefined,
+            'timeInForce': undefined,
+            'side': this.parseTradeSide(direction),
+            'price': this.safeString(order, 'P'),
+            'average': this.safeString(order, 't'),
+            'amount': this.safeString(order, 'V'),
+            'filled': this.safeString(order, 'VT'),
+            'remaining': undefined,
+            'triggerPrice': undefined,
+            'takeProfitPrice': this.safeString(order, 'TPT'),
+            'stopLossPrice': this.safeString(order, 'SLT'),
+            'cost': this.safeString(order, 'T'),
+            'trades': undefined,
+            'fee': undefined,
+            'reduceOnly': undefined,
+            'postOnly': undefined,
+            'info': order,
+        }, market);
+    }
+    parseWsOrderStatus(status) {
+        const statuses = {
+            '1': 'closed',
+            '4': 'open',
+            '6': 'canceled',
+        };
+        return this.safeString(statuses, status, status);
+    }
+    /**
+     * @method
+     * @name deepcoin#watchPositions
+     * @description watch all open positions
+     * @see https://www.deepcoin.com/docs/privateWS/Position
+     * @param {string[]} [symbols] list of unified market symbols to watch positions for
+     * @param {int} [since] the earliest time in ms to fetch positions for
+     * @param {int} [limit] the maximum number of positions to retrieve
+     * @param {object} params extra parameters specific to the exchange API endpoint
+     * @returns {object[]} a list of [position structure]{@link https://docs.ccxt.com/en/latest/manual.html#position-structure}
+     */
+    async watchPositions(symbols = undefined, since = undefined, limit = undefined, params = {}) {
+        await this.loadMarkets();
+        const listenKey = await this.authenticate();
+        symbols = this.marketSymbols(symbols);
+        const messageHash = 'positions';
+        const messageHashes = [];
+        if (symbols !== undefined) {
+            for (let i = 0; i < symbols.length; i++) {
+                const symbol = symbols[i];
+                const symbolMessageHash = messageHash + '::' + symbol;
+                messageHashes.push(symbolMessageHash);
+            }
+        }
+        else {
+            messageHashes.push(messageHash);
+        }
+        const url = this.urls['api']['ws']['private'] + '?listenKey=' + listenKey;
+        const positions = await this.watchMultiple(url, messageHashes, params, ['private']);
+        if (this.newUpdates) {
+            return positions;
+        }
+        return this.filterBySymbolsSinceLimit(this.positions, symbols, since, limit, true);
+    }
+    handlePosition(client, message) {
+        //
+        //     {
+        //         "action": "PushPosition",
+        //         "result": [
+        //             {
+        //                 "table": "Position",
+        //                 "data": {
+        //                     "A": "9256245",
+        //                     "CP": 0,
+        //                     "I": "DOGE/USDT",
+        //                     "M": "9256245",
+        //                     "OP": 0.198845,
+        //                     "Po": 151.696,
+        //                     "U": 1761058213,
+        //                     "i": 1,
+        //                     "l": 1,
+        //                     "p": "0",
+        //                     "u": 0
+        //                 }
+        //             }
+        //         ]
+        //     }
+        //
+        const result = this.safeList(message, 'result', []);
+        const first = this.safeDict(result, 0, {});
+        const data = this.safeDict(first, 'data', {});
+        const marketId = this.safeString(data, 'I');
+        const market = this.safeMarket(marketId, undefined, '/');
+        const symbol = this.safeSymbol(marketId, market);
+        const messageHash = 'positions';
+        const symbolMessageHash = messageHash + '::' + symbol;
+        if ((messageHash in client.futures) || (symbolMessageHash in client.futures)) {
+            if (this.positions === undefined) {
+                this.positions = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__/* .ArrayCacheBySymbolBySide */ .Hk();
+            }
+            const parsed = this.parseWsPosition(data, market);
+            this.positions.append(parsed);
+            client.resolve(this.positions, messageHash);
+            client.resolve(this.positions, symbolMessageHash);
+        }
+    }
+    parseWsPosition(position, market = undefined) {
+        //
+        //     {
+        //         "A": "9256245",
+        //         "CP": 0,
+        //         "I": "DOGE/USDT",
+        //         "M": "9256245",
+        //         "OP": 0.198845,
+        //         "Po": 151.696,
+        //         "U": 1761058213,
+        //         "i": 1,
+        //         "l": 1,
+        //         "p": "0",
+        //         "u": 0
+        //     }
+        //
+        const timestamp = this.safeInteger(position, 'U');
+        const direction = this.safeString(position, 'p');
+        const marginMode = this.safeString(position, 'i');
+        return this.safePosition({
+            'symbol': market['symbol'],
+            'id': undefined,
+            'timestamp': timestamp,
+            'datetime': this.iso8601(timestamp),
+            'contracts': this.safeString(position, 'Po'),
+            'contractSize': undefined,
+            'side': this.parsePositionSide(direction),
+            'notional': undefined,
+            'leverage': this.omitZero(this.safeString(position, 'l')),
+            'unrealizedPnl': undefined,
+            'realizedPnl': undefined,
+            'collateral': undefined,
+            'entryPrice': this.safeString(position, 'OP'),
+            'markPrice': undefined,
+            'liquidationPrice': undefined,
+            'marginMode': this.parseWsMarginMode(marginMode),
+            'hedged': true,
+            'maintenanceMargin': this.safeString(position, 'u'),
+            'maintenanceMarginPercentage': undefined,
+            'initialMargin': undefined,
+            'initialMarginPercentage': undefined,
+            'marginRatio': undefined,
+            'lastUpdateTimestamp': undefined,
+            'lastPrice': undefined,
+            'stopLossPrice': undefined,
+            'takeProfitPrice': undefined,
+            'percentage': undefined,
+            'info': position,
+        });
+    }
+    parsePositionSide(direction) {
+        if (direction === undefined) {
+            return direction;
+        }
+        const directions = {
+            '0': 'long',
+            '1': 'short',
+        };
+        return this.safeString(directions, direction, direction);
+    }
+    parseWsMarginMode(marginMode) {
+        if (marginMode === undefined) {
+            return marginMode;
+        }
+        const modes = {
+            '0': 'isolated',
+            '1': 'cross',
+        };
+        return this.safeString(modes, marginMode, marginMode);
+    }
+    handleMessage(client, message) {
+        if (message === 'pong') {
+            this.handlePong(client, message);
+        }
+        else {
+            const m = this.safeString(message, 'm');
+            if ((m !== undefined) && (m !== 'Success')) {
+                this.handleErrorMessage(client, message);
+            }
+            const action = this.safeString2(message, 'a', 'action');
+            if (action === 'RecvTopicAction') {
+                this.handleSubscriptionStatus(client, message);
+            }
+            else if (action === 'PO') {
+                this.handleTicker(client, message);
+            }
+            else if (action === 'PMT') {
+                this.handleTrades(client, message);
+            }
+            else if (action === 'PK') {
+                this.handleOHLCV(client, message);
+            }
+            else if (action === 'PMO') {
+                this.handleOrderBook(client, message);
+            }
+            else if (action === 'PushTrade') {
+                this.handleMyTrade(client, message);
+            }
+            else if (action === 'PushOrder') {
+                this.handleOrder(client, message);
+            }
+            else if (action === 'PushPosition') {
+                this.handlePosition(client, message);
+            }
+        }
+    }
+    handleSubscriptionStatus(client, message) {
+        //
+        //     {
+        //         "a": "RecvTopicAction",
+        //         "m": "Success",
+        //         "r": [
+        //             {
+        //                 "d": {
+        //                     "A": "0",
+        //                     "L": 1,
+        //                     "T": "7",
+        //                     "F": "DeepCoin_BTC/USDT",
+        //                     "R": -1
+        //                 }
+        //             }
+        //         ]
+        //     }
+        //
+        const response = this.safeList(message, 'r', []);
+        const first = this.safeDict(response, 0, {});
+        const data = this.safeDict(first, 'd', {});
+        const action = this.safeString(data, 'A'); // 1 = subscribe, 0 = unsubscribe
+        if (action === '0') {
+            const subscriptionsById = this.indexBy(client.subscriptions, 'id');
+            const subId = this.safeInteger(data, 'L');
+            const subscription = this.safeDict(subscriptionsById, subId, {}); // original watch subscription
+            const subHash = this.safeString(subscription, 'subHash');
+            const unsubHash = 'unsubscribe::' + subHash;
+            const unsubsciption = this.safeDict(client.subscriptions, unsubHash, {}); // unWatch subscription
+            this.handleUnSubscription(client, unsubsciption);
+        }
+    }
+    handleUnSubscription(client, subscription) {
+        const subHash = this.safeString(subscription, 'subHash');
+        const unsubHash = this.safeString(subscription, 'unsubHash');
+        this.cleanUnsubscription(client, subHash, unsubHash);
+        this.cleanCache(subscription);
+    }
+    handleErrorMessage(client, message) {
+        //
+        //     {
+        //         "a": "RecvTopicAction",
+        //         "m": "subscription cluster does not "exist": BTC/USD",
+        //         "r": [
+        //             {
+        //                 "d": {
+        //                     "A": "1",
+        //                     "L": 1,
+        //                     "T": "7",
+        //                     "F": "DeepCoin_BTC/USD",
+        //                     "R": -1
+        //                 }
+        //             }
+        //         ]
+        //     }
+        //
+        const messageText = this.safeString(message, 'm', '');
+        const response = this.safeList(message, 'r', []);
+        const first = this.safeDict(response, 0, {});
+        const data = this.safeDict(first, 'd', {});
+        const requestId = this.safeInteger(data, 'L');
+        const subscriptionsById = this.indexBy(client.subscriptions, 'id');
+        const subscription = this.safeDict(subscriptionsById, requestId, {});
+        const messageHash = this.safeString(subscription, 'subHash');
+        const feedback = this.id + ' ' + this.json(message);
+        try {
+            this.throwExactlyMatchedException(this.exceptions['exact'], messageText, feedback);
+            this.throwBroadlyMatchedException(this.exceptions['broad'], messageText, feedback);
+            throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ExchangeError(feedback);
+        }
+        catch (e) {
+            client.reject(e, messageHash);
         }
     }
 }
@@ -425471,49 +429823,49 @@ async function __wbg_init(input) {
 var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   AccountNotEnabled: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.AccountNotEnabled),
-/* harmony export */   AccountSuspended: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.AccountSuspended),
-/* harmony export */   AddressPending: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.AddressPending),
-/* harmony export */   ArgumentsRequired: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.ArgumentsRequired),
-/* harmony export */   AuthenticationError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.AuthenticationError),
-/* harmony export */   BadRequest: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.BadRequest),
-/* harmony export */   BadResponse: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.BadResponse),
-/* harmony export */   BadSymbol: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.BadSymbol),
-/* harmony export */   BaseError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.BaseError),
-/* harmony export */   CancelPending: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.CancelPending),
-/* harmony export */   ChecksumError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.ChecksumError),
-/* harmony export */   ContractUnavailable: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.ContractUnavailable),
-/* harmony export */   DDoSProtection: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.DDoSProtection),
-/* harmony export */   DuplicateOrderId: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.DuplicateOrderId),
+/* harmony export */   AccountNotEnabled: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.AccountNotEnabled),
+/* harmony export */   AccountSuspended: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.AccountSuspended),
+/* harmony export */   AddressPending: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.AddressPending),
+/* harmony export */   ArgumentsRequired: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.ArgumentsRequired),
+/* harmony export */   AuthenticationError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.AuthenticationError),
+/* harmony export */   BadRequest: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.BadRequest),
+/* harmony export */   BadResponse: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.BadResponse),
+/* harmony export */   BadSymbol: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.BadSymbol),
+/* harmony export */   BaseError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.BaseError),
+/* harmony export */   CancelPending: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.CancelPending),
+/* harmony export */   ChecksumError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.ChecksumError),
+/* harmony export */   ContractUnavailable: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.ContractUnavailable),
+/* harmony export */   DDoSProtection: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.DDoSProtection),
+/* harmony export */   DuplicateOrderId: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.DuplicateOrderId),
 /* harmony export */   Exchange: () => (/* reexport safe */ ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_.k),
-/* harmony export */   ExchangeClosedByUser: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.ExchangeClosedByUser),
-/* harmony export */   ExchangeError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.ExchangeError),
-/* harmony export */   ExchangeNotAvailable: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.ExchangeNotAvailable),
-/* harmony export */   InsufficientFunds: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.InsufficientFunds),
-/* harmony export */   InvalidAddress: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.InvalidAddress),
-/* harmony export */   InvalidNonce: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.InvalidNonce),
-/* harmony export */   InvalidOrder: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.InvalidOrder),
-/* harmony export */   InvalidProxySettings: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.InvalidProxySettings),
-/* harmony export */   ManualInteractionNeeded: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.ManualInteractionNeeded),
-/* harmony export */   MarginModeAlreadySet: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.MarginModeAlreadySet),
-/* harmony export */   MarketClosed: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.MarketClosed),
-/* harmony export */   NetworkError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.NetworkError),
-/* harmony export */   NoChange: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.NoChange),
-/* harmony export */   NotSupported: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.NotSupported),
-/* harmony export */   NullResponse: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.NullResponse),
-/* harmony export */   OnMaintenance: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.OnMaintenance),
-/* harmony export */   OperationFailed: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.OperationFailed),
-/* harmony export */   OperationRejected: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.OperationRejected),
-/* harmony export */   OrderImmediatelyFillable: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.OrderImmediatelyFillable),
-/* harmony export */   OrderNotCached: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.OrderNotCached),
-/* harmony export */   OrderNotFillable: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.OrderNotFillable),
-/* harmony export */   OrderNotFound: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.OrderNotFound),
-/* harmony export */   PermissionDenied: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.PermissionDenied),
-/* harmony export */   Precise: () => (/* reexport safe */ ccxt_src_base_Precise_js_WEBPACK_IMPORTED_MODULE_180_.Y),
-/* harmony export */   RateLimitExceeded: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.RateLimitExceeded),
-/* harmony export */   RequestTimeout: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.RequestTimeout),
-/* harmony export */   RestrictedLocation: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.RestrictedLocation),
-/* harmony export */   UnsubscribeError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_.UnsubscribeError),
+/* harmony export */   ExchangeClosedByUser: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.ExchangeClosedByUser),
+/* harmony export */   ExchangeError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.ExchangeError),
+/* harmony export */   ExchangeNotAvailable: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.ExchangeNotAvailable),
+/* harmony export */   InsufficientFunds: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.InsufficientFunds),
+/* harmony export */   InvalidAddress: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.InvalidAddress),
+/* harmony export */   InvalidNonce: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.InvalidNonce),
+/* harmony export */   InvalidOrder: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.InvalidOrder),
+/* harmony export */   InvalidProxySettings: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.InvalidProxySettings),
+/* harmony export */   ManualInteractionNeeded: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.ManualInteractionNeeded),
+/* harmony export */   MarginModeAlreadySet: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.MarginModeAlreadySet),
+/* harmony export */   MarketClosed: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.MarketClosed),
+/* harmony export */   NetworkError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.NetworkError),
+/* harmony export */   NoChange: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.NoChange),
+/* harmony export */   NotSupported: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.NotSupported),
+/* harmony export */   NullResponse: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.NullResponse),
+/* harmony export */   OnMaintenance: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.OnMaintenance),
+/* harmony export */   OperationFailed: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.OperationFailed),
+/* harmony export */   OperationRejected: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.OperationRejected),
+/* harmony export */   OrderImmediatelyFillable: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.OrderImmediatelyFillable),
+/* harmony export */   OrderNotCached: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.OrderNotCached),
+/* harmony export */   OrderNotFillable: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.OrderNotFillable),
+/* harmony export */   OrderNotFound: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.OrderNotFound),
+/* harmony export */   PermissionDenied: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.PermissionDenied),
+/* harmony export */   Precise: () => (/* reexport safe */ ccxt_src_base_Precise_js_WEBPACK_IMPORTED_MODULE_182_.Y),
+/* harmony export */   RateLimitExceeded: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.RateLimitExceeded),
+/* harmony export */   RequestTimeout: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.RequestTimeout),
+/* harmony export */   RestrictedLocation: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.RestrictedLocation),
+/* harmony export */   UnsubscribeError: () => (/* reexport safe */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_.UnsubscribeError),
 /* harmony export */   alpaca: () => (/* reexport safe */ ccxt_src_alpaca_js_WEBPACK_IMPORTED_MODULE_1_.A),
 /* harmony export */   apex: () => (/* reexport safe */ ccxt_src_apex_js_WEBPACK_IMPORTED_MODULE_2_.A),
 /* harmony export */   arkham: () => (/* reexport safe */ ccxt_src_arkham_js_WEBPACK_IMPORTED_MODULE_3_.A),
@@ -425564,73 +429916,74 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   coinspot: () => (/* reexport safe */ ccxt_src_coinspot_js_WEBPACK_IMPORTED_MODULE_48_.A),
 /* harmony export */   cryptocom: () => (/* reexport safe */ ccxt_src_cryptocom_js_WEBPACK_IMPORTED_MODULE_49_.A),
 /* harmony export */   cryptomus: () => (/* reexport safe */ ccxt_src_cryptomus_js_WEBPACK_IMPORTED_MODULE_50_.A),
+/* harmony export */   deepcoin: () => (/* reexport safe */ ccxt_src_deepcoin_js_WEBPACK_IMPORTED_MODULE_51_.A),
 /* harmony export */   "default": () => (ts_ccxt),
-/* harmony export */   defx: () => (/* reexport safe */ ccxt_src_defx_js_WEBPACK_IMPORTED_MODULE_51_.A),
-/* harmony export */   delta: () => (/* reexport safe */ ccxt_src_delta_js_WEBPACK_IMPORTED_MODULE_52_.A),
-/* harmony export */   deribit: () => (/* reexport safe */ ccxt_src_deribit_js_WEBPACK_IMPORTED_MODULE_53_.A),
-/* harmony export */   derive: () => (/* reexport safe */ ccxt_src_derive_js_WEBPACK_IMPORTED_MODULE_54_.A),
-/* harmony export */   digifinex: () => (/* reexport safe */ ccxt_src_digifinex_js_WEBPACK_IMPORTED_MODULE_55_.A),
-/* harmony export */   errors: () => (/* reexport module object */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_),
+/* harmony export */   defx: () => (/* reexport safe */ ccxt_src_defx_js_WEBPACK_IMPORTED_MODULE_52_.A),
+/* harmony export */   delta: () => (/* reexport safe */ ccxt_src_delta_js_WEBPACK_IMPORTED_MODULE_53_.A),
+/* harmony export */   deribit: () => (/* reexport safe */ ccxt_src_deribit_js_WEBPACK_IMPORTED_MODULE_54_.A),
+/* harmony export */   derive: () => (/* reexport safe */ ccxt_src_derive_js_WEBPACK_IMPORTED_MODULE_55_.A),
+/* harmony export */   digifinex: () => (/* reexport safe */ ccxt_src_digifinex_js_WEBPACK_IMPORTED_MODULE_56_.A),
+/* harmony export */   errors: () => (/* reexport module object */ ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_),
 /* harmony export */   exchanges: () => (/* binding */ ccxt_exchanges),
-/* harmony export */   exmo: () => (/* reexport safe */ ccxt_src_exmo_js_WEBPACK_IMPORTED_MODULE_56_.A),
-/* harmony export */   fmfwio: () => (/* reexport safe */ ccxt_src_fmfwio_js_WEBPACK_IMPORTED_MODULE_57_.A),
-/* harmony export */   foxbit: () => (/* reexport safe */ ccxt_src_foxbit_js_WEBPACK_IMPORTED_MODULE_58_.A),
-/* harmony export */   functions: () => (/* reexport module object */ ccxt_src_base_functions_js_WEBPACK_IMPORTED_MODULE_181_),
-/* harmony export */   gate: () => (/* reexport safe */ ccxt_src_gate_js_WEBPACK_IMPORTED_MODULE_59_.A),
-/* harmony export */   gateio: () => (/* reexport safe */ ccxt_src_gateio_js_WEBPACK_IMPORTED_MODULE_60_.A),
-/* harmony export */   gemini: () => (/* reexport safe */ ccxt_src_gemini_js_WEBPACK_IMPORTED_MODULE_61_.A),
-/* harmony export */   hashkey: () => (/* reexport safe */ ccxt_src_hashkey_js_WEBPACK_IMPORTED_MODULE_62_.A),
-/* harmony export */   hibachi: () => (/* reexport safe */ ccxt_src_hibachi_js_WEBPACK_IMPORTED_MODULE_63_.A),
-/* harmony export */   hitbtc: () => (/* reexport safe */ ccxt_src_hitbtc_js_WEBPACK_IMPORTED_MODULE_64_.A),
-/* harmony export */   hollaex: () => (/* reexport safe */ ccxt_src_hollaex_js_WEBPACK_IMPORTED_MODULE_65_.A),
-/* harmony export */   htx: () => (/* reexport safe */ ccxt_src_htx_js_WEBPACK_IMPORTED_MODULE_66_.A),
-/* harmony export */   huobi: () => (/* reexport safe */ ccxt_src_huobi_js_WEBPACK_IMPORTED_MODULE_67_.A),
-/* harmony export */   hyperliquid: () => (/* reexport safe */ ccxt_src_hyperliquid_js_WEBPACK_IMPORTED_MODULE_68_.A),
-/* harmony export */   independentreserve: () => (/* reexport safe */ ccxt_src_independentreserve_js_WEBPACK_IMPORTED_MODULE_69_.A),
-/* harmony export */   indodax: () => (/* reexport safe */ ccxt_src_indodax_js_WEBPACK_IMPORTED_MODULE_70_.A),
-/* harmony export */   kraken: () => (/* reexport safe */ ccxt_src_kraken_js_WEBPACK_IMPORTED_MODULE_71_.A),
-/* harmony export */   krakenfutures: () => (/* reexport safe */ ccxt_src_krakenfutures_js_WEBPACK_IMPORTED_MODULE_72_.A),
-/* harmony export */   kucoin: () => (/* reexport safe */ ccxt_src_kucoin_js_WEBPACK_IMPORTED_MODULE_73_.A),
-/* harmony export */   kucoinfutures: () => (/* reexport safe */ ccxt_src_kucoinfutures_js_WEBPACK_IMPORTED_MODULE_74_.A),
-/* harmony export */   latoken: () => (/* reexport safe */ ccxt_src_latoken_js_WEBPACK_IMPORTED_MODULE_75_.A),
-/* harmony export */   lbank: () => (/* reexport safe */ ccxt_src_lbank_js_WEBPACK_IMPORTED_MODULE_76_.A),
-/* harmony export */   luno: () => (/* reexport safe */ ccxt_src_luno_js_WEBPACK_IMPORTED_MODULE_77_.A),
-/* harmony export */   mercado: () => (/* reexport safe */ ccxt_src_mercado_js_WEBPACK_IMPORTED_MODULE_78_.A),
-/* harmony export */   mexc: () => (/* reexport safe */ ccxt_src_mexc_js_WEBPACK_IMPORTED_MODULE_79_.A),
-/* harmony export */   modetrade: () => (/* reexport safe */ ccxt_src_modetrade_js_WEBPACK_IMPORTED_MODULE_80_.A),
-/* harmony export */   myokx: () => (/* reexport safe */ ccxt_src_myokx_js_WEBPACK_IMPORTED_MODULE_81_.A),
-/* harmony export */   ndax: () => (/* reexport safe */ ccxt_src_ndax_js_WEBPACK_IMPORTED_MODULE_82_.A),
-/* harmony export */   novadax: () => (/* reexport safe */ ccxt_src_novadax_js_WEBPACK_IMPORTED_MODULE_83_.A),
-/* harmony export */   oceanex: () => (/* reexport safe */ ccxt_src_oceanex_js_WEBPACK_IMPORTED_MODULE_84_.A),
-/* harmony export */   okx: () => (/* reexport safe */ ccxt_src_okx_js_WEBPACK_IMPORTED_MODULE_85_.A),
-/* harmony export */   okxus: () => (/* reexport safe */ ccxt_src_okxus_js_WEBPACK_IMPORTED_MODULE_86_.A),
-/* harmony export */   onetrading: () => (/* reexport safe */ ccxt_src_onetrading_js_WEBPACK_IMPORTED_MODULE_87_.A),
-/* harmony export */   oxfun: () => (/* reexport safe */ ccxt_src_oxfun_js_WEBPACK_IMPORTED_MODULE_88_.A),
-/* harmony export */   p2b: () => (/* reexport safe */ ccxt_src_p2b_js_WEBPACK_IMPORTED_MODULE_89_.A),
-/* harmony export */   paradex: () => (/* reexport safe */ ccxt_src_paradex_js_WEBPACK_IMPORTED_MODULE_90_.A),
-/* harmony export */   paymium: () => (/* reexport safe */ ccxt_src_paymium_js_WEBPACK_IMPORTED_MODULE_91_.A),
-/* harmony export */   phemex: () => (/* reexport safe */ ccxt_src_phemex_js_WEBPACK_IMPORTED_MODULE_92_.A),
-/* harmony export */   poloniex: () => (/* reexport safe */ ccxt_src_poloniex_js_WEBPACK_IMPORTED_MODULE_93_.A),
+/* harmony export */   exmo: () => (/* reexport safe */ ccxt_src_exmo_js_WEBPACK_IMPORTED_MODULE_57_.A),
+/* harmony export */   fmfwio: () => (/* reexport safe */ ccxt_src_fmfwio_js_WEBPACK_IMPORTED_MODULE_58_.A),
+/* harmony export */   foxbit: () => (/* reexport safe */ ccxt_src_foxbit_js_WEBPACK_IMPORTED_MODULE_59_.A),
+/* harmony export */   functions: () => (/* reexport module object */ ccxt_src_base_functions_js_WEBPACK_IMPORTED_MODULE_183_),
+/* harmony export */   gate: () => (/* reexport safe */ ccxt_src_gate_js_WEBPACK_IMPORTED_MODULE_60_.A),
+/* harmony export */   gateio: () => (/* reexport safe */ ccxt_src_gateio_js_WEBPACK_IMPORTED_MODULE_61_.A),
+/* harmony export */   gemini: () => (/* reexport safe */ ccxt_src_gemini_js_WEBPACK_IMPORTED_MODULE_62_.A),
+/* harmony export */   hashkey: () => (/* reexport safe */ ccxt_src_hashkey_js_WEBPACK_IMPORTED_MODULE_63_.A),
+/* harmony export */   hibachi: () => (/* reexport safe */ ccxt_src_hibachi_js_WEBPACK_IMPORTED_MODULE_64_.A),
+/* harmony export */   hitbtc: () => (/* reexport safe */ ccxt_src_hitbtc_js_WEBPACK_IMPORTED_MODULE_65_.A),
+/* harmony export */   hollaex: () => (/* reexport safe */ ccxt_src_hollaex_js_WEBPACK_IMPORTED_MODULE_66_.A),
+/* harmony export */   htx: () => (/* reexport safe */ ccxt_src_htx_js_WEBPACK_IMPORTED_MODULE_67_.A),
+/* harmony export */   huobi: () => (/* reexport safe */ ccxt_src_huobi_js_WEBPACK_IMPORTED_MODULE_68_.A),
+/* harmony export */   hyperliquid: () => (/* reexport safe */ ccxt_src_hyperliquid_js_WEBPACK_IMPORTED_MODULE_69_.A),
+/* harmony export */   independentreserve: () => (/* reexport safe */ ccxt_src_independentreserve_js_WEBPACK_IMPORTED_MODULE_70_.A),
+/* harmony export */   indodax: () => (/* reexport safe */ ccxt_src_indodax_js_WEBPACK_IMPORTED_MODULE_71_.A),
+/* harmony export */   kraken: () => (/* reexport safe */ ccxt_src_kraken_js_WEBPACK_IMPORTED_MODULE_72_.A),
+/* harmony export */   krakenfutures: () => (/* reexport safe */ ccxt_src_krakenfutures_js_WEBPACK_IMPORTED_MODULE_73_.A),
+/* harmony export */   kucoin: () => (/* reexport safe */ ccxt_src_kucoin_js_WEBPACK_IMPORTED_MODULE_74_.A),
+/* harmony export */   kucoinfutures: () => (/* reexport safe */ ccxt_src_kucoinfutures_js_WEBPACK_IMPORTED_MODULE_75_.A),
+/* harmony export */   latoken: () => (/* reexport safe */ ccxt_src_latoken_js_WEBPACK_IMPORTED_MODULE_76_.A),
+/* harmony export */   lbank: () => (/* reexport safe */ ccxt_src_lbank_js_WEBPACK_IMPORTED_MODULE_77_.A),
+/* harmony export */   luno: () => (/* reexport safe */ ccxt_src_luno_js_WEBPACK_IMPORTED_MODULE_78_.A),
+/* harmony export */   mercado: () => (/* reexport safe */ ccxt_src_mercado_js_WEBPACK_IMPORTED_MODULE_79_.A),
+/* harmony export */   mexc: () => (/* reexport safe */ ccxt_src_mexc_js_WEBPACK_IMPORTED_MODULE_80_.A),
+/* harmony export */   modetrade: () => (/* reexport safe */ ccxt_src_modetrade_js_WEBPACK_IMPORTED_MODULE_81_.A),
+/* harmony export */   myokx: () => (/* reexport safe */ ccxt_src_myokx_js_WEBPACK_IMPORTED_MODULE_82_.A),
+/* harmony export */   ndax: () => (/* reexport safe */ ccxt_src_ndax_js_WEBPACK_IMPORTED_MODULE_83_.A),
+/* harmony export */   novadax: () => (/* reexport safe */ ccxt_src_novadax_js_WEBPACK_IMPORTED_MODULE_84_.A),
+/* harmony export */   oceanex: () => (/* reexport safe */ ccxt_src_oceanex_js_WEBPACK_IMPORTED_MODULE_85_.A),
+/* harmony export */   okx: () => (/* reexport safe */ ccxt_src_okx_js_WEBPACK_IMPORTED_MODULE_86_.A),
+/* harmony export */   okxus: () => (/* reexport safe */ ccxt_src_okxus_js_WEBPACK_IMPORTED_MODULE_87_.A),
+/* harmony export */   onetrading: () => (/* reexport safe */ ccxt_src_onetrading_js_WEBPACK_IMPORTED_MODULE_88_.A),
+/* harmony export */   oxfun: () => (/* reexport safe */ ccxt_src_oxfun_js_WEBPACK_IMPORTED_MODULE_89_.A),
+/* harmony export */   p2b: () => (/* reexport safe */ ccxt_src_p2b_js_WEBPACK_IMPORTED_MODULE_90_.A),
+/* harmony export */   paradex: () => (/* reexport safe */ ccxt_src_paradex_js_WEBPACK_IMPORTED_MODULE_91_.A),
+/* harmony export */   paymium: () => (/* reexport safe */ ccxt_src_paymium_js_WEBPACK_IMPORTED_MODULE_92_.A),
+/* harmony export */   phemex: () => (/* reexport safe */ ccxt_src_phemex_js_WEBPACK_IMPORTED_MODULE_93_.A),
+/* harmony export */   poloniex: () => (/* reexport safe */ ccxt_src_poloniex_js_WEBPACK_IMPORTED_MODULE_94_.A),
 /* harmony export */   pro: () => (/* binding */ ccxt_pro),
-/* harmony export */   probit: () => (/* reexport safe */ ccxt_src_probit_js_WEBPACK_IMPORTED_MODULE_94_.A),
-/* harmony export */   timex: () => (/* reexport safe */ ccxt_src_timex_js_WEBPACK_IMPORTED_MODULE_95_.A),
-/* harmony export */   tokocrypto: () => (/* reexport safe */ ccxt_src_tokocrypto_js_WEBPACK_IMPORTED_MODULE_96_.A),
-/* harmony export */   toobit: () => (/* reexport safe */ ccxt_src_toobit_js_WEBPACK_IMPORTED_MODULE_97_.A),
-/* harmony export */   upbit: () => (/* reexport safe */ ccxt_src_upbit_js_WEBPACK_IMPORTED_MODULE_98_.A),
+/* harmony export */   probit: () => (/* reexport safe */ ccxt_src_probit_js_WEBPACK_IMPORTED_MODULE_95_.A),
+/* harmony export */   timex: () => (/* reexport safe */ ccxt_src_timex_js_WEBPACK_IMPORTED_MODULE_96_.A),
+/* harmony export */   tokocrypto: () => (/* reexport safe */ ccxt_src_tokocrypto_js_WEBPACK_IMPORTED_MODULE_97_.A),
+/* harmony export */   toobit: () => (/* reexport safe */ ccxt_src_toobit_js_WEBPACK_IMPORTED_MODULE_98_.A),
+/* harmony export */   upbit: () => (/* reexport safe */ ccxt_src_upbit_js_WEBPACK_IMPORTED_MODULE_99_.A),
 /* harmony export */   version: () => (/* binding */ ccxt_version),
-/* harmony export */   wavesexchange: () => (/* reexport safe */ ccxt_src_wavesexchange_js_WEBPACK_IMPORTED_MODULE_99_.A),
-/* harmony export */   whitebit: () => (/* reexport safe */ ccxt_src_whitebit_js_WEBPACK_IMPORTED_MODULE_100_.A),
-/* harmony export */   woo: () => (/* reexport safe */ ccxt_src_woo_js_WEBPACK_IMPORTED_MODULE_101_.A),
-/* harmony export */   woofipro: () => (/* reexport safe */ ccxt_src_woofipro_js_WEBPACK_IMPORTED_MODULE_102_.A),
-/* harmony export */   xt: () => (/* reexport safe */ ccxt_src_xt_js_WEBPACK_IMPORTED_MODULE_103_.A),
-/* harmony export */   yobit: () => (/* reexport safe */ ccxt_src_yobit_js_WEBPACK_IMPORTED_MODULE_104_.A),
-/* harmony export */   zaif: () => (/* reexport safe */ ccxt_src_zaif_js_WEBPACK_IMPORTED_MODULE_105_.A),
-/* harmony export */   zonda: () => (/* reexport safe */ ccxt_src_zonda_js_WEBPACK_IMPORTED_MODULE_106_.A)
+/* harmony export */   wavesexchange: () => (/* reexport safe */ ccxt_src_wavesexchange_js_WEBPACK_IMPORTED_MODULE_100_.A),
+/* harmony export */   whitebit: () => (/* reexport safe */ ccxt_src_whitebit_js_WEBPACK_IMPORTED_MODULE_101_.A),
+/* harmony export */   woo: () => (/* reexport safe */ ccxt_src_woo_js_WEBPACK_IMPORTED_MODULE_102_.A),
+/* harmony export */   woofipro: () => (/* reexport safe */ ccxt_src_woofipro_js_WEBPACK_IMPORTED_MODULE_103_.A),
+/* harmony export */   xt: () => (/* reexport safe */ ccxt_src_xt_js_WEBPACK_IMPORTED_MODULE_104_.A),
+/* harmony export */   yobit: () => (/* reexport safe */ ccxt_src_yobit_js_WEBPACK_IMPORTED_MODULE_105_.A),
+/* harmony export */   zaif: () => (/* reexport safe */ ccxt_src_zaif_js_WEBPACK_IMPORTED_MODULE_106_.A),
+/* harmony export */   zonda: () => (/* reexport safe */ ccxt_src_zonda_js_WEBPACK_IMPORTED_MODULE_107_.A)
 /* harmony export */ });
 /* harmony import */ var ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_ = __webpack_require__(2961);
-/* harmony import */ var ccxt_src_base_Precise_js_WEBPACK_IMPORTED_MODULE_180_ = __webpack_require__(5147);
-/* harmony import */ var ccxt_src_base_functions_js_WEBPACK_IMPORTED_MODULE_181_ = __webpack_require__(5095);
-/* harmony import */ var ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_ = __webpack_require__(2079);
+/* harmony import */ var ccxt_src_base_Precise_js_WEBPACK_IMPORTED_MODULE_182_ = __webpack_require__(5147);
+/* harmony import */ var ccxt_src_base_functions_js_WEBPACK_IMPORTED_MODULE_183_ = __webpack_require__(5095);
+/* harmony import */ var ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_ = __webpack_require__(2079);
 /* harmony import */ var ccxt_src_alpaca_js_WEBPACK_IMPORTED_MODULE_1_ = __webpack_require__(7930);
 /* harmony import */ var ccxt_src_apex_js_WEBPACK_IMPORTED_MODULE_2_ = __webpack_require__(4920);
 /* harmony import */ var ccxt_src_arkham_js_WEBPACK_IMPORTED_MODULE_3_ = __webpack_require__(5278);
@@ -425681,135 +430034,137 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ccxt_src_coinspot_js_WEBPACK_IMPORTED_MODULE_48_ = __webpack_require__(1669);
 /* harmony import */ var ccxt_src_cryptocom_js_WEBPACK_IMPORTED_MODULE_49_ = __webpack_require__(6068);
 /* harmony import */ var ccxt_src_cryptomus_js_WEBPACK_IMPORTED_MODULE_50_ = __webpack_require__(870);
-/* harmony import */ var ccxt_src_defx_js_WEBPACK_IMPORTED_MODULE_51_ = __webpack_require__(6077);
-/* harmony import */ var ccxt_src_delta_js_WEBPACK_IMPORTED_MODULE_52_ = __webpack_require__(1080);
-/* harmony import */ var ccxt_src_deribit_js_WEBPACK_IMPORTED_MODULE_53_ = __webpack_require__(2591);
-/* harmony import */ var ccxt_src_derive_js_WEBPACK_IMPORTED_MODULE_54_ = __webpack_require__(1839);
-/* harmony import */ var ccxt_src_digifinex_js_WEBPACK_IMPORTED_MODULE_55_ = __webpack_require__(779);
-/* harmony import */ var ccxt_src_exmo_js_WEBPACK_IMPORTED_MODULE_56_ = __webpack_require__(7057);
-/* harmony import */ var ccxt_src_fmfwio_js_WEBPACK_IMPORTED_MODULE_57_ = __webpack_require__(3042);
-/* harmony import */ var ccxt_src_foxbit_js_WEBPACK_IMPORTED_MODULE_58_ = __webpack_require__(448);
-/* harmony import */ var ccxt_src_gate_js_WEBPACK_IMPORTED_MODULE_59_ = __webpack_require__(9403);
-/* harmony import */ var ccxt_src_gateio_js_WEBPACK_IMPORTED_MODULE_60_ = __webpack_require__(784);
-/* harmony import */ var ccxt_src_gemini_js_WEBPACK_IMPORTED_MODULE_61_ = __webpack_require__(8823);
-/* harmony import */ var ccxt_src_hashkey_js_WEBPACK_IMPORTED_MODULE_62_ = __webpack_require__(2937);
-/* harmony import */ var ccxt_src_hibachi_js_WEBPACK_IMPORTED_MODULE_63_ = __webpack_require__(5106);
-/* harmony import */ var ccxt_src_hitbtc_js_WEBPACK_IMPORTED_MODULE_64_ = __webpack_require__(7996);
-/* harmony import */ var ccxt_src_hollaex_js_WEBPACK_IMPORTED_MODULE_65_ = __webpack_require__(4455);
-/* harmony import */ var ccxt_src_htx_js_WEBPACK_IMPORTED_MODULE_66_ = __webpack_require__(9946);
-/* harmony import */ var ccxt_src_huobi_js_WEBPACK_IMPORTED_MODULE_67_ = __webpack_require__(63);
-/* harmony import */ var ccxt_src_hyperliquid_js_WEBPACK_IMPORTED_MODULE_68_ = __webpack_require__(1936);
-/* harmony import */ var ccxt_src_independentreserve_js_WEBPACK_IMPORTED_MODULE_69_ = __webpack_require__(4162);
-/* harmony import */ var ccxt_src_indodax_js_WEBPACK_IMPORTED_MODULE_70_ = __webpack_require__(7325);
-/* harmony import */ var ccxt_src_kraken_js_WEBPACK_IMPORTED_MODULE_71_ = __webpack_require__(8042);
-/* harmony import */ var ccxt_src_krakenfutures_js_WEBPACK_IMPORTED_MODULE_72_ = __webpack_require__(2300);
-/* harmony import */ var ccxt_src_kucoin_js_WEBPACK_IMPORTED_MODULE_73_ = __webpack_require__(1397);
-/* harmony import */ var ccxt_src_kucoinfutures_js_WEBPACK_IMPORTED_MODULE_74_ = __webpack_require__(6217);
-/* harmony import */ var ccxt_src_latoken_js_WEBPACK_IMPORTED_MODULE_75_ = __webpack_require__(8146);
-/* harmony import */ var ccxt_src_lbank_js_WEBPACK_IMPORTED_MODULE_76_ = __webpack_require__(3144);
-/* harmony import */ var ccxt_src_luno_js_WEBPACK_IMPORTED_MODULE_77_ = __webpack_require__(9248);
-/* harmony import */ var ccxt_src_mercado_js_WEBPACK_IMPORTED_MODULE_78_ = __webpack_require__(6419);
-/* harmony import */ var ccxt_src_mexc_js_WEBPACK_IMPORTED_MODULE_79_ = __webpack_require__(2403);
-/* harmony import */ var ccxt_src_modetrade_js_WEBPACK_IMPORTED_MODULE_80_ = __webpack_require__(5345);
-/* harmony import */ var ccxt_src_myokx_js_WEBPACK_IMPORTED_MODULE_81_ = __webpack_require__(8982);
-/* harmony import */ var ccxt_src_ndax_js_WEBPACK_IMPORTED_MODULE_82_ = __webpack_require__(4460);
-/* harmony import */ var ccxt_src_novadax_js_WEBPACK_IMPORTED_MODULE_83_ = __webpack_require__(8473);
-/* harmony import */ var ccxt_src_oceanex_js_WEBPACK_IMPORTED_MODULE_84_ = __webpack_require__(3805);
-/* harmony import */ var ccxt_src_okx_js_WEBPACK_IMPORTED_MODULE_85_ = __webpack_require__(3660);
-/* harmony import */ var ccxt_src_okxus_js_WEBPACK_IMPORTED_MODULE_86_ = __webpack_require__(3536);
-/* harmony import */ var ccxt_src_onetrading_js_WEBPACK_IMPORTED_MODULE_87_ = __webpack_require__(3573);
-/* harmony import */ var ccxt_src_oxfun_js_WEBPACK_IMPORTED_MODULE_88_ = __webpack_require__(6358);
-/* harmony import */ var ccxt_src_p2b_js_WEBPACK_IMPORTED_MODULE_89_ = __webpack_require__(4998);
-/* harmony import */ var ccxt_src_paradex_js_WEBPACK_IMPORTED_MODULE_90_ = __webpack_require__(6993);
-/* harmony import */ var ccxt_src_paymium_js_WEBPACK_IMPORTED_MODULE_91_ = __webpack_require__(3280);
-/* harmony import */ var ccxt_src_phemex_js_WEBPACK_IMPORTED_MODULE_92_ = __webpack_require__(9075);
-/* harmony import */ var ccxt_src_poloniex_js_WEBPACK_IMPORTED_MODULE_93_ = __webpack_require__(288);
-/* harmony import */ var ccxt_src_probit_js_WEBPACK_IMPORTED_MODULE_94_ = __webpack_require__(5037);
-/* harmony import */ var ccxt_src_timex_js_WEBPACK_IMPORTED_MODULE_95_ = __webpack_require__(6213);
-/* harmony import */ var ccxt_src_tokocrypto_js_WEBPACK_IMPORTED_MODULE_96_ = __webpack_require__(2490);
-/* harmony import */ var ccxt_src_toobit_js_WEBPACK_IMPORTED_MODULE_97_ = __webpack_require__(237);
-/* harmony import */ var ccxt_src_upbit_js_WEBPACK_IMPORTED_MODULE_98_ = __webpack_require__(930);
-/* harmony import */ var ccxt_src_wavesexchange_js_WEBPACK_IMPORTED_MODULE_99_ = __webpack_require__(7073);
-/* harmony import */ var ccxt_src_whitebit_js_WEBPACK_IMPORTED_MODULE_100_ = __webpack_require__(5336);
-/* harmony import */ var ccxt_src_woo_js_WEBPACK_IMPORTED_MODULE_101_ = __webpack_require__(669);
-/* harmony import */ var ccxt_src_woofipro_js_WEBPACK_IMPORTED_MODULE_102_ = __webpack_require__(9641);
-/* harmony import */ var ccxt_src_xt_js_WEBPACK_IMPORTED_MODULE_103_ = __webpack_require__(5344);
-/* harmony import */ var ccxt_src_yobit_js_WEBPACK_IMPORTED_MODULE_104_ = __webpack_require__(7469);
-/* harmony import */ var ccxt_src_zaif_js_WEBPACK_IMPORTED_MODULE_105_ = __webpack_require__(1530);
-/* harmony import */ var ccxt_src_zonda_js_WEBPACK_IMPORTED_MODULE_106_ = __webpack_require__(6022);
-/* harmony import */ var ccxt_src_pro_alpaca_js_WEBPACK_IMPORTED_MODULE_107_ = __webpack_require__(6810);
-/* harmony import */ var ccxt_src_pro_apex_js_WEBPACK_IMPORTED_MODULE_108_ = __webpack_require__(136);
-/* harmony import */ var ccxt_src_pro_arkham_js_WEBPACK_IMPORTED_MODULE_109_ = __webpack_require__(5758);
-/* harmony import */ var ccxt_src_pro_ascendex_js_WEBPACK_IMPORTED_MODULE_110_ = __webpack_require__(1657);
-/* harmony import */ var ccxt_src_pro_backpack_js_WEBPACK_IMPORTED_MODULE_111_ = __webpack_require__(4034);
-/* harmony import */ var ccxt_src_pro_bequant_js_WEBPACK_IMPORTED_MODULE_112_ = __webpack_require__(9338);
-/* harmony import */ var ccxt_src_pro_binance_js_WEBPACK_IMPORTED_MODULE_113_ = __webpack_require__(9544);
-/* harmony import */ var ccxt_src_pro_binancecoinm_js_WEBPACK_IMPORTED_MODULE_114_ = __webpack_require__(902);
-/* harmony import */ var ccxt_src_pro_binanceus_js_WEBPACK_IMPORTED_MODULE_115_ = __webpack_require__(8788);
-/* harmony import */ var ccxt_src_pro_binanceusdm_js_WEBPACK_IMPORTED_MODULE_116_ = __webpack_require__(8251);
-/* harmony import */ var ccxt_src_pro_bingx_js_WEBPACK_IMPORTED_MODULE_117_ = __webpack_require__(9456);
-/* harmony import */ var ccxt_src_pro_bitfinex_js_WEBPACK_IMPORTED_MODULE_118_ = __webpack_require__(1038);
-/* harmony import */ var ccxt_src_pro_bitget_js_WEBPACK_IMPORTED_MODULE_119_ = __webpack_require__(205);
-/* harmony import */ var ccxt_src_pro_bithumb_js_WEBPACK_IMPORTED_MODULE_120_ = __webpack_require__(6181);
-/* harmony import */ var ccxt_src_pro_bitmart_js_WEBPACK_IMPORTED_MODULE_121_ = __webpack_require__(3069);
-/* harmony import */ var ccxt_src_pro_bitmex_js_WEBPACK_IMPORTED_MODULE_122_ = __webpack_require__(3731);
-/* harmony import */ var ccxt_src_pro_bitopro_js_WEBPACK_IMPORTED_MODULE_123_ = __webpack_require__(4401);
-/* harmony import */ var ccxt_src_pro_bitrue_js_WEBPACK_IMPORTED_MODULE_124_ = __webpack_require__(3333);
-/* harmony import */ var ccxt_src_pro_bitstamp_js_WEBPACK_IMPORTED_MODULE_125_ = __webpack_require__(3326);
-/* harmony import */ var ccxt_src_pro_bittrade_js_WEBPACK_IMPORTED_MODULE_126_ = __webpack_require__(2391);
-/* harmony import */ var ccxt_src_pro_bitvavo_js_WEBPACK_IMPORTED_MODULE_127_ = __webpack_require__(1327);
-/* harmony import */ var ccxt_src_pro_blockchaincom_js_WEBPACK_IMPORTED_MODULE_128_ = __webpack_require__(8693);
-/* harmony import */ var ccxt_src_pro_blofin_js_WEBPACK_IMPORTED_MODULE_129_ = __webpack_require__(1672);
-/* harmony import */ var ccxt_src_pro_bybit_js_WEBPACK_IMPORTED_MODULE_130_ = __webpack_require__(8518);
-/* harmony import */ var ccxt_src_pro_cex_js_WEBPACK_IMPORTED_MODULE_131_ = __webpack_require__(3774);
-/* harmony import */ var ccxt_src_pro_coinbase_js_WEBPACK_IMPORTED_MODULE_132_ = __webpack_require__(8160);
-/* harmony import */ var ccxt_src_pro_coinbaseadvanced_js_WEBPACK_IMPORTED_MODULE_133_ = __webpack_require__(5918);
-/* harmony import */ var ccxt_src_pro_coinbaseexchange_js_WEBPACK_IMPORTED_MODULE_134_ = __webpack_require__(1925);
-/* harmony import */ var ccxt_src_pro_coinbaseinternational_js_WEBPACK_IMPORTED_MODULE_135_ = __webpack_require__(998);
-/* harmony import */ var ccxt_src_pro_coincatch_js_WEBPACK_IMPORTED_MODULE_136_ = __webpack_require__(3242);
-/* harmony import */ var ccxt_src_pro_coincheck_js_WEBPACK_IMPORTED_MODULE_137_ = __webpack_require__(79);
-/* harmony import */ var ccxt_src_pro_coinex_js_WEBPACK_IMPORTED_MODULE_138_ = __webpack_require__(9088);
-/* harmony import */ var ccxt_src_pro_coinone_js_WEBPACK_IMPORTED_MODULE_139_ = __webpack_require__(8673);
-/* harmony import */ var ccxt_src_pro_cryptocom_js_WEBPACK_IMPORTED_MODULE_140_ = __webpack_require__(6292);
-/* harmony import */ var ccxt_src_pro_defx_js_WEBPACK_IMPORTED_MODULE_141_ = __webpack_require__(8717);
-/* harmony import */ var ccxt_src_pro_deribit_js_WEBPACK_IMPORTED_MODULE_142_ = __webpack_require__(7791);
-/* harmony import */ var ccxt_src_pro_derive_js_WEBPACK_IMPORTED_MODULE_143_ = __webpack_require__(2127);
-/* harmony import */ var ccxt_src_pro_exmo_js_WEBPACK_IMPORTED_MODULE_144_ = __webpack_require__(5233);
-/* harmony import */ var ccxt_src_pro_gate_js_WEBPACK_IMPORTED_MODULE_145_ = __webpack_require__(9195);
-/* harmony import */ var ccxt_src_pro_gateio_js_WEBPACK_IMPORTED_MODULE_146_ = __webpack_require__(5843);
-/* harmony import */ var ccxt_src_pro_gemini_js_WEBPACK_IMPORTED_MODULE_147_ = __webpack_require__(375);
-/* harmony import */ var ccxt_src_pro_hashkey_js_WEBPACK_IMPORTED_MODULE_148_ = __webpack_require__(1481);
-/* harmony import */ var ccxt_src_pro_hitbtc_js_WEBPACK_IMPORTED_MODULE_149_ = __webpack_require__(4524);
-/* harmony import */ var ccxt_src_pro_hollaex_js_WEBPACK_IMPORTED_MODULE_150_ = __webpack_require__(8247);
-/* harmony import */ var ccxt_src_pro_htx_js_WEBPACK_IMPORTED_MODULE_151_ = __webpack_require__(3898);
-/* harmony import */ var ccxt_src_pro_huobi_js_WEBPACK_IMPORTED_MODULE_152_ = __webpack_require__(6335);
-/* harmony import */ var ccxt_src_pro_hyperliquid_js_WEBPACK_IMPORTED_MODULE_153_ = __webpack_require__(3984);
-/* harmony import */ var ccxt_src_pro_independentreserve_js_WEBPACK_IMPORTED_MODULE_154_ = __webpack_require__(98);
-/* harmony import */ var ccxt_src_pro_kraken_js_WEBPACK_IMPORTED_MODULE_155_ = __webpack_require__(9050);
-/* harmony import */ var ccxt_src_pro_krakenfutures_js_WEBPACK_IMPORTED_MODULE_156_ = __webpack_require__(6396);
-/* harmony import */ var ccxt_src_pro_kucoin_js_WEBPACK_IMPORTED_MODULE_157_ = __webpack_require__(4965);
-/* harmony import */ var ccxt_src_pro_kucoinfutures_js_WEBPACK_IMPORTED_MODULE_158_ = __webpack_require__(905);
-/* harmony import */ var ccxt_src_pro_lbank_js_WEBPACK_IMPORTED_MODULE_159_ = __webpack_require__(1736);
-/* harmony import */ var ccxt_src_pro_luno_js_WEBPACK_IMPORTED_MODULE_160_ = __webpack_require__(2208);
-/* harmony import */ var ccxt_src_pro_mexc_js_WEBPACK_IMPORTED_MODULE_161_ = __webpack_require__(9219);
-/* harmony import */ var ccxt_src_pro_modetrade_js_WEBPACK_IMPORTED_MODULE_162_ = __webpack_require__(49);
-/* harmony import */ var ccxt_src_pro_myokx_js_WEBPACK_IMPORTED_MODULE_163_ = __webpack_require__(3062);
-/* harmony import */ var ccxt_src_pro_ndax_js_WEBPACK_IMPORTED_MODULE_164_ = __webpack_require__(3887);
-/* harmony import */ var ccxt_src_pro_okx_js_WEBPACK_IMPORTED_MODULE_165_ = __webpack_require__(8588);
-/* harmony import */ var ccxt_src_pro_okxus_js_WEBPACK_IMPORTED_MODULE_166_ = __webpack_require__(3296);
-/* harmony import */ var ccxt_src_pro_onetrading_js_WEBPACK_IMPORTED_MODULE_167_ = __webpack_require__(4357);
-/* harmony import */ var ccxt_src_pro_oxfun_js_WEBPACK_IMPORTED_MODULE_168_ = __webpack_require__(550);
-/* harmony import */ var ccxt_src_pro_p2b_js_WEBPACK_IMPORTED_MODULE_169_ = __webpack_require__(4934);
-/* harmony import */ var ccxt_src_pro_paradex_js_WEBPACK_IMPORTED_MODULE_170_ = __webpack_require__(1057);
-/* harmony import */ var ccxt_src_pro_phemex_js_WEBPACK_IMPORTED_MODULE_171_ = __webpack_require__(1619);
-/* harmony import */ var ccxt_src_pro_poloniex_js_WEBPACK_IMPORTED_MODULE_172_ = __webpack_require__(3456);
-/* harmony import */ var ccxt_src_pro_probit_js_WEBPACK_IMPORTED_MODULE_173_ = __webpack_require__(5738);
-/* harmony import */ var ccxt_src_pro_toobit_js_WEBPACK_IMPORTED_MODULE_174_ = __webpack_require__(3933);
-/* harmony import */ var ccxt_src_pro_upbit_js_WEBPACK_IMPORTED_MODULE_175_ = __webpack_require__(5794);
-/* harmony import */ var ccxt_src_pro_whitebit_js_WEBPACK_IMPORTED_MODULE_176_ = __webpack_require__(4712);
-/* harmony import */ var ccxt_src_pro_woo_js_WEBPACK_IMPORTED_MODULE_177_ = __webpack_require__(5869);
-/* harmony import */ var ccxt_src_pro_woofipro_js_WEBPACK_IMPORTED_MODULE_178_ = __webpack_require__(8713);
-/* harmony import */ var ccxt_src_pro_xt_js_WEBPACK_IMPORTED_MODULE_179_ = __webpack_require__(2368);
+/* harmony import */ var ccxt_src_deepcoin_js_WEBPACK_IMPORTED_MODULE_51_ = __webpack_require__(763);
+/* harmony import */ var ccxt_src_defx_js_WEBPACK_IMPORTED_MODULE_52_ = __webpack_require__(6077);
+/* harmony import */ var ccxt_src_delta_js_WEBPACK_IMPORTED_MODULE_53_ = __webpack_require__(1080);
+/* harmony import */ var ccxt_src_deribit_js_WEBPACK_IMPORTED_MODULE_54_ = __webpack_require__(2591);
+/* harmony import */ var ccxt_src_derive_js_WEBPACK_IMPORTED_MODULE_55_ = __webpack_require__(1839);
+/* harmony import */ var ccxt_src_digifinex_js_WEBPACK_IMPORTED_MODULE_56_ = __webpack_require__(779);
+/* harmony import */ var ccxt_src_exmo_js_WEBPACK_IMPORTED_MODULE_57_ = __webpack_require__(7057);
+/* harmony import */ var ccxt_src_fmfwio_js_WEBPACK_IMPORTED_MODULE_58_ = __webpack_require__(3042);
+/* harmony import */ var ccxt_src_foxbit_js_WEBPACK_IMPORTED_MODULE_59_ = __webpack_require__(448);
+/* harmony import */ var ccxt_src_gate_js_WEBPACK_IMPORTED_MODULE_60_ = __webpack_require__(9403);
+/* harmony import */ var ccxt_src_gateio_js_WEBPACK_IMPORTED_MODULE_61_ = __webpack_require__(784);
+/* harmony import */ var ccxt_src_gemini_js_WEBPACK_IMPORTED_MODULE_62_ = __webpack_require__(8823);
+/* harmony import */ var ccxt_src_hashkey_js_WEBPACK_IMPORTED_MODULE_63_ = __webpack_require__(2937);
+/* harmony import */ var ccxt_src_hibachi_js_WEBPACK_IMPORTED_MODULE_64_ = __webpack_require__(5106);
+/* harmony import */ var ccxt_src_hitbtc_js_WEBPACK_IMPORTED_MODULE_65_ = __webpack_require__(7996);
+/* harmony import */ var ccxt_src_hollaex_js_WEBPACK_IMPORTED_MODULE_66_ = __webpack_require__(4455);
+/* harmony import */ var ccxt_src_htx_js_WEBPACK_IMPORTED_MODULE_67_ = __webpack_require__(9946);
+/* harmony import */ var ccxt_src_huobi_js_WEBPACK_IMPORTED_MODULE_68_ = __webpack_require__(63);
+/* harmony import */ var ccxt_src_hyperliquid_js_WEBPACK_IMPORTED_MODULE_69_ = __webpack_require__(1936);
+/* harmony import */ var ccxt_src_independentreserve_js_WEBPACK_IMPORTED_MODULE_70_ = __webpack_require__(4162);
+/* harmony import */ var ccxt_src_indodax_js_WEBPACK_IMPORTED_MODULE_71_ = __webpack_require__(7325);
+/* harmony import */ var ccxt_src_kraken_js_WEBPACK_IMPORTED_MODULE_72_ = __webpack_require__(8042);
+/* harmony import */ var ccxt_src_krakenfutures_js_WEBPACK_IMPORTED_MODULE_73_ = __webpack_require__(2300);
+/* harmony import */ var ccxt_src_kucoin_js_WEBPACK_IMPORTED_MODULE_74_ = __webpack_require__(1397);
+/* harmony import */ var ccxt_src_kucoinfutures_js_WEBPACK_IMPORTED_MODULE_75_ = __webpack_require__(6217);
+/* harmony import */ var ccxt_src_latoken_js_WEBPACK_IMPORTED_MODULE_76_ = __webpack_require__(8146);
+/* harmony import */ var ccxt_src_lbank_js_WEBPACK_IMPORTED_MODULE_77_ = __webpack_require__(3144);
+/* harmony import */ var ccxt_src_luno_js_WEBPACK_IMPORTED_MODULE_78_ = __webpack_require__(9248);
+/* harmony import */ var ccxt_src_mercado_js_WEBPACK_IMPORTED_MODULE_79_ = __webpack_require__(6419);
+/* harmony import */ var ccxt_src_mexc_js_WEBPACK_IMPORTED_MODULE_80_ = __webpack_require__(2403);
+/* harmony import */ var ccxt_src_modetrade_js_WEBPACK_IMPORTED_MODULE_81_ = __webpack_require__(5345);
+/* harmony import */ var ccxt_src_myokx_js_WEBPACK_IMPORTED_MODULE_82_ = __webpack_require__(8982);
+/* harmony import */ var ccxt_src_ndax_js_WEBPACK_IMPORTED_MODULE_83_ = __webpack_require__(4460);
+/* harmony import */ var ccxt_src_novadax_js_WEBPACK_IMPORTED_MODULE_84_ = __webpack_require__(8473);
+/* harmony import */ var ccxt_src_oceanex_js_WEBPACK_IMPORTED_MODULE_85_ = __webpack_require__(3805);
+/* harmony import */ var ccxt_src_okx_js_WEBPACK_IMPORTED_MODULE_86_ = __webpack_require__(3660);
+/* harmony import */ var ccxt_src_okxus_js_WEBPACK_IMPORTED_MODULE_87_ = __webpack_require__(3536);
+/* harmony import */ var ccxt_src_onetrading_js_WEBPACK_IMPORTED_MODULE_88_ = __webpack_require__(3573);
+/* harmony import */ var ccxt_src_oxfun_js_WEBPACK_IMPORTED_MODULE_89_ = __webpack_require__(6358);
+/* harmony import */ var ccxt_src_p2b_js_WEBPACK_IMPORTED_MODULE_90_ = __webpack_require__(4998);
+/* harmony import */ var ccxt_src_paradex_js_WEBPACK_IMPORTED_MODULE_91_ = __webpack_require__(6993);
+/* harmony import */ var ccxt_src_paymium_js_WEBPACK_IMPORTED_MODULE_92_ = __webpack_require__(3280);
+/* harmony import */ var ccxt_src_phemex_js_WEBPACK_IMPORTED_MODULE_93_ = __webpack_require__(9075);
+/* harmony import */ var ccxt_src_poloniex_js_WEBPACK_IMPORTED_MODULE_94_ = __webpack_require__(288);
+/* harmony import */ var ccxt_src_probit_js_WEBPACK_IMPORTED_MODULE_95_ = __webpack_require__(5037);
+/* harmony import */ var ccxt_src_timex_js_WEBPACK_IMPORTED_MODULE_96_ = __webpack_require__(6213);
+/* harmony import */ var ccxt_src_tokocrypto_js_WEBPACK_IMPORTED_MODULE_97_ = __webpack_require__(2490);
+/* harmony import */ var ccxt_src_toobit_js_WEBPACK_IMPORTED_MODULE_98_ = __webpack_require__(237);
+/* harmony import */ var ccxt_src_upbit_js_WEBPACK_IMPORTED_MODULE_99_ = __webpack_require__(930);
+/* harmony import */ var ccxt_src_wavesexchange_js_WEBPACK_IMPORTED_MODULE_100_ = __webpack_require__(7073);
+/* harmony import */ var ccxt_src_whitebit_js_WEBPACK_IMPORTED_MODULE_101_ = __webpack_require__(5336);
+/* harmony import */ var ccxt_src_woo_js_WEBPACK_IMPORTED_MODULE_102_ = __webpack_require__(669);
+/* harmony import */ var ccxt_src_woofipro_js_WEBPACK_IMPORTED_MODULE_103_ = __webpack_require__(9641);
+/* harmony import */ var ccxt_src_xt_js_WEBPACK_IMPORTED_MODULE_104_ = __webpack_require__(5344);
+/* harmony import */ var ccxt_src_yobit_js_WEBPACK_IMPORTED_MODULE_105_ = __webpack_require__(7469);
+/* harmony import */ var ccxt_src_zaif_js_WEBPACK_IMPORTED_MODULE_106_ = __webpack_require__(1530);
+/* harmony import */ var ccxt_src_zonda_js_WEBPACK_IMPORTED_MODULE_107_ = __webpack_require__(6022);
+/* harmony import */ var ccxt_src_pro_alpaca_js_WEBPACK_IMPORTED_MODULE_108_ = __webpack_require__(6810);
+/* harmony import */ var ccxt_src_pro_apex_js_WEBPACK_IMPORTED_MODULE_109_ = __webpack_require__(136);
+/* harmony import */ var ccxt_src_pro_arkham_js_WEBPACK_IMPORTED_MODULE_110_ = __webpack_require__(5758);
+/* harmony import */ var ccxt_src_pro_ascendex_js_WEBPACK_IMPORTED_MODULE_111_ = __webpack_require__(1657);
+/* harmony import */ var ccxt_src_pro_backpack_js_WEBPACK_IMPORTED_MODULE_112_ = __webpack_require__(4034);
+/* harmony import */ var ccxt_src_pro_bequant_js_WEBPACK_IMPORTED_MODULE_113_ = __webpack_require__(9338);
+/* harmony import */ var ccxt_src_pro_binance_js_WEBPACK_IMPORTED_MODULE_114_ = __webpack_require__(9544);
+/* harmony import */ var ccxt_src_pro_binancecoinm_js_WEBPACK_IMPORTED_MODULE_115_ = __webpack_require__(902);
+/* harmony import */ var ccxt_src_pro_binanceus_js_WEBPACK_IMPORTED_MODULE_116_ = __webpack_require__(8788);
+/* harmony import */ var ccxt_src_pro_binanceusdm_js_WEBPACK_IMPORTED_MODULE_117_ = __webpack_require__(8251);
+/* harmony import */ var ccxt_src_pro_bingx_js_WEBPACK_IMPORTED_MODULE_118_ = __webpack_require__(9456);
+/* harmony import */ var ccxt_src_pro_bitfinex_js_WEBPACK_IMPORTED_MODULE_119_ = __webpack_require__(1038);
+/* harmony import */ var ccxt_src_pro_bitget_js_WEBPACK_IMPORTED_MODULE_120_ = __webpack_require__(205);
+/* harmony import */ var ccxt_src_pro_bithumb_js_WEBPACK_IMPORTED_MODULE_121_ = __webpack_require__(6181);
+/* harmony import */ var ccxt_src_pro_bitmart_js_WEBPACK_IMPORTED_MODULE_122_ = __webpack_require__(3069);
+/* harmony import */ var ccxt_src_pro_bitmex_js_WEBPACK_IMPORTED_MODULE_123_ = __webpack_require__(3731);
+/* harmony import */ var ccxt_src_pro_bitopro_js_WEBPACK_IMPORTED_MODULE_124_ = __webpack_require__(4401);
+/* harmony import */ var ccxt_src_pro_bitrue_js_WEBPACK_IMPORTED_MODULE_125_ = __webpack_require__(3333);
+/* harmony import */ var ccxt_src_pro_bitstamp_js_WEBPACK_IMPORTED_MODULE_126_ = __webpack_require__(3326);
+/* harmony import */ var ccxt_src_pro_bittrade_js_WEBPACK_IMPORTED_MODULE_127_ = __webpack_require__(2391);
+/* harmony import */ var ccxt_src_pro_bitvavo_js_WEBPACK_IMPORTED_MODULE_128_ = __webpack_require__(1327);
+/* harmony import */ var ccxt_src_pro_blockchaincom_js_WEBPACK_IMPORTED_MODULE_129_ = __webpack_require__(8693);
+/* harmony import */ var ccxt_src_pro_blofin_js_WEBPACK_IMPORTED_MODULE_130_ = __webpack_require__(1672);
+/* harmony import */ var ccxt_src_pro_bybit_js_WEBPACK_IMPORTED_MODULE_131_ = __webpack_require__(8518);
+/* harmony import */ var ccxt_src_pro_cex_js_WEBPACK_IMPORTED_MODULE_132_ = __webpack_require__(3774);
+/* harmony import */ var ccxt_src_pro_coinbase_js_WEBPACK_IMPORTED_MODULE_133_ = __webpack_require__(8160);
+/* harmony import */ var ccxt_src_pro_coinbaseadvanced_js_WEBPACK_IMPORTED_MODULE_134_ = __webpack_require__(5918);
+/* harmony import */ var ccxt_src_pro_coinbaseexchange_js_WEBPACK_IMPORTED_MODULE_135_ = __webpack_require__(1925);
+/* harmony import */ var ccxt_src_pro_coinbaseinternational_js_WEBPACK_IMPORTED_MODULE_136_ = __webpack_require__(998);
+/* harmony import */ var ccxt_src_pro_coincatch_js_WEBPACK_IMPORTED_MODULE_137_ = __webpack_require__(3242);
+/* harmony import */ var ccxt_src_pro_coincheck_js_WEBPACK_IMPORTED_MODULE_138_ = __webpack_require__(79);
+/* harmony import */ var ccxt_src_pro_coinex_js_WEBPACK_IMPORTED_MODULE_139_ = __webpack_require__(9088);
+/* harmony import */ var ccxt_src_pro_coinone_js_WEBPACK_IMPORTED_MODULE_140_ = __webpack_require__(8673);
+/* harmony import */ var ccxt_src_pro_cryptocom_js_WEBPACK_IMPORTED_MODULE_141_ = __webpack_require__(6292);
+/* harmony import */ var ccxt_src_pro_deepcoin_js_WEBPACK_IMPORTED_MODULE_142_ = __webpack_require__(4811);
+/* harmony import */ var ccxt_src_pro_defx_js_WEBPACK_IMPORTED_MODULE_143_ = __webpack_require__(8717);
+/* harmony import */ var ccxt_src_pro_deribit_js_WEBPACK_IMPORTED_MODULE_144_ = __webpack_require__(7791);
+/* harmony import */ var ccxt_src_pro_derive_js_WEBPACK_IMPORTED_MODULE_145_ = __webpack_require__(2127);
+/* harmony import */ var ccxt_src_pro_exmo_js_WEBPACK_IMPORTED_MODULE_146_ = __webpack_require__(5233);
+/* harmony import */ var ccxt_src_pro_gate_js_WEBPACK_IMPORTED_MODULE_147_ = __webpack_require__(9195);
+/* harmony import */ var ccxt_src_pro_gateio_js_WEBPACK_IMPORTED_MODULE_148_ = __webpack_require__(5843);
+/* harmony import */ var ccxt_src_pro_gemini_js_WEBPACK_IMPORTED_MODULE_149_ = __webpack_require__(375);
+/* harmony import */ var ccxt_src_pro_hashkey_js_WEBPACK_IMPORTED_MODULE_150_ = __webpack_require__(1481);
+/* harmony import */ var ccxt_src_pro_hitbtc_js_WEBPACK_IMPORTED_MODULE_151_ = __webpack_require__(4524);
+/* harmony import */ var ccxt_src_pro_hollaex_js_WEBPACK_IMPORTED_MODULE_152_ = __webpack_require__(8247);
+/* harmony import */ var ccxt_src_pro_htx_js_WEBPACK_IMPORTED_MODULE_153_ = __webpack_require__(3898);
+/* harmony import */ var ccxt_src_pro_huobi_js_WEBPACK_IMPORTED_MODULE_154_ = __webpack_require__(6335);
+/* harmony import */ var ccxt_src_pro_hyperliquid_js_WEBPACK_IMPORTED_MODULE_155_ = __webpack_require__(3984);
+/* harmony import */ var ccxt_src_pro_independentreserve_js_WEBPACK_IMPORTED_MODULE_156_ = __webpack_require__(98);
+/* harmony import */ var ccxt_src_pro_kraken_js_WEBPACK_IMPORTED_MODULE_157_ = __webpack_require__(9050);
+/* harmony import */ var ccxt_src_pro_krakenfutures_js_WEBPACK_IMPORTED_MODULE_158_ = __webpack_require__(6396);
+/* harmony import */ var ccxt_src_pro_kucoin_js_WEBPACK_IMPORTED_MODULE_159_ = __webpack_require__(4965);
+/* harmony import */ var ccxt_src_pro_kucoinfutures_js_WEBPACK_IMPORTED_MODULE_160_ = __webpack_require__(905);
+/* harmony import */ var ccxt_src_pro_lbank_js_WEBPACK_IMPORTED_MODULE_161_ = __webpack_require__(1736);
+/* harmony import */ var ccxt_src_pro_luno_js_WEBPACK_IMPORTED_MODULE_162_ = __webpack_require__(2208);
+/* harmony import */ var ccxt_src_pro_mexc_js_WEBPACK_IMPORTED_MODULE_163_ = __webpack_require__(9219);
+/* harmony import */ var ccxt_src_pro_modetrade_js_WEBPACK_IMPORTED_MODULE_164_ = __webpack_require__(49);
+/* harmony import */ var ccxt_src_pro_myokx_js_WEBPACK_IMPORTED_MODULE_165_ = __webpack_require__(3062);
+/* harmony import */ var ccxt_src_pro_ndax_js_WEBPACK_IMPORTED_MODULE_166_ = __webpack_require__(3887);
+/* harmony import */ var ccxt_src_pro_okx_js_WEBPACK_IMPORTED_MODULE_167_ = __webpack_require__(8588);
+/* harmony import */ var ccxt_src_pro_okxus_js_WEBPACK_IMPORTED_MODULE_168_ = __webpack_require__(3296);
+/* harmony import */ var ccxt_src_pro_onetrading_js_WEBPACK_IMPORTED_MODULE_169_ = __webpack_require__(4357);
+/* harmony import */ var ccxt_src_pro_oxfun_js_WEBPACK_IMPORTED_MODULE_170_ = __webpack_require__(550);
+/* harmony import */ var ccxt_src_pro_p2b_js_WEBPACK_IMPORTED_MODULE_171_ = __webpack_require__(4934);
+/* harmony import */ var ccxt_src_pro_paradex_js_WEBPACK_IMPORTED_MODULE_172_ = __webpack_require__(1057);
+/* harmony import */ var ccxt_src_pro_phemex_js_WEBPACK_IMPORTED_MODULE_173_ = __webpack_require__(1619);
+/* harmony import */ var ccxt_src_pro_poloniex_js_WEBPACK_IMPORTED_MODULE_174_ = __webpack_require__(3456);
+/* harmony import */ var ccxt_src_pro_probit_js_WEBPACK_IMPORTED_MODULE_175_ = __webpack_require__(5738);
+/* harmony import */ var ccxt_src_pro_toobit_js_WEBPACK_IMPORTED_MODULE_176_ = __webpack_require__(3933);
+/* harmony import */ var ccxt_src_pro_upbit_js_WEBPACK_IMPORTED_MODULE_177_ = __webpack_require__(5794);
+/* harmony import */ var ccxt_src_pro_whitebit_js_WEBPACK_IMPORTED_MODULE_178_ = __webpack_require__(4712);
+/* harmony import */ var ccxt_src_pro_woo_js_WEBPACK_IMPORTED_MODULE_179_ = __webpack_require__(5869);
+/* harmony import */ var ccxt_src_pro_woofipro_js_WEBPACK_IMPORTED_MODULE_180_ = __webpack_require__(8713);
+/* harmony import */ var ccxt_src_pro_xt_js_WEBPACK_IMPORTED_MODULE_181_ = __webpack_require__(2368);
 /*
 
 MIT License
@@ -425847,6 +430202,7 @@ SOFTWARE.
 const ccxt_version = '4.5.17';
 ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k.ccxtVersion = ccxt_version;
 //-----------------------------------------------------------------------------
+
 
 
 
@@ -426027,6 +430383,7 @@ ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k.ccxtVersi
 
 
 
+
 const ccxt_exchanges = {
     'alpaca': ccxt_src_alpaca_js_WEBPACK_IMPORTED_MODULE_1_/* ["default"] */ .A,
     'apex': ccxt_src_apex_js_WEBPACK_IMPORTED_MODULE_2_/* ["default"] */ .A,
@@ -426078,137 +430435,139 @@ const ccxt_exchanges = {
     'coinspot': ccxt_src_coinspot_js_WEBPACK_IMPORTED_MODULE_48_/* ["default"] */ .A,
     'cryptocom': ccxt_src_cryptocom_js_WEBPACK_IMPORTED_MODULE_49_/* ["default"] */ .A,
     'cryptomus': ccxt_src_cryptomus_js_WEBPACK_IMPORTED_MODULE_50_/* ["default"] */ .A,
-    'defx': ccxt_src_defx_js_WEBPACK_IMPORTED_MODULE_51_/* ["default"] */ .A,
-    'delta': ccxt_src_delta_js_WEBPACK_IMPORTED_MODULE_52_/* ["default"] */ .A,
-    'deribit': ccxt_src_deribit_js_WEBPACK_IMPORTED_MODULE_53_/* ["default"] */ .A,
-    'derive': ccxt_src_derive_js_WEBPACK_IMPORTED_MODULE_54_/* ["default"] */ .A,
-    'digifinex': ccxt_src_digifinex_js_WEBPACK_IMPORTED_MODULE_55_/* ["default"] */ .A,
-    'exmo': ccxt_src_exmo_js_WEBPACK_IMPORTED_MODULE_56_/* ["default"] */ .A,
-    'fmfwio': ccxt_src_fmfwio_js_WEBPACK_IMPORTED_MODULE_57_/* ["default"] */ .A,
-    'foxbit': ccxt_src_foxbit_js_WEBPACK_IMPORTED_MODULE_58_/* ["default"] */ .A,
-    'gate': ccxt_src_gate_js_WEBPACK_IMPORTED_MODULE_59_/* ["default"] */ .A,
-    'gateio': ccxt_src_gateio_js_WEBPACK_IMPORTED_MODULE_60_/* ["default"] */ .A,
-    'gemini': ccxt_src_gemini_js_WEBPACK_IMPORTED_MODULE_61_/* ["default"] */ .A,
-    'hashkey': ccxt_src_hashkey_js_WEBPACK_IMPORTED_MODULE_62_/* ["default"] */ .A,
-    'hibachi': ccxt_src_hibachi_js_WEBPACK_IMPORTED_MODULE_63_/* ["default"] */ .A,
-    'hitbtc': ccxt_src_hitbtc_js_WEBPACK_IMPORTED_MODULE_64_/* ["default"] */ .A,
-    'hollaex': ccxt_src_hollaex_js_WEBPACK_IMPORTED_MODULE_65_/* ["default"] */ .A,
-    'htx': ccxt_src_htx_js_WEBPACK_IMPORTED_MODULE_66_/* ["default"] */ .A,
-    'huobi': ccxt_src_huobi_js_WEBPACK_IMPORTED_MODULE_67_/* ["default"] */ .A,
-    'hyperliquid': ccxt_src_hyperliquid_js_WEBPACK_IMPORTED_MODULE_68_/* ["default"] */ .A,
-    'independentreserve': ccxt_src_independentreserve_js_WEBPACK_IMPORTED_MODULE_69_/* ["default"] */ .A,
-    'indodax': ccxt_src_indodax_js_WEBPACK_IMPORTED_MODULE_70_/* ["default"] */ .A,
-    'kraken': ccxt_src_kraken_js_WEBPACK_IMPORTED_MODULE_71_/* ["default"] */ .A,
-    'krakenfutures': ccxt_src_krakenfutures_js_WEBPACK_IMPORTED_MODULE_72_/* ["default"] */ .A,
-    'kucoin': ccxt_src_kucoin_js_WEBPACK_IMPORTED_MODULE_73_/* ["default"] */ .A,
-    'kucoinfutures': ccxt_src_kucoinfutures_js_WEBPACK_IMPORTED_MODULE_74_/* ["default"] */ .A,
-    'latoken': ccxt_src_latoken_js_WEBPACK_IMPORTED_MODULE_75_/* ["default"] */ .A,
-    'lbank': ccxt_src_lbank_js_WEBPACK_IMPORTED_MODULE_76_/* ["default"] */ .A,
-    'luno': ccxt_src_luno_js_WEBPACK_IMPORTED_MODULE_77_/* ["default"] */ .A,
-    'mercado': ccxt_src_mercado_js_WEBPACK_IMPORTED_MODULE_78_/* ["default"] */ .A,
-    'mexc': ccxt_src_mexc_js_WEBPACK_IMPORTED_MODULE_79_/* ["default"] */ .A,
-    'modetrade': ccxt_src_modetrade_js_WEBPACK_IMPORTED_MODULE_80_/* ["default"] */ .A,
-    'myokx': ccxt_src_myokx_js_WEBPACK_IMPORTED_MODULE_81_/* ["default"] */ .A,
-    'ndax': ccxt_src_ndax_js_WEBPACK_IMPORTED_MODULE_82_/* ["default"] */ .A,
-    'novadax': ccxt_src_novadax_js_WEBPACK_IMPORTED_MODULE_83_/* ["default"] */ .A,
-    'oceanex': ccxt_src_oceanex_js_WEBPACK_IMPORTED_MODULE_84_/* ["default"] */ .A,
-    'okx': ccxt_src_okx_js_WEBPACK_IMPORTED_MODULE_85_/* ["default"] */ .A,
-    'okxus': ccxt_src_okxus_js_WEBPACK_IMPORTED_MODULE_86_/* ["default"] */ .A,
-    'onetrading': ccxt_src_onetrading_js_WEBPACK_IMPORTED_MODULE_87_/* ["default"] */ .A,
-    'oxfun': ccxt_src_oxfun_js_WEBPACK_IMPORTED_MODULE_88_/* ["default"] */ .A,
-    'p2b': ccxt_src_p2b_js_WEBPACK_IMPORTED_MODULE_89_/* ["default"] */ .A,
-    'paradex': ccxt_src_paradex_js_WEBPACK_IMPORTED_MODULE_90_/* ["default"] */ .A,
-    'paymium': ccxt_src_paymium_js_WEBPACK_IMPORTED_MODULE_91_/* ["default"] */ .A,
-    'phemex': ccxt_src_phemex_js_WEBPACK_IMPORTED_MODULE_92_/* ["default"] */ .A,
-    'poloniex': ccxt_src_poloniex_js_WEBPACK_IMPORTED_MODULE_93_/* ["default"] */ .A,
-    'probit': ccxt_src_probit_js_WEBPACK_IMPORTED_MODULE_94_/* ["default"] */ .A,
-    'timex': ccxt_src_timex_js_WEBPACK_IMPORTED_MODULE_95_/* ["default"] */ .A,
-    'tokocrypto': ccxt_src_tokocrypto_js_WEBPACK_IMPORTED_MODULE_96_/* ["default"] */ .A,
-    'toobit': ccxt_src_toobit_js_WEBPACK_IMPORTED_MODULE_97_/* ["default"] */ .A,
-    'upbit': ccxt_src_upbit_js_WEBPACK_IMPORTED_MODULE_98_/* ["default"] */ .A,
-    'wavesexchange': ccxt_src_wavesexchange_js_WEBPACK_IMPORTED_MODULE_99_/* ["default"] */ .A,
-    'whitebit': ccxt_src_whitebit_js_WEBPACK_IMPORTED_MODULE_100_/* ["default"] */ .A,
-    'woo': ccxt_src_woo_js_WEBPACK_IMPORTED_MODULE_101_/* ["default"] */ .A,
-    'woofipro': ccxt_src_woofipro_js_WEBPACK_IMPORTED_MODULE_102_/* ["default"] */ .A,
-    'xt': ccxt_src_xt_js_WEBPACK_IMPORTED_MODULE_103_/* ["default"] */ .A,
-    'yobit': ccxt_src_yobit_js_WEBPACK_IMPORTED_MODULE_104_/* ["default"] */ .A,
-    'zaif': ccxt_src_zaif_js_WEBPACK_IMPORTED_MODULE_105_/* ["default"] */ .A,
-    'zonda': ccxt_src_zonda_js_WEBPACK_IMPORTED_MODULE_106_/* ["default"] */ .A,
+    'deepcoin': ccxt_src_deepcoin_js_WEBPACK_IMPORTED_MODULE_51_/* ["default"] */ .A,
+    'defx': ccxt_src_defx_js_WEBPACK_IMPORTED_MODULE_52_/* ["default"] */ .A,
+    'delta': ccxt_src_delta_js_WEBPACK_IMPORTED_MODULE_53_/* ["default"] */ .A,
+    'deribit': ccxt_src_deribit_js_WEBPACK_IMPORTED_MODULE_54_/* ["default"] */ .A,
+    'derive': ccxt_src_derive_js_WEBPACK_IMPORTED_MODULE_55_/* ["default"] */ .A,
+    'digifinex': ccxt_src_digifinex_js_WEBPACK_IMPORTED_MODULE_56_/* ["default"] */ .A,
+    'exmo': ccxt_src_exmo_js_WEBPACK_IMPORTED_MODULE_57_/* ["default"] */ .A,
+    'fmfwio': ccxt_src_fmfwio_js_WEBPACK_IMPORTED_MODULE_58_/* ["default"] */ .A,
+    'foxbit': ccxt_src_foxbit_js_WEBPACK_IMPORTED_MODULE_59_/* ["default"] */ .A,
+    'gate': ccxt_src_gate_js_WEBPACK_IMPORTED_MODULE_60_/* ["default"] */ .A,
+    'gateio': ccxt_src_gateio_js_WEBPACK_IMPORTED_MODULE_61_/* ["default"] */ .A,
+    'gemini': ccxt_src_gemini_js_WEBPACK_IMPORTED_MODULE_62_/* ["default"] */ .A,
+    'hashkey': ccxt_src_hashkey_js_WEBPACK_IMPORTED_MODULE_63_/* ["default"] */ .A,
+    'hibachi': ccxt_src_hibachi_js_WEBPACK_IMPORTED_MODULE_64_/* ["default"] */ .A,
+    'hitbtc': ccxt_src_hitbtc_js_WEBPACK_IMPORTED_MODULE_65_/* ["default"] */ .A,
+    'hollaex': ccxt_src_hollaex_js_WEBPACK_IMPORTED_MODULE_66_/* ["default"] */ .A,
+    'htx': ccxt_src_htx_js_WEBPACK_IMPORTED_MODULE_67_/* ["default"] */ .A,
+    'huobi': ccxt_src_huobi_js_WEBPACK_IMPORTED_MODULE_68_/* ["default"] */ .A,
+    'hyperliquid': ccxt_src_hyperliquid_js_WEBPACK_IMPORTED_MODULE_69_/* ["default"] */ .A,
+    'independentreserve': ccxt_src_independentreserve_js_WEBPACK_IMPORTED_MODULE_70_/* ["default"] */ .A,
+    'indodax': ccxt_src_indodax_js_WEBPACK_IMPORTED_MODULE_71_/* ["default"] */ .A,
+    'kraken': ccxt_src_kraken_js_WEBPACK_IMPORTED_MODULE_72_/* ["default"] */ .A,
+    'krakenfutures': ccxt_src_krakenfutures_js_WEBPACK_IMPORTED_MODULE_73_/* ["default"] */ .A,
+    'kucoin': ccxt_src_kucoin_js_WEBPACK_IMPORTED_MODULE_74_/* ["default"] */ .A,
+    'kucoinfutures': ccxt_src_kucoinfutures_js_WEBPACK_IMPORTED_MODULE_75_/* ["default"] */ .A,
+    'latoken': ccxt_src_latoken_js_WEBPACK_IMPORTED_MODULE_76_/* ["default"] */ .A,
+    'lbank': ccxt_src_lbank_js_WEBPACK_IMPORTED_MODULE_77_/* ["default"] */ .A,
+    'luno': ccxt_src_luno_js_WEBPACK_IMPORTED_MODULE_78_/* ["default"] */ .A,
+    'mercado': ccxt_src_mercado_js_WEBPACK_IMPORTED_MODULE_79_/* ["default"] */ .A,
+    'mexc': ccxt_src_mexc_js_WEBPACK_IMPORTED_MODULE_80_/* ["default"] */ .A,
+    'modetrade': ccxt_src_modetrade_js_WEBPACK_IMPORTED_MODULE_81_/* ["default"] */ .A,
+    'myokx': ccxt_src_myokx_js_WEBPACK_IMPORTED_MODULE_82_/* ["default"] */ .A,
+    'ndax': ccxt_src_ndax_js_WEBPACK_IMPORTED_MODULE_83_/* ["default"] */ .A,
+    'novadax': ccxt_src_novadax_js_WEBPACK_IMPORTED_MODULE_84_/* ["default"] */ .A,
+    'oceanex': ccxt_src_oceanex_js_WEBPACK_IMPORTED_MODULE_85_/* ["default"] */ .A,
+    'okx': ccxt_src_okx_js_WEBPACK_IMPORTED_MODULE_86_/* ["default"] */ .A,
+    'okxus': ccxt_src_okxus_js_WEBPACK_IMPORTED_MODULE_87_/* ["default"] */ .A,
+    'onetrading': ccxt_src_onetrading_js_WEBPACK_IMPORTED_MODULE_88_/* ["default"] */ .A,
+    'oxfun': ccxt_src_oxfun_js_WEBPACK_IMPORTED_MODULE_89_/* ["default"] */ .A,
+    'p2b': ccxt_src_p2b_js_WEBPACK_IMPORTED_MODULE_90_/* ["default"] */ .A,
+    'paradex': ccxt_src_paradex_js_WEBPACK_IMPORTED_MODULE_91_/* ["default"] */ .A,
+    'paymium': ccxt_src_paymium_js_WEBPACK_IMPORTED_MODULE_92_/* ["default"] */ .A,
+    'phemex': ccxt_src_phemex_js_WEBPACK_IMPORTED_MODULE_93_/* ["default"] */ .A,
+    'poloniex': ccxt_src_poloniex_js_WEBPACK_IMPORTED_MODULE_94_/* ["default"] */ .A,
+    'probit': ccxt_src_probit_js_WEBPACK_IMPORTED_MODULE_95_/* ["default"] */ .A,
+    'timex': ccxt_src_timex_js_WEBPACK_IMPORTED_MODULE_96_/* ["default"] */ .A,
+    'tokocrypto': ccxt_src_tokocrypto_js_WEBPACK_IMPORTED_MODULE_97_/* ["default"] */ .A,
+    'toobit': ccxt_src_toobit_js_WEBPACK_IMPORTED_MODULE_98_/* ["default"] */ .A,
+    'upbit': ccxt_src_upbit_js_WEBPACK_IMPORTED_MODULE_99_/* ["default"] */ .A,
+    'wavesexchange': ccxt_src_wavesexchange_js_WEBPACK_IMPORTED_MODULE_100_/* ["default"] */ .A,
+    'whitebit': ccxt_src_whitebit_js_WEBPACK_IMPORTED_MODULE_101_/* ["default"] */ .A,
+    'woo': ccxt_src_woo_js_WEBPACK_IMPORTED_MODULE_102_/* ["default"] */ .A,
+    'woofipro': ccxt_src_woofipro_js_WEBPACK_IMPORTED_MODULE_103_/* ["default"] */ .A,
+    'xt': ccxt_src_xt_js_WEBPACK_IMPORTED_MODULE_104_/* ["default"] */ .A,
+    'yobit': ccxt_src_yobit_js_WEBPACK_IMPORTED_MODULE_105_/* ["default"] */ .A,
+    'zaif': ccxt_src_zaif_js_WEBPACK_IMPORTED_MODULE_106_/* ["default"] */ .A,
+    'zonda': ccxt_src_zonda_js_WEBPACK_IMPORTED_MODULE_107_/* ["default"] */ .A,
 };
 const ccxt_pro = {
-    'alpaca': ccxt_src_pro_alpaca_js_WEBPACK_IMPORTED_MODULE_107_/* ["default"] */ .A,
-    'apex': ccxt_src_pro_apex_js_WEBPACK_IMPORTED_MODULE_108_/* ["default"] */ .A,
-    'arkham': ccxt_src_pro_arkham_js_WEBPACK_IMPORTED_MODULE_109_/* ["default"] */ .A,
-    'ascendex': ccxt_src_pro_ascendex_js_WEBPACK_IMPORTED_MODULE_110_/* ["default"] */ .A,
-    'backpack': ccxt_src_pro_backpack_js_WEBPACK_IMPORTED_MODULE_111_/* ["default"] */ .A,
-    'bequant': ccxt_src_pro_bequant_js_WEBPACK_IMPORTED_MODULE_112_/* ["default"] */ .A,
-    'binance': ccxt_src_pro_binance_js_WEBPACK_IMPORTED_MODULE_113_/* ["default"] */ .A,
-    'binancecoinm': ccxt_src_pro_binancecoinm_js_WEBPACK_IMPORTED_MODULE_114_/* ["default"] */ .A,
-    'binanceus': ccxt_src_pro_binanceus_js_WEBPACK_IMPORTED_MODULE_115_/* ["default"] */ .A,
-    'binanceusdm': ccxt_src_pro_binanceusdm_js_WEBPACK_IMPORTED_MODULE_116_/* ["default"] */ .A,
-    'bingx': ccxt_src_pro_bingx_js_WEBPACK_IMPORTED_MODULE_117_/* ["default"] */ .A,
-    'bitfinex': ccxt_src_pro_bitfinex_js_WEBPACK_IMPORTED_MODULE_118_/* ["default"] */ .A,
-    'bitget': ccxt_src_pro_bitget_js_WEBPACK_IMPORTED_MODULE_119_/* ["default"] */ .A,
-    'bithumb': ccxt_src_pro_bithumb_js_WEBPACK_IMPORTED_MODULE_120_/* ["default"] */ .A,
-    'bitmart': ccxt_src_pro_bitmart_js_WEBPACK_IMPORTED_MODULE_121_/* ["default"] */ .A,
-    'bitmex': ccxt_src_pro_bitmex_js_WEBPACK_IMPORTED_MODULE_122_/* ["default"] */ .A,
-    'bitopro': ccxt_src_pro_bitopro_js_WEBPACK_IMPORTED_MODULE_123_/* ["default"] */ .A,
-    'bitrue': ccxt_src_pro_bitrue_js_WEBPACK_IMPORTED_MODULE_124_/* ["default"] */ .A,
-    'bitstamp': ccxt_src_pro_bitstamp_js_WEBPACK_IMPORTED_MODULE_125_/* ["default"] */ .A,
-    'bittrade': ccxt_src_pro_bittrade_js_WEBPACK_IMPORTED_MODULE_126_/* ["default"] */ .A,
-    'bitvavo': ccxt_src_pro_bitvavo_js_WEBPACK_IMPORTED_MODULE_127_/* ["default"] */ .A,
-    'blockchaincom': ccxt_src_pro_blockchaincom_js_WEBPACK_IMPORTED_MODULE_128_/* ["default"] */ .A,
-    'blofin': ccxt_src_pro_blofin_js_WEBPACK_IMPORTED_MODULE_129_/* ["default"] */ .A,
-    'bybit': ccxt_src_pro_bybit_js_WEBPACK_IMPORTED_MODULE_130_/* ["default"] */ .A,
-    'cex': ccxt_src_pro_cex_js_WEBPACK_IMPORTED_MODULE_131_/* ["default"] */ .A,
-    'coinbase': ccxt_src_pro_coinbase_js_WEBPACK_IMPORTED_MODULE_132_/* ["default"] */ .A,
-    'coinbaseadvanced': ccxt_src_pro_coinbaseadvanced_js_WEBPACK_IMPORTED_MODULE_133_/* ["default"] */ .A,
-    'coinbaseexchange': ccxt_src_pro_coinbaseexchange_js_WEBPACK_IMPORTED_MODULE_134_/* ["default"] */ .A,
-    'coinbaseinternational': ccxt_src_pro_coinbaseinternational_js_WEBPACK_IMPORTED_MODULE_135_/* ["default"] */ .A,
-    'coincatch': ccxt_src_pro_coincatch_js_WEBPACK_IMPORTED_MODULE_136_/* ["default"] */ .A,
-    'coincheck': ccxt_src_pro_coincheck_js_WEBPACK_IMPORTED_MODULE_137_/* ["default"] */ .A,
-    'coinex': ccxt_src_pro_coinex_js_WEBPACK_IMPORTED_MODULE_138_/* ["default"] */ .A,
-    'coinone': ccxt_src_pro_coinone_js_WEBPACK_IMPORTED_MODULE_139_/* ["default"] */ .A,
-    'cryptocom': ccxt_src_pro_cryptocom_js_WEBPACK_IMPORTED_MODULE_140_/* ["default"] */ .A,
-    'defx': ccxt_src_pro_defx_js_WEBPACK_IMPORTED_MODULE_141_/* ["default"] */ .A,
-    'deribit': ccxt_src_pro_deribit_js_WEBPACK_IMPORTED_MODULE_142_/* ["default"] */ .A,
-    'derive': ccxt_src_pro_derive_js_WEBPACK_IMPORTED_MODULE_143_/* ["default"] */ .A,
-    'exmo': ccxt_src_pro_exmo_js_WEBPACK_IMPORTED_MODULE_144_/* ["default"] */ .A,
-    'gate': ccxt_src_pro_gate_js_WEBPACK_IMPORTED_MODULE_145_/* ["default"] */ .A,
-    'gateio': ccxt_src_pro_gateio_js_WEBPACK_IMPORTED_MODULE_146_/* ["default"] */ .A,
-    'gemini': ccxt_src_pro_gemini_js_WEBPACK_IMPORTED_MODULE_147_/* ["default"] */ .A,
-    'hashkey': ccxt_src_pro_hashkey_js_WEBPACK_IMPORTED_MODULE_148_/* ["default"] */ .A,
-    'hitbtc': ccxt_src_pro_hitbtc_js_WEBPACK_IMPORTED_MODULE_149_/* ["default"] */ .A,
-    'hollaex': ccxt_src_pro_hollaex_js_WEBPACK_IMPORTED_MODULE_150_/* ["default"] */ .A,
-    'htx': ccxt_src_pro_htx_js_WEBPACK_IMPORTED_MODULE_151_/* ["default"] */ .A,
-    'huobi': ccxt_src_pro_huobi_js_WEBPACK_IMPORTED_MODULE_152_/* ["default"] */ .A,
-    'hyperliquid': ccxt_src_pro_hyperliquid_js_WEBPACK_IMPORTED_MODULE_153_/* ["default"] */ .A,
-    'independentreserve': ccxt_src_pro_independentreserve_js_WEBPACK_IMPORTED_MODULE_154_/* ["default"] */ .A,
-    'kraken': ccxt_src_pro_kraken_js_WEBPACK_IMPORTED_MODULE_155_/* ["default"] */ .A,
-    'krakenfutures': ccxt_src_pro_krakenfutures_js_WEBPACK_IMPORTED_MODULE_156_/* ["default"] */ .A,
-    'kucoin': ccxt_src_pro_kucoin_js_WEBPACK_IMPORTED_MODULE_157_/* ["default"] */ .A,
-    'kucoinfutures': ccxt_src_pro_kucoinfutures_js_WEBPACK_IMPORTED_MODULE_158_/* ["default"] */ .A,
-    'lbank': ccxt_src_pro_lbank_js_WEBPACK_IMPORTED_MODULE_159_/* ["default"] */ .A,
-    'luno': ccxt_src_pro_luno_js_WEBPACK_IMPORTED_MODULE_160_/* ["default"] */ .A,
-    'mexc': ccxt_src_pro_mexc_js_WEBPACK_IMPORTED_MODULE_161_/* ["default"] */ .A,
-    'modetrade': ccxt_src_pro_modetrade_js_WEBPACK_IMPORTED_MODULE_162_/* ["default"] */ .A,
-    'myokx': ccxt_src_pro_myokx_js_WEBPACK_IMPORTED_MODULE_163_/* ["default"] */ .A,
-    'ndax': ccxt_src_pro_ndax_js_WEBPACK_IMPORTED_MODULE_164_/* ["default"] */ .A,
-    'okx': ccxt_src_pro_okx_js_WEBPACK_IMPORTED_MODULE_165_/* ["default"] */ .A,
-    'okxus': ccxt_src_pro_okxus_js_WEBPACK_IMPORTED_MODULE_166_/* ["default"] */ .A,
-    'onetrading': ccxt_src_pro_onetrading_js_WEBPACK_IMPORTED_MODULE_167_/* ["default"] */ .A,
-    'oxfun': ccxt_src_pro_oxfun_js_WEBPACK_IMPORTED_MODULE_168_/* ["default"] */ .A,
-    'p2b': ccxt_src_pro_p2b_js_WEBPACK_IMPORTED_MODULE_169_/* ["default"] */ .A,
-    'paradex': ccxt_src_pro_paradex_js_WEBPACK_IMPORTED_MODULE_170_/* ["default"] */ .A,
-    'phemex': ccxt_src_pro_phemex_js_WEBPACK_IMPORTED_MODULE_171_/* ["default"] */ .A,
-    'poloniex': ccxt_src_pro_poloniex_js_WEBPACK_IMPORTED_MODULE_172_/* ["default"] */ .A,
-    'probit': ccxt_src_pro_probit_js_WEBPACK_IMPORTED_MODULE_173_/* ["default"] */ .A,
-    'toobit': ccxt_src_pro_toobit_js_WEBPACK_IMPORTED_MODULE_174_/* ["default"] */ .A,
-    'upbit': ccxt_src_pro_upbit_js_WEBPACK_IMPORTED_MODULE_175_/* ["default"] */ .A,
-    'whitebit': ccxt_src_pro_whitebit_js_WEBPACK_IMPORTED_MODULE_176_/* ["default"] */ .A,
-    'woo': ccxt_src_pro_woo_js_WEBPACK_IMPORTED_MODULE_177_/* ["default"] */ .A,
-    'woofipro': ccxt_src_pro_woofipro_js_WEBPACK_IMPORTED_MODULE_178_/* ["default"] */ .A,
-    'xt': ccxt_src_pro_xt_js_WEBPACK_IMPORTED_MODULE_179_/* ["default"] */ .A,
+    'alpaca': ccxt_src_pro_alpaca_js_WEBPACK_IMPORTED_MODULE_108_/* ["default"] */ .A,
+    'apex': ccxt_src_pro_apex_js_WEBPACK_IMPORTED_MODULE_109_/* ["default"] */ .A,
+    'arkham': ccxt_src_pro_arkham_js_WEBPACK_IMPORTED_MODULE_110_/* ["default"] */ .A,
+    'ascendex': ccxt_src_pro_ascendex_js_WEBPACK_IMPORTED_MODULE_111_/* ["default"] */ .A,
+    'backpack': ccxt_src_pro_backpack_js_WEBPACK_IMPORTED_MODULE_112_/* ["default"] */ .A,
+    'bequant': ccxt_src_pro_bequant_js_WEBPACK_IMPORTED_MODULE_113_/* ["default"] */ .A,
+    'binance': ccxt_src_pro_binance_js_WEBPACK_IMPORTED_MODULE_114_/* ["default"] */ .A,
+    'binancecoinm': ccxt_src_pro_binancecoinm_js_WEBPACK_IMPORTED_MODULE_115_/* ["default"] */ .A,
+    'binanceus': ccxt_src_pro_binanceus_js_WEBPACK_IMPORTED_MODULE_116_/* ["default"] */ .A,
+    'binanceusdm': ccxt_src_pro_binanceusdm_js_WEBPACK_IMPORTED_MODULE_117_/* ["default"] */ .A,
+    'bingx': ccxt_src_pro_bingx_js_WEBPACK_IMPORTED_MODULE_118_/* ["default"] */ .A,
+    'bitfinex': ccxt_src_pro_bitfinex_js_WEBPACK_IMPORTED_MODULE_119_/* ["default"] */ .A,
+    'bitget': ccxt_src_pro_bitget_js_WEBPACK_IMPORTED_MODULE_120_/* ["default"] */ .A,
+    'bithumb': ccxt_src_pro_bithumb_js_WEBPACK_IMPORTED_MODULE_121_/* ["default"] */ .A,
+    'bitmart': ccxt_src_pro_bitmart_js_WEBPACK_IMPORTED_MODULE_122_/* ["default"] */ .A,
+    'bitmex': ccxt_src_pro_bitmex_js_WEBPACK_IMPORTED_MODULE_123_/* ["default"] */ .A,
+    'bitopro': ccxt_src_pro_bitopro_js_WEBPACK_IMPORTED_MODULE_124_/* ["default"] */ .A,
+    'bitrue': ccxt_src_pro_bitrue_js_WEBPACK_IMPORTED_MODULE_125_/* ["default"] */ .A,
+    'bitstamp': ccxt_src_pro_bitstamp_js_WEBPACK_IMPORTED_MODULE_126_/* ["default"] */ .A,
+    'bittrade': ccxt_src_pro_bittrade_js_WEBPACK_IMPORTED_MODULE_127_/* ["default"] */ .A,
+    'bitvavo': ccxt_src_pro_bitvavo_js_WEBPACK_IMPORTED_MODULE_128_/* ["default"] */ .A,
+    'blockchaincom': ccxt_src_pro_blockchaincom_js_WEBPACK_IMPORTED_MODULE_129_/* ["default"] */ .A,
+    'blofin': ccxt_src_pro_blofin_js_WEBPACK_IMPORTED_MODULE_130_/* ["default"] */ .A,
+    'bybit': ccxt_src_pro_bybit_js_WEBPACK_IMPORTED_MODULE_131_/* ["default"] */ .A,
+    'cex': ccxt_src_pro_cex_js_WEBPACK_IMPORTED_MODULE_132_/* ["default"] */ .A,
+    'coinbase': ccxt_src_pro_coinbase_js_WEBPACK_IMPORTED_MODULE_133_/* ["default"] */ .A,
+    'coinbaseadvanced': ccxt_src_pro_coinbaseadvanced_js_WEBPACK_IMPORTED_MODULE_134_/* ["default"] */ .A,
+    'coinbaseexchange': ccxt_src_pro_coinbaseexchange_js_WEBPACK_IMPORTED_MODULE_135_/* ["default"] */ .A,
+    'coinbaseinternational': ccxt_src_pro_coinbaseinternational_js_WEBPACK_IMPORTED_MODULE_136_/* ["default"] */ .A,
+    'coincatch': ccxt_src_pro_coincatch_js_WEBPACK_IMPORTED_MODULE_137_/* ["default"] */ .A,
+    'coincheck': ccxt_src_pro_coincheck_js_WEBPACK_IMPORTED_MODULE_138_/* ["default"] */ .A,
+    'coinex': ccxt_src_pro_coinex_js_WEBPACK_IMPORTED_MODULE_139_/* ["default"] */ .A,
+    'coinone': ccxt_src_pro_coinone_js_WEBPACK_IMPORTED_MODULE_140_/* ["default"] */ .A,
+    'cryptocom': ccxt_src_pro_cryptocom_js_WEBPACK_IMPORTED_MODULE_141_/* ["default"] */ .A,
+    'deepcoin': ccxt_src_pro_deepcoin_js_WEBPACK_IMPORTED_MODULE_142_/* ["default"] */ .A,
+    'defx': ccxt_src_pro_defx_js_WEBPACK_IMPORTED_MODULE_143_/* ["default"] */ .A,
+    'deribit': ccxt_src_pro_deribit_js_WEBPACK_IMPORTED_MODULE_144_/* ["default"] */ .A,
+    'derive': ccxt_src_pro_derive_js_WEBPACK_IMPORTED_MODULE_145_/* ["default"] */ .A,
+    'exmo': ccxt_src_pro_exmo_js_WEBPACK_IMPORTED_MODULE_146_/* ["default"] */ .A,
+    'gate': ccxt_src_pro_gate_js_WEBPACK_IMPORTED_MODULE_147_/* ["default"] */ .A,
+    'gateio': ccxt_src_pro_gateio_js_WEBPACK_IMPORTED_MODULE_148_/* ["default"] */ .A,
+    'gemini': ccxt_src_pro_gemini_js_WEBPACK_IMPORTED_MODULE_149_/* ["default"] */ .A,
+    'hashkey': ccxt_src_pro_hashkey_js_WEBPACK_IMPORTED_MODULE_150_/* ["default"] */ .A,
+    'hitbtc': ccxt_src_pro_hitbtc_js_WEBPACK_IMPORTED_MODULE_151_/* ["default"] */ .A,
+    'hollaex': ccxt_src_pro_hollaex_js_WEBPACK_IMPORTED_MODULE_152_/* ["default"] */ .A,
+    'htx': ccxt_src_pro_htx_js_WEBPACK_IMPORTED_MODULE_153_/* ["default"] */ .A,
+    'huobi': ccxt_src_pro_huobi_js_WEBPACK_IMPORTED_MODULE_154_/* ["default"] */ .A,
+    'hyperliquid': ccxt_src_pro_hyperliquid_js_WEBPACK_IMPORTED_MODULE_155_/* ["default"] */ .A,
+    'independentreserve': ccxt_src_pro_independentreserve_js_WEBPACK_IMPORTED_MODULE_156_/* ["default"] */ .A,
+    'kraken': ccxt_src_pro_kraken_js_WEBPACK_IMPORTED_MODULE_157_/* ["default"] */ .A,
+    'krakenfutures': ccxt_src_pro_krakenfutures_js_WEBPACK_IMPORTED_MODULE_158_/* ["default"] */ .A,
+    'kucoin': ccxt_src_pro_kucoin_js_WEBPACK_IMPORTED_MODULE_159_/* ["default"] */ .A,
+    'kucoinfutures': ccxt_src_pro_kucoinfutures_js_WEBPACK_IMPORTED_MODULE_160_/* ["default"] */ .A,
+    'lbank': ccxt_src_pro_lbank_js_WEBPACK_IMPORTED_MODULE_161_/* ["default"] */ .A,
+    'luno': ccxt_src_pro_luno_js_WEBPACK_IMPORTED_MODULE_162_/* ["default"] */ .A,
+    'mexc': ccxt_src_pro_mexc_js_WEBPACK_IMPORTED_MODULE_163_/* ["default"] */ .A,
+    'modetrade': ccxt_src_pro_modetrade_js_WEBPACK_IMPORTED_MODULE_164_/* ["default"] */ .A,
+    'myokx': ccxt_src_pro_myokx_js_WEBPACK_IMPORTED_MODULE_165_/* ["default"] */ .A,
+    'ndax': ccxt_src_pro_ndax_js_WEBPACK_IMPORTED_MODULE_166_/* ["default"] */ .A,
+    'okx': ccxt_src_pro_okx_js_WEBPACK_IMPORTED_MODULE_167_/* ["default"] */ .A,
+    'okxus': ccxt_src_pro_okxus_js_WEBPACK_IMPORTED_MODULE_168_/* ["default"] */ .A,
+    'onetrading': ccxt_src_pro_onetrading_js_WEBPACK_IMPORTED_MODULE_169_/* ["default"] */ .A,
+    'oxfun': ccxt_src_pro_oxfun_js_WEBPACK_IMPORTED_MODULE_170_/* ["default"] */ .A,
+    'p2b': ccxt_src_pro_p2b_js_WEBPACK_IMPORTED_MODULE_171_/* ["default"] */ .A,
+    'paradex': ccxt_src_pro_paradex_js_WEBPACK_IMPORTED_MODULE_172_/* ["default"] */ .A,
+    'phemex': ccxt_src_pro_phemex_js_WEBPACK_IMPORTED_MODULE_173_/* ["default"] */ .A,
+    'poloniex': ccxt_src_pro_poloniex_js_WEBPACK_IMPORTED_MODULE_174_/* ["default"] */ .A,
+    'probit': ccxt_src_pro_probit_js_WEBPACK_IMPORTED_MODULE_175_/* ["default"] */ .A,
+    'toobit': ccxt_src_pro_toobit_js_WEBPACK_IMPORTED_MODULE_176_/* ["default"] */ .A,
+    'upbit': ccxt_src_pro_upbit_js_WEBPACK_IMPORTED_MODULE_177_/* ["default"] */ .A,
+    'whitebit': ccxt_src_pro_whitebit_js_WEBPACK_IMPORTED_MODULE_178_/* ["default"] */ .A,
+    'woo': ccxt_src_pro_woo_js_WEBPACK_IMPORTED_MODULE_179_/* ["default"] */ .A,
+    'woofipro': ccxt_src_pro_woofipro_js_WEBPACK_IMPORTED_MODULE_180_/* ["default"] */ .A,
+    'xt': ccxt_src_pro_xt_js_WEBPACK_IMPORTED_MODULE_181_/* ["default"] */ .A,
 };
 for (const exchange in ccxt_pro) {
     // const ccxtExchange = exchanges[exchange]
@@ -426221,7 +430580,7 @@ for (const exchange in ccxt_pro) {
 ccxt_pro.exchanges = Object.keys(ccxt_pro);
 ccxt_pro['Exchange'] = ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k; // now the same for rest and ts
 //-----------------------------------------------------------------------------
-const ccxt_ccxt = Object.assign({ version: ccxt_version, Exchange: ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k, Precise: ccxt_src_base_Precise_js_WEBPACK_IMPORTED_MODULE_180_/* .Precise */ .Y, 'exchanges': Object.keys(ccxt_exchanges), 'pro': ccxt_pro }, ccxt_exchanges, ccxt_src_base_functions_js_WEBPACK_IMPORTED_MODULE_181_, ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_182_);
+const ccxt_ccxt = Object.assign({ version: ccxt_version, Exchange: ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k, Precise: ccxt_src_base_Precise_js_WEBPACK_IMPORTED_MODULE_182_/* .Precise */ .Y, 'exchanges': Object.keys(ccxt_exchanges), 'pro': ccxt_pro }, ccxt_exchanges, ccxt_src_base_functions_js_WEBPACK_IMPORTED_MODULE_183_, ccxt_src_base_errors_js_WEBPACK_IMPORTED_MODULE_184_);
 
 /* harmony default export */ const ts_ccxt = (ccxt_ccxt);
 //-----------------------------------------------------------------------------
