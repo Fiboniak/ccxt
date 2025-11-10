@@ -17602,7 +17602,7 @@ class Exchange {
                 fee = this.parseFeeNumeric(fee);
             }
             if (!feesDefined) {
-                // just set it directly, no further processing needed
+                // just set it directly, no further processing needed.
                 fees = [fee];
             }
             // 'fees' were set, so reparse them
