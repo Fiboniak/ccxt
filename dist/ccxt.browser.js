@@ -160906,6 +160906,12 @@ class deribit extends _abstract_deribit_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
         const request = {};
         let market = undefined;
         let response = undefined;
+        if (limit !== undefined) {
+            request['count'] = limit;
+        }
+        else {
+            request['count'] = 1000; // max value
+        }
         if (symbol === undefined) {
             const code = this.codeFromOptions('fetchClosedOrders', params);
             const currency = this.currency(code);
@@ -384518,7 +384524,7 @@ class toobit extends _abstract_toobit_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'withdraw': true,
             },
             'urls': {
-                'logo': 'https://github.com/user-attachments/assets/3fc13870-5406-431b-8be0-2aab69c4f225',
+                'logo': 'https://github.com/user-attachments/assets/0c7a97d5-182c-492e-b921-23540c868e0e',
                 'api': {
                     'common': 'https://api.toobit.com',
                     'private': 'https://api.toobit.com',
@@ -387429,6 +387435,7 @@ class toobit extends _abstract_toobit_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 body += '&signature=' + signature;
             }
             headers = {
+                'Referrer': 'CCXT',
                 'X-BB-APIKEY': this.apiKey,
                 'Content-Type': 'application/x-www-form-urlencoded',
             };
