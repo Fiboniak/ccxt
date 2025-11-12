@@ -59340,6 +59340,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                     'spot': {
                         '1m': '1min',
                         '5m': '5min',
+                        '3m': '3min',
                         '15m': '15min',
                         '30m': '30min',
                         '1h': '1h',
@@ -190014,7 +190015,7 @@ class hibachi extends _abstract_hibachi_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
     }
     createOrderRequest(nonce, symbol, type, side, amount, price = undefined, params = {}) {
         const market = this.market(symbol);
-        const feeRate = Math.max(this.safeNumber(market, 'taker'), this.safeNumber(market, 'maker'));
+        const feeRate = Math.max(this.safeNumber(market, 'taker', this.safeNumber(this.options, 'defaultTakerFee', 0.00045)), this.safeNumber(market, 'maker', this.safeNumber(this.options, 'defaultMakerFee', 0.00015)));
         let sideInternal = '';
         if (side === 'sell') {
             sideInternal = 'ASK';
