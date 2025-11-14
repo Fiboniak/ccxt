@@ -169917,7 +169917,7 @@ class dydx extends _abstract_dydx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
             'rateLimit': 100,
             'version': 'v4',
             'certified': false,
-            'pro': false,
+            'pro': true,
             'has': {
                 'CORS': undefined,
                 'spot': false,
@@ -170039,9 +170039,7 @@ class dydx extends _abstract_dydx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                 'fees': [
                     'https://docs.dydx.exchange/introduction-trading_fees',
                 ],
-                'referral': {
-                    'url': '',
-                },
+                'referral': 'dydx.trade?ref=ccxt',
             },
             'api': {
                 'indexer': {
