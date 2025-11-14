@@ -42543,6 +42543,9 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                 'future': false,
                 'option': false,
                 'addMargin': true,
+                'borrowCrossMargin': false,
+                'borrowIsolatedMargin': false,
+                'borrowMargin': false,
                 'cancelAllOrders': true,
                 'cancelAllOrdersAfter': true,
                 'cancelOrder': true,
@@ -42563,9 +42566,18 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                 'createTrailingPercentOrder': true,
                 'createTriggerOrder': true,
                 'editOrder': true,
+                'fetchAllGreeks': false,
                 'fetchBalance': true,
+                'fetchBorrowInterest': false,
+                'fetchBorrowRate': false,
+                'fetchBorrowRateHistories': false,
+                'fetchBorrowRateHistory': false,
+                'fetchBorrowRates': false,
+                'fetchBorrowRatesPerSymbol': false,
                 'fetchCanceledOrders': true,
                 'fetchClosedOrders': true,
+                'fetchCrossBorrowRate': false,
+                'fetchCrossBorrowRates': false,
                 'fetchCurrencies': true,
                 'fetchDepositAddress': true,
                 'fetchDepositAddresses': false,
@@ -42576,6 +42588,9 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                 'fetchFundingRate': true,
                 'fetchFundingRateHistory': true,
                 'fetchFundingRates': true,
+                'fetchGreeks': false,
+                'fetchIsolatedBorrowRate': false,
+                'fetchIsolatedBorrowRates': false,
                 'fetchLeverage': true,
                 'fetchLiquidations': false,
                 'fetchMarginAdjustmentHistory': false,
@@ -42589,6 +42604,8 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                 'fetchOHLCV': true,
                 'fetchOpenInterest': true,
                 'fetchOpenOrders': true,
+                'fetchOption': false,
+                'fetchOptionChain': false,
                 'fetchOrder': true,
                 'fetchOrderBook': true,
                 'fetchOrders': true,
@@ -42603,8 +42620,11 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                 'fetchTrades': true,
                 'fetchTradingFee': true,
                 'fetchTransfers': true,
+                'fetchVolatilityHistory': false,
                 'fetchWithdrawals': true,
                 'reduceMargin': true,
+                'repayCrossMargin': false,
+                'repayIsolatedMargin': false,
                 'sandbox': true,
                 'setLeverage': true,
                 'setMargin': true,
@@ -59404,6 +59424,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                         '15m': 30,
                         '30m': 30,
                         '1h': 60,
+                        '2h': 120,
                         '4h': 240,
                         '6h': 360,
                         '12h': 720,
@@ -62174,11 +62195,17 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             request['startTime'] = since;
             if (!untilDefined) {
                 calculatedEndTime = this.sum(calculatedStartTime, limitMultipliedDuration);
+                if (calculatedEndTime > now) {
+                    calculatedEndTime = now;
+                }
                 request['endTime'] = calculatedEndTime;
             }
         }
         if (untilDefined) {
             calculatedEndTime = until;
+            if (calculatedEndTime > now) {
+                calculatedEndTime = now;
+            }
             request['endTime'] = calculatedEndTime;
             if (!sinceDefined) {
                 calculatedStartTime = calculatedEndTime - limitMultipliedDuration;
@@ -332150,8 +332177,7 @@ class kraken extends _kraken_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
      * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
      */
     async watchOrders(symbol = undefined, since = undefined, limit = undefined, params = {}) {
-        params['snap_orders'] = true;
-        return await this.watchPrivate('orders', symbol, since, limit, params);
+        return await this.watchPrivate('orders', symbol, since, limit, this.extend(params, { 'snap_orders': true }));
     }
     handleOrders(client, message, subscription = undefined) {
         //
@@ -332211,7 +332237,9 @@ class kraken extends _kraken_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
                     }
                 }
                 stored.append(newOrder);
-                symbols[symbol] = true;
+                if (symbol !== undefined) {
+                    symbols[symbol] = true;
+                }
             }
             const name = 'orders';
             client.resolve(this.orders, name);
