@@ -14,7 +14,7 @@ public partial class dydx : Exchange
             { "rateLimit", 100 },
             { "version", "v4" },
             { "certified", false },
-            { "pro", false },
+            { "pro", true },
             { "has", new Dictionary<string, object>() {
                 { "CORS", null },
                 { "spot", false },
@@ -132,9 +132,7 @@ public partial class dydx : Exchange
                 { "www", "https://www.dydx.xyz" },
                 { "doc", new List<object>() {"https://docs.dydx.xyz"} },
                 { "fees", new List<object>() {"https://docs.dydx.exchange/introduction-trading_fees"} },
-                { "referral", new Dictionary<string, object>() {
-                    { "url", "" },
-                } },
+                { "referral", "dydx.trade?ref=ccxt" },
             } },
             { "api", new Dictionary<string, object>() {
                 { "indexer", new Dictionary<string, object>() {
