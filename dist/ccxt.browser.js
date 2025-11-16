@@ -169917,6 +169917,7 @@ class dydx extends _abstract_dydx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
             'rateLimit': 100,
             'version': 'v4',
             'certified': false,
+            'dex': true,
             'pro': true,
             'has': {
                 'CORS': undefined,
@@ -444394,7 +444395,7 @@ SOFTWARE.
 
 //-----------------------------------------------------------------------------
 // this is updated by vss.js when building
-const ccxt_version = '4.5.18';
+const ccxt_version = '4.5.19';
 ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k.ccxtVersion = ccxt_version;
 //-----------------------------------------------------------------------------
 
