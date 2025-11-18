@@ -361231,6 +361231,7 @@ class xt extends _xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         const options = this.safeDict(this.options, 'watchTickers');
         const defaultMethod = this.safeString(options, 'method', 'tickers');
         const name = this.safeString(params, 'method', defaultMethod);
+        symbols = this.marketSymbols(symbols);
         let market = undefined;
         if (symbols !== undefined) {
             market = this.market(symbols[0]);
