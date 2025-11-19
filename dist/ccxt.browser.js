@@ -153387,6 +153387,7 @@ class defx extends _abstract_defx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                 'exact': {
                     '404': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.BadRequest,
                     'missing_auth_signature': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.AuthenticationError,
+                    'leverage_higher_than_capped_leverage': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.BadRequest,
                     'order_rejected': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
                     'invalid_order_id': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
                     'filter_lotsize_maxqty': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
@@ -356336,23 +356337,34 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         const url = this.implodeParams(this.urls['api']['ws'], {
             'hostname': this.hostname,
         });
-        this.options[channel] = this.safeValue(this.options, channel, {});
-        this.options[channel][symbol] = true;
-        const symbols = Object.keys(this.options[channel]);
-        const marketIds = this.marketIds(symbols);
-        const request = [
+        const client = this.client(url);
+        const subscriptionsKey = 'upbitPublicSubscriptions';
+        if (!(subscriptionsKey in client.subscriptions)) {
+            client.subscriptions[subscriptionsKey] = {};
+        }
+        const subscriptions = client.subscriptions[subscriptionsKey];
+        let messageHash = channel;
+        const request = {
+            'type': channel,
+        };
+        if (symbol !== undefined) {
+            messageHash = channel + ':' + symbol;
+            request['codes'] = [marketId];
+        }
+        if (!(messageHash in subscriptions)) {
+            subscriptions[messageHash] = request;
+        }
+        const finalMessage = [
             {
                 'ticket': this.uuid(),
             },
-            {
-                'type': channel,
-                'codes': marketIds,
-                // 'isOnlySnapshot': false,
-                // 'isOnlyRealtime': false,
-            },
         ];
-        const messageHash = channel + ':' + marketId;
-        return await this.watch(url, messageHash, request, messageHash);
+        const channelKeys = Object.keys(subscriptions);
+        for (let i = 0; i < channelKeys.length; i++) {
+            const key = channelKeys[i];
+            finalMessage.push(subscriptions[key]);
+        }
+        return await this.watch(url, messageHash, finalMessage, messageHash);
     }
     async watchPublicMultiple(symbols, channel, params = {}) {
         await this.loadMarkets();
@@ -444597,7 +444609,7 @@ SOFTWARE.
 
 //-----------------------------------------------------------------------------
 // this is updated by vss.js when building
-const ccxt_version = '4.5.19';
+const ccxt_version = '4.5.20';
 ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k.ccxtVersion = ccxt_version;
 //-----------------------------------------------------------------------------
 
