@@ -15628,6 +15628,12 @@ class Exchange {
     binaryLength(binary) {
         return binary.length;
     }
+    lockId() {
+        return undefined; // c# stub
+    }
+    unlockId() {
+        return undefined; // c# stub
+    }
     /* eslint-enable */
     // ------------------------------------------------------------------------
     // ########################################################################
@@ -303529,8 +303535,10 @@ class bittrade extends _bittrade_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] *
         });
     }
     requestId() {
+        this.lockId();
         const requestId = this.sum(this.safeInteger(this.options, 'requestId', 0), 1);
         this.options['requestId'] = requestId;
+        this.unlockId();
         return requestId.toString();
     }
     /**
@@ -307275,8 +307283,10 @@ class bybit extends _bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         });
     }
     requestId() {
+        this.lockId();
         const requestId = this.sum(this.safeInteger(this.options, 'requestId', 0), 1);
         this.options['requestId'] = requestId;
+        this.unlockId();
         return requestId;
     }
     async getUrlByMarketType(symbol = undefined, isPrivate = false, method = undefined, params = {}) {
@@ -309744,8 +309754,10 @@ class cex extends _cex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         });
     }
     requestId() {
+        this.lockId();
         const requestId = this.sum(this.safeInteger(this.options, 'requestId', 0), 1);
         this.options['requestId'] = requestId;
+        this.unlockId();
         return requestId.toString();
     }
     /**
@@ -315906,8 +315918,10 @@ class coinex extends _coinex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
         });
     }
     requestId() {
+        this.lockId();
         const requestId = this.sum(this.safeInteger(this.options, 'requestId', 0), 1);
         this.options['requestId'] = requestId;
+        this.unlockId();
         return requestId;
     }
     handleTicker(client, message) {
@@ -319191,9 +319205,11 @@ class deepcoin extends _deepcoin_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] *
         return message;
     }
     requestId() {
+        this.lockId();
         const previousValue = this.safeInteger(this.options, 'lastRequestId', 0);
         const newValue = this.sum(previousValue, 1);
         this.options['lastRequestId'] = newValue;
+        this.unlockId();
         return newValue;
     }
     createPublicRequest(market, requestId, topicID, suffix = '', unWatch = false) {
@@ -323503,8 +323519,10 @@ class exmo extends _exmo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         });
     }
     requestId() {
+        this.lockId();
         const requestId = this.sum(this.safeInteger(this.options, 'requestId', 0), 1);
         this.options['requestId'] = requestId;
+        this.unlockId();
         return requestId;
     }
     /**
@@ -326341,8 +326359,10 @@ class gate extends _gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
     }
     requestId() {
         // their support said that reqid must be an int32, not documented
+        this.lockId();
         const reqid = this.sum(this.safeInteger(this.options, 'reqid', 0), 1);
         this.options['reqid'] = reqid;
+        this.unlockId();
         return reqid;
     }
     async subscribePublic(url, messageHash, payload, channel, params = {}, subscription = undefined) {
@@ -330478,8 +330498,10 @@ class htx extends _htx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         });
     }
     requestId() {
+        this.lockId();
         const requestId = this.sum(this.safeInteger(this.options, 'requestId', 0), 1);
         this.options['requestId'] = requestId;
+        this.unlockId();
         return requestId.toString();
     }
     /**
@@ -335047,8 +335069,10 @@ class kraken extends _kraken_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
     }
     requestId() {
         // their support said that reqid must be an int32, not documented
+        this.lockId();
         const reqid = this.sum(this.safeInteger(this.options, 'reqid', 0), 1);
         this.options['reqid'] = reqid;
+        this.unlockId();
         return reqid;
     }
     /**
@@ -337747,8 +337771,10 @@ class kucoin extends _kucoin_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
         return undefined;
     }
     requestId() {
+        this.lockId();
         const requestId = this.sum(this.safeInteger(this.options, 'requestId', 0), 1);
         this.options['requestId'] = requestId;
+        this.unlockId();
         return requestId;
     }
     async subscribe(url, messageHash, subscriptionHash, params = {}, subscription = undefined) {
@@ -339268,8 +339294,10 @@ class kucoinfutures extends _kucoinfutures_js__WEBPACK_IMPORTED_MODULE_0__/* ["d
         return undefined;
     }
     requestId() {
+        this.lockId();
         const requestId = this.sum(this.safeInteger(this.options, 'requestId', 0), 1);
         this.options['requestId'] = requestId;
+        this.unlockId();
         return requestId;
     }
     async subscribe(url, messageHash, subscriptionHash, subscription, params = {}) {
@@ -340480,9 +340508,11 @@ class lbank extends _lbank_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         });
     }
     requestId() {
+        this.lockId();
         const previousValue = this.safeInteger(this.options, 'requestId', 0);
         const newValue = this.sum(previousValue, 1);
         this.options['requestId'] = newValue;
+        this.unlockId();
         return newValue;
     }
     /**
@@ -351701,8 +351731,10 @@ class phemex extends _phemex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
         return this.fromEn(er, this.safeInteger(market, 'ratioScale'));
     }
     requestId() {
+        this.lockId();
         const requestId = this.sum(this.safeInteger(this.options, 'requestId', 0), 1);
         this.options['requestId'] = requestId;
+        this.unlockId();
         return requestId;
     }
     parseSwapTicker(ticker, market = undefined) {
