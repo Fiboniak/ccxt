@@ -325316,8 +325316,8 @@ class gate extends _gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             const ohlcv = result[i];
             const subscription = this.safeString(ohlcv, 'n', '');
             const parts = subscription.split('_');
-            const timeframe = this.safeString(parts, 0);
-            const timeframeId = this.findTimeframe(timeframe);
+            const timeframeId = this.safeString(parts, 0);
+            const timeframe = this.findTimeframe(timeframeId);
             const prefix = timeframe + '_';
             const marketId = subscription.replace(prefix, '');
             const symbol = this.safeSymbol(marketId, undefined, '_', marketType);
@@ -325327,7 +325327,7 @@ class gate extends _gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             if (stored === undefined) {
                 const limit = this.safeInteger(this.options, 'OHLCVLimit', 1000);
                 stored = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__/* .ArrayCacheByTimestamp */ .TG(limit);
-                this.ohlcvs[symbol][timeframeId] = stored;
+                this.ohlcvs[symbol][timeframe] = stored;
             }
             stored.append(parsed);
             marketIds[symbol] = timeframe;
