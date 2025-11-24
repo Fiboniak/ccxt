@@ -8109,7 +8109,12 @@ class ascendex extends _abstract_ascendex_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
                 'fetchAccounts': true,
                 'fetchAllGreeks': false,
                 'fetchBalance': true,
+                'fetchBorrowRate': false,
+                'fetchBorrowRateHistory': false,
+                'fetchBorrowRates': false,
                 'fetchClosedOrders': true,
+                'fetchCrossBorrowRate': false,
+                'fetchCrossBorrowRates': false,
                 'fetchCurrencies': true,
                 'fetchDepositAddress': true,
                 'fetchDepositAddresses': false,
@@ -8124,6 +8129,8 @@ class ascendex extends _abstract_ascendex_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
                 'fetchFundingRates': true,
                 'fetchGreeks': false,
                 'fetchIndexOHLCV': false,
+                'fetchIsolatedBorrowRate': false,
+                'fetchIsolatedBorrowRates': false,
                 'fetchLeverage': 'emulated',
                 'fetchLeverages': true,
                 'fetchLeverageTiers': true,
@@ -28830,6 +28837,7 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                         'commissionRate': 20,
                         'rateLimit/order': 1,
                         'apiTradingStatus': 1,
+                        'symbolAdlRisk': 1,
                         'multiAssetsMargin': 30,
                         // broker endpoints
                         'apiReferral/ifNewUser': 1,
@@ -43088,6 +43096,7 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                                 'user/marginAssets': 5,
                             },
                             'post': {
+                                'trade/amend': 2,
                                 'trade/cancelReplace': 2,
                                 'positionSide/dual': 5,
                                 'trade/batchCancelReplace': 5,
@@ -43303,10 +43312,19 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                         'private': {
                             'get': {
                                 'swap/trace/currentTrack': 2,
+                                'PFutures/traderDetail': 2,
+                                'PFutures/profitHistorySummarys': 2,
+                                'PFutures/profitDetail': 2,
+                                'PFutures/tradingPairs': 2,
+                                'spot/traderDetail': 2,
+                                'spot/profitHistorySummarys': 2,
+                                'spot/profitDetail': 2,
+                                'spot/historyOrder': 2,
                             },
                             'post': {
                                 'swap/trace/closeTrackOrder': 2,
                                 'swap/trace/setTPSL': 2,
+                                'PFutures/setCommission': 2,
                                 'spot/trader/sellOrder': 10,
                             },
                         },
@@ -58553,6 +58571,9 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                             'mix/v1/market/history-mark-candles': 1,
                             'mix/v1/market/merge-depth': 1,
                             'v2/mix/market/vip-fee-rate': 2,
+                            'v2/mix/market/union-interest-rate-history': 4,
+                            'v2/mix/market/exchange-rate': 4,
+                            'v2/mix/market/discount-rate': 4,
                             'v2/mix/market/merge-depth': 1,
                             'v2/mix/market/ticker': 1,
                             'v2/mix/market/tickers': 1,
@@ -58567,6 +58588,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                             'v2/mix/market/symbol-price': 1,
                             'v2/mix/market/history-fund-rate': 1,
                             'v2/mix/market/current-fund-rate': 1,
+                            'v2/mix/market/oi-limit': 2,
                             'v2/mix/market/contracts': 1,
                             'v2/mix/market/query-position-lever': 2,
                             'v2/mix/market/account-long-short': 20,
@@ -58749,17 +58771,26 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                             'v2/mix/account/account': 2,
                             'v2/mix/account/accounts': 2,
                             'v2/mix/account/sub-account-assets': 200,
+                            'v2/mix/account/interest-history': 4,
+                            'v2/mix/account/max-open': 1,
+                            'v2/mix/account/liq-price': 1,
                             'v2/mix/account/open-count': 2,
                             'v2/mix/account/bill': 2,
+                            'v2/mix/account/transfer-limits': 20,
+                            'v2/mix/account/union-config': 20,
+                            'v2/mix/account/switch-union-usdt': 20,
+                            'v2/mix/account/isolated-symbols': 2,
                             'v2/mix/market/query-position-lever': 2,
                             'v2/mix/position/single-position': 2,
                             'v2/mix/position/all-position': 4,
+                            'v2/mix/position/adlRank': 4,
                             'v2/mix/position/history-position': 1,
                             'v2/mix/order/detail': 2,
                             'v2/mix/order/fills': 2,
                             'v2/mix/order/fill-history': 2,
                             'v2/mix/order/orders-pending': 2,
                             'v2/mix/order/orders-history': 2,
+                            'v2/mix/order/plan-sub-order': 2,
                             'v2/mix/order/orders-plan-pending': 2,
                             'v2/mix/order/orders-plan-history': 2,
                             'v2/mix/market/position-long-short': 20,
@@ -58807,9 +58838,13 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                             'mix/v1/trace/report/order/currentList': 2,
                             'mix/v1/trace/queryTraderTpslRatioConfig': 2,
                             'mix/v1/trace/traderUpdateTpslRatioConfig': 2,
+                            'v2/mix/account/set-auto-margin': 4,
                             'v2/mix/account/set-leverage': 4,
+                            'v2/mix/account/set-all-leverage': 4,
                             'v2/mix/account/set-margin': 4,
+                            'v2/mix/account/set-asset-mode': 10,
                             'v2/mix/account/set-margin-mode': 4,
+                            'v2/mix/account/union-convert': 20,
                             'v2/mix/account/set-position-mode': 4,
                             'v2/mix/order/place-order': 2,
                             'v2/mix/order/click-backhand': 20,
@@ -58818,7 +58853,9 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                             'v2/mix/order/cancel-order': 2,
                             'v2/mix/order/batch-cancel-orders': 2,
                             'v2/mix/order/close-positions': 20,
+                            'v2/mix/order/cancel-all-orders': 20,
                             'v2/mix/order/place-tpsl-order': 2,
+                            'v2/mix/order/place-pos-tpsl': 2,
                             'v2/mix/order/place-plan-order': 2,
                             'v2/mix/order/modify-tpsl-order': 2,
                             'v2/mix/order/modify-plan-order': 2,
@@ -159068,6 +159105,8 @@ class deribit extends _abstract_deribit_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                 'fetchMyTrades': true,
                 'fetchOHLCV': true,
                 'fetchOpenOrders': true,
+                'fetchOpenInterest': true,
+                'fetchOpenInterests': false,
                 'fetchOption': true,
                 'fetchOptionChain': true,
                 'fetchOrder': true,
@@ -162732,6 +162771,106 @@ class deribit extends _abstract_deribit_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
             'baseVolume': this.safeNumber(chain, 'volume'),
             'quoteVolume': this.safeNumber(chain, 'volume_usd'),
         };
+    }
+    /**
+     * @method
+     * @name deribit#fetchOpenInterest
+     * @description Retrieves the open interest of a symbol
+     * @see https://docs.deribit.com/?shell#public-get_book_summary_by_instrument
+     * @param {string} symbol unified CCXT market symbol
+     * @param {object} [params] exchange specific parameters
+     * @returns {object} an open interest structure{@link https://docs.ccxt.com/#/?id=open-interest-structure}
+     */
+    async fetchOpenInterest(symbol, params = {}) {
+        await this.loadMarkets();
+        const market = this.market(symbol);
+        if (!market['contract']) {
+            throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.BadRequest(this.id + ' fetchOpenInterest() supports contract markets only');
+        }
+        const request = {
+            'instrument_name': market['id'],
+        };
+        const response = await this.publicGetGetBookSummaryByInstrument(this.extend(request, params));
+        //
+        //     {
+        //         "jsonrpc": "2.0",
+        //         "result": [
+        //             {
+        //                 "high": 93099.5,
+        //                 "low": 81773.0,
+        //                 "last": 87197.0,
+        //                 "instrument_name": "BTC-PERPETUAL",
+        //                 "bid_price": 87083.0,
+        //                 "ask_price": 87149.5,
+        //                 "open_interest": 9978911260,
+        //                 "mark_price": 87102.01,
+        //                 "creation_timestamp": 1763674177068,
+        //                 "price_change": -3.2032,
+        //                 "volume": 7377.18657991,
+        //                 "estimated_delivery_price": 87047.2,
+        //                 "base_currency": "BTC",
+        //                 "quote_currency": "USD",
+        //                 "volume_usd": 661040250.0,
+        //                 "volume_notional": 661040250.0,
+        //                 "current_funding": 1.2966e-4,
+        //                 "funding_8h": -8.1069e-4,
+        //                 "mid_price": 87116.25
+        //             }
+        //         ],
+        //         "usIn": 1763674177068845,
+        //         "usOut": 1763674177068996,
+        //         "usDiff": 151,
+        //         "testnet": true
+        //     }
+        //
+        const result = this.safeList(response, 'result', []);
+        const data = this.safeDict(result, 0, {});
+        return this.parseOpenInterest(data, market);
+    }
+    parseOpenInterest(interest, market = undefined) {
+        //
+        //     {
+        //         "high": 93099.5,
+        //         "low": 81773.0,
+        //         "last": 87197.0,
+        //         "instrument_name": "BTC-PERPETUAL",
+        //         "bid_price": 87083.0,
+        //         "ask_price": 87149.5,
+        //         "open_interest": 9978911260,
+        //         "mark_price": 87102.01,
+        //         "creation_timestamp": 1763674177068,
+        //         "price_change": -3.2032,
+        //         "volume": 7377.18657991,
+        //         "estimated_delivery_price": 87047.2,
+        //         "base_currency": "BTC",
+        //         "quote_currency": "USD",
+        //         "volume_usd": 661040250.0,
+        //         "volume_notional": 661040250.0,
+        //         "current_funding": 1.2966e-4,
+        //         "funding_8h": -8.1069e-4,
+        //         "mid_price": 87116.25
+        //     }
+        //
+        const timestamp = this.safeInteger(interest, 'creation_timestamp');
+        const marketId = this.safeString(interest, 'instrument_name');
+        market = this.safeMarket(marketId, market);
+        const openInterest = this.safeNumber(interest, 'open_interest');
+        let openInterestAmount = undefined;
+        let openInterestValue = undefined;
+        if (market['option'] || (market['future'] && market['linear'])) {
+            openInterestAmount = openInterest;
+        }
+        else {
+            openInterestValue = openInterest;
+        }
+        return this.safeOpenInterest({
+            'symbol': this.safeSymbol(marketId, market),
+            'openInterestAmount': openInterestAmount,
+            'openInterestValue': openInterestValue,
+            'timestamp': timestamp,
+            'datetime': this.iso8601(timestamp),
+            'info': interest,
+        }, market);
     }
     nonce() {
         return this.milliseconds();
@@ -361250,10 +361389,7 @@ class xt extends _xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             unsubscribe['params'] = [name];
         }
         const tradeType = isContract ? 'contract' : 'spot';
-        let subMessageHash = name + '::' + tradeType;
-        if (symbols !== undefined) {
-            subMessageHash = subMessageHash + '::' + symbols.join(',');
-        }
+        const subMessageHash = name + '::' + tradeType;
         const request = this.extend(unsubscribe, params);
         let tail = access;
         if (isContract) {
@@ -361268,6 +361404,11 @@ class xt extends _xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             'symbols': symbols,
             'topic': topic,
         };
+        const symbolsAndTimeframes = this.safeList(subscriptionParams, 'symbolsAndTimeframes');
+        if (symbolsAndTimeframes !== undefined) {
+            subscription['symbolsAndTimeframes'] = symbolsAndTimeframes;
+            subscriptionParams = this.omit(subscriptionParams, 'symbolsAndTimeframes');
+        }
         return await this.watch(url, messageHash, this.extend(request, params), messageHash, this.extend(subscription, subscriptionParams));
     }
     /**
@@ -361330,7 +361471,6 @@ class xt extends _xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         const options = this.safeDict(this.options, 'watchTickers');
         const defaultMethod = this.safeString(options, 'method', 'tickers');
         const name = this.safeString(params, 'method', defaultMethod);
-        symbols = this.marketSymbols(symbols);
         let market = undefined;
         if (symbols !== undefined) {
             market = this.market(symbols[0]);
@@ -361407,8 +361547,8 @@ class xt extends _xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         const market = this.market(symbol);
         const name = 'kline@' + market['id'] + ',' + timeframe;
         const messageHash = 'unsubscribe::' + name;
-        params['symbolsAndTimeframes'] = [[market['symbol'], timeframe]];
-        return await this.unSubscribe(messageHash, name, 'public', 'unWatchOHLCV', 'kline', market, undefined, params);
+        const symbolsAndTimeframes = [[market['symbol'], timeframe]];
+        return await this.unSubscribe(messageHash, name, 'public', 'unWatchOHLCV', 'ohlcv', market, [symbol], params, { 'symbolsAndTimeframes': symbolsAndTimeframes });
     }
     /**
      * @method
@@ -361447,7 +361587,7 @@ class xt extends _xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         const market = this.market(symbol);
         const name = 'trade@' + market['id'];
         const messageHash = 'unsubscribe::' + name;
-        return await this.unSubscribe(messageHash, name, 'public', 'unWatchTrades', 'trade', market, undefined, params);
+        return await this.unSubscribe(messageHash, name, 'public', 'unWatchTrades', 'trades', market, [symbol], params);
     }
     /**
      * @method
@@ -361498,7 +361638,7 @@ class xt extends _xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             name = 'depth@' + market['id'] + ',' + levels;
         }
         const messageHash = 'unsubscribe::' + name;
-        return await this.unSubscribe(messageHash, name, 'public', 'unWatchOrderBook', 'depth', market, undefined, params);
+        return await this.unSubscribe(messageHash, name, 'public', 'unWatchOrderBook', 'orderbook', market, [symbol], params);
     }
     /**
      * @method
@@ -400342,7 +400482,7 @@ class upbit extends _abstract_upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
         return this.deepExtend(super.describe(), {
             'id': 'upbit',
             'name': 'Upbit',
-            'countries': ['KR'],
+            'countries': ['KR', 'ID', 'SG', 'TH'],
             'version': 'v1',
             'rateLimit': 50,
             'pro': true,
@@ -400423,7 +400563,7 @@ class upbit extends _abstract_upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                     'private': 'https://{hostname}',
                 },
                 'www': 'https://upbit.com',
-                'doc': 'https://docs.upbit.com/docs/%EC%9A%94%EC%B2%AD-%EC%88%98-%EC%A0%9C%ED%95%9C',
+                'doc': ['https://docs.upbit.com/kr', 'https://global-docs.upbit.com'],
                 'fees': 'https://upbit.com/service_center/guide',
             },
             'api': {
@@ -400453,7 +400593,6 @@ class upbit extends _abstract_upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                         'ticker/all': 2,
                         'orderbook': 2,
                         'orderbook/instruments': 2,
-                        'orderbook/supported_levels': 2, // Upbit KR only, deprecatd
                     },
                 },
                 'private': {
@@ -400479,6 +400618,7 @@ class upbit extends _abstract_upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                     },
                     'post': {
                         'orders': 2.5,
+                        'orders/test': 2.5,
                         'orders/cancel_and_new': 2.5,
                         'withdraws/coin': 0.67,
                         'withdraws/krw': 0.67,
@@ -400491,6 +400631,7 @@ class upbit extends _abstract_upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                         'order': 0.67,
                         'orders/open': 40,
                         'orders/uuids': 0.67,
+                        'withdraws/coin': 0.67,
                     },
                 },
             },
