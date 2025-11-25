@@ -308155,7 +308155,7 @@ class bybit extends _bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         params = this.cleanParams(params);
         const market = this.market(symbols[0]);
         if (limit === undefined) {
-            limit = (market['spot']) ? 50 : 500;
+            limit = 50;
             if (market['option']) {
                 limit = 100;
             }
@@ -308164,7 +308164,7 @@ class bybit extends _bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             const limits = {
                 'spot': [1, 50, 200, 1000],
                 'option': [25, 100],
-                'default': [1, 50, 200, 500, 1000],
+                'default': [1, 50, 200, 1000],
             };
             const selectedLimits = this.safeList2(limits, market['type'], 'default');
             if (!this.inArray(limit, selectedLimits)) {
@@ -362551,12 +362551,22 @@ class xt extends _xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         //         method: 'unsubscribe'
         //     }
         //
-        const method = this.safeStringLower(message, 'method');
-        if (method === 'unsubscribe') {
-            const id = this.safeString(message, 'id');
-            const subscriptionsById = this.indexBy(client.subscriptions, 'id');
-            const subscription = this.safeValue(subscriptionsById, id, {});
-            this.handleUnSubscription(client, subscription);
+        //     {
+        //         code: 0,
+        //         msg: 'success',
+        //         id: '1764032903806ticker@btc_usdt',
+        //         sessionId: '5e1597fffeb08f50-00000001-06401597-943ec6d3c64310dd-9b247bee'
+        //     }
+        //
+        const id = this.safeString(message, 'id');
+        const subscriptionsById = this.indexBy(client.subscriptions, 'id');
+        let unsubscribe = false;
+        if (id !== undefined) {
+            const subscription = this.safeDict(subscriptionsById, id, {});
+            unsubscribe = this.safeBool(subscription, 'unsubscribe', false);
+            if (unsubscribe) {
+                this.handleUnSubscription(client, subscription);
+            }
         }
         return message;
     }
@@ -401630,6 +401640,8 @@ class upbit extends _abstract_upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
      * @description create a trade order
      * @see https://docs.upbit.com/kr/reference/new-order
      * @see https://global-docs.upbit.com/reference/new-order
+     * @see https://docs.upbit.com/kr/reference/order-test
+     * @see https://global-docs.upbit.com/reference/order-test
      * @param {string} symbol unified symbol of the market to create an order in
      * @param {string} type supports 'market' and 'limit'. if params.ordType is set to best, a best-type order will be created regardless of the value of type.
      * @param {string} side 'buy' or 'sell'
@@ -401640,6 +401652,7 @@ class upbit extends _abstract_upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
      * @param {string} [params.ordType] this field can be used to place a ‘best’ type order
      * @param {string} [params.timeInForce] 'IOC' or 'FOK' for limit or best type orders, 'PO' for limit orders. this field is required when the order type is 'best'.
      * @param {string} [params.selfTradePrevention] 'reduce', 'cancel_maker', 'cancel_taker' {@link https://global-docs.upbit.com/docs/smp}
+     * @param {boolean} [params.test] If test is true, testOrder will be executed. It allows you to validate the request without creating an actual order. Default is false.
      * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
      */
     async createOrder(symbol, type, side, amount, price = undefined, params = {}) {
@@ -401650,6 +401663,7 @@ class upbit extends _abstract_upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
         const postOnly = this.isPostOnly(type === 'market', false, params);
         const timeInForce = this.safeStringLower2(params, 'timeInForce', 'time_in_force');
         const selfTradePrevention = this.safeString2(params, 'selfTradePrevention', 'smp_type');
+        const test = this.safeBool(params, 'test', false);
         if (postOnly && (selfTradePrevention !== undefined)) {
             throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.ExchangeError(this.id + ' createOrder() does not support post_only and selfTradePrevention simultaneously.');
         }
@@ -401724,8 +401738,14 @@ class upbit extends _abstract_upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
         if (request['ord_type'] === 'best' && timeInForce === undefined) {
             throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' createOrder() requires a timeInForce parameter for best type orders');
         }
-        params = this.omit(params, ['timeInForce', 'time_in_force', 'postOnly', 'clientOrderId', 'cost', 'selfTradePrevention', 'smp_type']);
-        const response = await this.privatePostOrders(this.extend(request, params));
+        let response = undefined;
+        params = this.omit(params, ['timeInForce', 'time_in_force', 'postOnly', 'clientOrderId', 'cost', 'selfTradePrevention', 'smp_type', 'test']);
+        if (test) {
+            response = await this.privatePostOrdersTest(this.extend(request, params));
+        }
+        else {
+            response = await this.privatePostOrders(this.extend(request, params));
+        }
         //
         //     {
         //         "uuid": "cdd92199-2897-4e14-9448-f923320408ad",
