@@ -18919,7 +18919,8 @@ class Exchange {
                 if (e instanceof _errors_js__WEBPACK_IMPORTED_MODULE_5__.OperationFailed) {
                     if (i < retries) {
                         if (this.verbose) {
-                            this.log('Request failed with the error: ' + e.toString() + ', retrying ' + (i + 1).toString() + ' of ' + retries.toString() + '...');
+                            const index = i + 1;
+                            this.log('Request failed with the error: ' + e.toString() + ', retrying ' + index.toString() + ' of ' + retries.toString() + '...');
                         }
                         if ((retryDelay !== undefined) && (retryDelay !== 0)) {
                             await this.sleep(retryDelay);
@@ -43053,6 +43054,7 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                             'get': {
                                 'market/depth': 1,
                                 'market/kline': 1,
+                                'ticker/price': 1,
                             },
                         },
                     },
@@ -444857,7 +444859,7 @@ SOFTWARE.
 
 //-----------------------------------------------------------------------------
 // this is updated by vss.js when building
-const ccxt_version = '4.5.21';
+const ccxt_version = '4.5.22';
 ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k.ccxtVersion = ccxt_version;
 //-----------------------------------------------------------------------------
 
