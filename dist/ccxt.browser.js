@@ -28785,6 +28785,7 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                         'time': 1,
                         'exchangeInfo': 1,
                         'depth': { 'cost': 2, 'byLimit': [[50, 2], [100, 5], [500, 10], [1000, 20]] },
+                        'rpiDepth': 20,
                         'trades': 5,
                         'historicalTrades': 20,
                         'aggTrades': 20,
@@ -31950,13 +31951,15 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name binance#fetchOrderBook
      * @description fetches information on open orders with bid (buy) and ask (sell) prices, volumes and other data
-     * @see https://developers.binance.com/docs/binance-spot-api-docs/rest-api/market-data-endpoints#order-book     // spot
-     * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book   // swap
-     * @see https://developers.binance.com/docs/derivatives/coin-margined-futures/market-data/rest-api/Order-Book   // future
-     * @see https://developers.binance.com/docs/derivatives/option/market-data/Order-Book                           // option
+     * @see https://developers.binance.com/docs/binance-spot-api-docs/rest-api/market-data-endpoints#order-book       // spot
+     * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book     // swap
+     * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book-RPI // swap rpi
+     * @see https://developers.binance.com/docs/derivatives/coin-margined-futures/market-data/rest-api/Order-Book     // future
+     * @see https://developers.binance.com/docs/derivatives/option/market-data/Order-Book                             // option
      * @param {string} symbol unified symbol of the market to fetch the order book for
      * @param {int} [limit] the maximum amount of order book entries to return
      * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {boolean} [params.rpi] *swap only* set to true to use the RPI endpoint
      * @returns {object} A dictionary of [order book structures]{@link https://docs.ccxt.com/#/?id=order-book-structure} indexed by market symbols
      */
     async fetchOrderBook(symbol, limit = undefined, params = {}) {
@@ -31973,7 +31976,14 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
             response = await this.eapiPublicGetDepth(this.extend(request, params));
         }
         else if (market['linear']) {
-            response = await this.fapiPublicGetDepth(this.extend(request, params));
+            const rpi = this.safeValue(params, 'rpi', false);
+            params = this.omit(params, 'rpi');
+            if (rpi) {
+                response = await this.fapiPublicGetRpiDepth(this.extend(request, params));
+            }
+            else {
+                response = await this.fapiPublicGetDepth(this.extend(request, params));
+            }
         }
         else if (market['inverse']) {
             response = await this.dapiPublicGetDepth(this.extend(request, params));
@@ -240448,6 +240458,7 @@ class mexc extends _abstract_mexc_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                         'get': {
                             'ping': 1,
                             'time': 1,
+                            'defaultSymbols': 1,
                             'exchangeInfo': 10,
                             'depth': 1,
                             'trades': 5,
@@ -240463,14 +240474,19 @@ class mexc extends _abstract_mexc_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                     },
                     'private': {
                         'get': {
+                            'kyc/status': 1,
+                            'uid': 1,
                             'order': 2,
                             'openOrders': 3,
                             'allOrders': 10,
                             'account': 10,
                             'myTrades': 10,
+                            'strategy/group': 20,
+                            'strategy/group/uid': 20,
                             'tradeFee': 10,
                             'sub-account/list': 1,
                             'sub-account/apiKey': 1,
+                            'sub-account/asset': 1,
                             'capital/config/getall': 10,
                             'capital/deposit/hisrec': 1,
                             'capital/withdraw/history': 1,
@@ -240516,6 +240532,7 @@ class mexc extends _abstract_mexc_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                             'sub-account/futures': 1,
                             'sub-account/margin': 1,
                             'batchOrders': 10,
+                            'strategy/group': 20,
                             'capital/withdraw/apply': 1,
                             'capital/withdraw': 1,
                             'capital/transfer': 1,
@@ -356700,11 +356717,13 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             },
         });
     }
-    async watchPublic(symbol, channel, params = {}) {
+    async watchPublicMultiple(symbols, channel, params = {}) {
         await this.loadMarkets();
-        const market = this.market(symbol);
-        symbol = market['symbol'];
-        const marketId = market['id'];
+        if (symbols === undefined) {
+            symbols = this.symbols;
+        }
+        symbols = this.marketSymbols(symbols);
+        const marketIds = this.marketIds(symbols);
         const url = this.implodeParams(this.urls['api']['ws'], {
             'hostname': this.hostname,
         });
@@ -356714,16 +356733,18 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             client.subscriptions[subscriptionsKey] = {};
         }
         const subscriptions = client.subscriptions[subscriptionsKey];
-        let messageHash = channel;
-        const request = {
-            'type': channel,
-        };
-        if (symbol !== undefined) {
-            messageHash = channel + ':' + symbol;
-            request['codes'] = [marketId];
-        }
-        if (!(messageHash in subscriptions)) {
-            subscriptions[messageHash] = request;
+        const messageHashes = [];
+        for (let i = 0; i < symbols.length; i++) {
+            const marketId = marketIds[i];
+            const symbol = symbols[i];
+            const messageHash = channel + ':' + symbol;
+            messageHashes.push(messageHash);
+            if (!(messageHash in subscriptions)) {
+                subscriptions[messageHash] = {
+                    'type': channel,
+                    'codes': [marketId],
+                };
+            }
         }
         const finalMessage = [
             {
@@ -356735,34 +356756,7 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             const key = channelKeys[i];
             finalMessage.push(subscriptions[key]);
         }
-        return await this.watch(url, messageHash, finalMessage, messageHash);
-    }
-    async watchPublicMultiple(symbols, channel, params = {}) {
-        await this.loadMarkets();
-        if (symbols === undefined) {
-            symbols = this.symbols;
-        }
-        symbols = this.marketSymbols(symbols);
-        const marketIds = this.marketIds(symbols);
-        const url = this.implodeParams(this.urls['api']['ws'], {
-            'hostname': this.hostname,
-        });
-        const messageHashes = [];
-        for (let i = 0; i < marketIds.length; i++) {
-            messageHashes.push(channel + ':' + marketIds[i]);
-        }
-        const request = [
-            {
-                'ticket': this.uuid(),
-            },
-            {
-                'type': channel,
-                'codes': marketIds,
-                // 'isOnlySnapshot': false,
-                // 'isOnlyRealtime': false,
-            },
-        ];
-        return await this.watchMultiple(url, messageHashes, request, messageHashes);
+        return await this.watchMultiple(url, messageHashes, finalMessage, messageHashes);
     }
     /**
      * @method
@@ -356774,7 +356768,7 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
      * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/#/?id=ticker-structure}
      */
     async watchTicker(symbol, params = {}) {
-        return await this.watchPublic(symbol, 'ticker');
+        return await this.watchPublicMultiple([symbol], 'ticker');
     }
     /**
      * @method
@@ -356820,37 +356814,7 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
      * @returns {object[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=public-trades}
      */
     async watchTradesForSymbols(symbols, since = undefined, limit = undefined, params = {}) {
-        await this.loadMarkets();
-        symbols = this.marketSymbols(symbols, undefined, false, true, true);
-        const channel = 'trade';
-        const messageHashes = [];
-        const url = this.implodeParams(this.urls['api']['ws'], {
-            'hostname': this.hostname,
-        });
-        if (symbols !== undefined) {
-            for (let i = 0; i < symbols.length; i++) {
-                const market = this.market(symbols[i]);
-                const marketId = market['id'];
-                const symbol = market['symbol'];
-                this.options[channel] = this.safeValue(this.options, channel, {});
-                this.options[channel][symbol] = true;
-                messageHashes.push(channel + ':' + marketId);
-            }
-        }
-        const optionSymbols = Object.keys(this.options[channel]);
-        const marketIds = this.marketIds(optionSymbols);
-        const request = [
-            {
-                'ticket': this.uuid(),
-            },
-            {
-                'type': channel,
-                'codes': marketIds,
-                // 'isOnlySnapshot': false,
-                // 'isOnlyRealtime': false,
-            },
-        ];
-        const trades = await this.watchMultiple(url, messageHashes, request, messageHashes);
+        const trades = await this.watchPublicMultiple(symbols, 'trade');
         if (this.newUpdates) {
             const first = this.safeValue(trades, 0);
             const tradeSymbol = this.safeString(first, 'symbol');
@@ -356869,7 +356833,7 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
      * @returns {object} A dictionary of [order book structures]{@link https://docs.ccxt.com/#/?id=order-book-structure} indexed by market symbols
      */
     async watchOrderBook(symbol, limit = undefined, params = {}) {
-        const orderbook = await this.watchPublic(symbol, 'orderbook');
+        const orderbook = await this.watchPublicMultiple([symbol], 'orderbook');
         return orderbook.limit();
     }
     /**
@@ -356890,7 +356854,7 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NotSupported(this.id + ' watchOHLCV does not support' + timeframe + ' candle.');
         }
         const timeFrameOHLCV = 'candle.' + timeframe;
-        return await this.watchPublic(symbol, timeFrameOHLCV);
+        return await this.watchPublicMultiple([symbol], timeFrameOHLCV);
     }
     handleTicker(client, message) {
         // 2020-03-17T23:07:36.511Z "onMessage" <Buffer 7b 22 74 79 70 65 22 3a 22 74 69 63 6b 65 72 22 2c 22 63 6f 64 65 22 3a 22 42 54 43 2d 45 54 48 22 2c 22 6f 70 65 6e 69 6e 67 5f 70 72 69 63 65 22 3a ... >
@@ -356929,11 +356893,10 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         //   "acc_trade_price_24h": 2.5955306323568927,
         //   "acc_trade_volume_24h": 118.38798416,
         //   "stream_type": "SNAPSHOT" }
-        const marketId = this.safeString(message, 'code');
-        const messageHash = 'ticker:' + marketId;
         const ticker = this.parseTicker(message);
         const symbol = ticker['symbol'];
         this.tickers[symbol] = ticker;
+        const messageHash = 'ticker:' + symbol;
         client.resolve(ticker, messageHash);
     }
     handleOrderBook(client, message) {
@@ -356987,7 +356950,7 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         const datetime = this.iso8601(timestamp);
         orderbook['timestamp'] = timestamp;
         orderbook['datetime'] = datetime;
-        const messageHash = 'orderbook:' + marketId;
+        const messageHash = 'orderbook:' + symbol;
         client.resolve(orderbook, messageHash);
     }
     handleTrades(client, message) {
@@ -357014,8 +356977,7 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             this.trades[symbol] = stored;
         }
         stored.append(trade);
-        const marketId = this.safeString(message, 'code');
-        const messageHash = 'trade:' + marketId;
+        const messageHash = 'trade:' + symbol;
         client.resolve(stored, messageHash);
     }
     handleOHLCV(client, message) {
@@ -357034,7 +356996,8 @@ class upbit extends _upbit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         //     stream_type: 'REALTIME'
         //   }
         const marketId = this.safeString(message, 'code');
-        const messageHash = 'candle.1s:' + marketId;
+        const symbol = this.safeSymbol(marketId, undefined);
+        const messageHash = 'candle.1s:' + symbol;
         const ohlcv = this.parseOHLCV(message);
         client.resolve(ohlcv, messageHash);
     }
