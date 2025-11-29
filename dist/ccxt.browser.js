@@ -210218,6 +210218,7 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
                 'defaultType': 'swap',
                 'sandboxMode': false,
                 'defaultSlippage': 0.05,
+                'marketHelperProps': ['hip3TokensByName', 'cachedCurrenciesById'],
                 'zeroAddress': '0x0000000000000000000000000000000000000000',
                 'spotCurrencyMapping': {
                     'UDZ': '2Z',
@@ -210418,7 +210419,8 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
             await this.initializeClient();
         }
         const request = {
-            'type': 'meta',
+            // 'type': 'meta',
+            'type': 'spotMeta',
         };
         const response = await this.publicPostInfo(this.extend(request, params));
         //
@@ -210435,18 +210437,23 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
         //         }
         //     ]
         //
-        const meta = this.safeList(response, 'universe', []);
+        // const spotMeta = await this.publicPostInfo ({ 'type': 'spotMeta' });
+        const tokens = this.safeList(response, 'tokens', []);
+        // const meta = this.safeList (response, 'universe', []);
+        this.options['cachedCurrenciesById'] = {}; // used to map hip3 markets
         const result = {};
-        for (let i = 0; i < meta.length; i++) {
-            const data = this.safeDict(meta, i, {});
-            const id = i;
+        for (let i = 0; i < tokens.length; i++) {
+            const data = this.safeDict(tokens, i, {});
+            // const id = i;
+            const id = this.safeString(data, 'index');
             const name = this.safeString(data, 'name');
             const code = this.safeCurrencyCode(name);
+            this.options['cachedCurrenciesById'][id] = name;
             result[code] = this.safeCurrencyStructure({
                 'id': id,
                 'name': name,
                 'code': code,
-                'precision': undefined,
+                'precision': this.parsePrecision(this.safeString(data, 'weiDecimals')),
                 'info': data,
                 'active': undefined,
                 'deposit': undefined,
@@ -210568,18 +210575,36 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
             rawPromises.push(this.publicPostInfo(this.extend(request, params)));
         }
         const promises = await Promise.all(rawPromises);
+        this.options['hip3TokensByName'] = {};
         let markets = [];
         for (let i = 0; i < promises.length; i++) {
             const dexName = fetchDexesList[i];
             const offset = perpDexesOffset[dexName];
             const response = promises[i];
             const meta = this.safeDict(response, 0, {});
+            const collateralToken = this.safeString(meta, 'collateralToken');
             const universe = this.safeList(meta, 'universe', []);
             const assetCtxs = this.safeList(response, 1, []);
             const result = [];
+            // helper because some endpoints return just the coin name like: flx:crcl
+            // and we don't have the base/settle information and we can't assume it's USDC for hip3 markets
             for (let j = 0; j < universe.length; j++) {
                 const data = this.extend(this.safeDict(universe, j, {}), this.safeDict(assetCtxs, j, {}));
                 data['baseId'] = j + offset;
+                data['collateralToken'] = collateralToken;
+                const cachedCurrencies = this.safeDict(this.options, 'c', {});
+                // injecting collateral token name for further usage in parseMarket, already converted from like '0' to 'USDC', etc
+                if (collateralToken in cachedCurrencies) {
+                    const name = this.safeString(data, 'name');
+                    const collateralTokenCode = this.safeString(cachedCurrencies, collateralToken);
+                    data['collateralTokenName'] = collateralTokenCode;
+                    // eg: 'flx:crcl' => {'quote': 'USDC', 'code': 'FLX-CRCL'}
+                    const safeCode = this.safeCurrencyCode(name);
+                    this.options['hip3TokensByName'][name] = {
+                        'quote': collateralTokenCode,
+                        'code': safeCode.replace(':', '-'),
+                    };
+                }
                 result.push(data);
             }
             markets = this.arrayConcat(markets, this.parseMarkets(result));
@@ -210615,6 +210640,8 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
         //     ]
         //
         //
+        // reset currency cache not needed anymore
+        this.options['cachedCurrenciesById'] = {};
         return markets;
     }
     /**
@@ -210912,16 +210939,19 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
         //         "oraclePx": "2367.3",
         //         "premium": "0.00090821",
         //         "prevDayPx": "2381.5"
+        //         "collateralToken": "0" hip3 tokens only
         //     }
         //
-        const quoteId = 'USDC';
+        const collateralTokenCode = this.safeString(market, 'collateralTokenName');
+        const quoteId = (collateralTokenCode === undefined) ? 'USDC' : collateralTokenCode;
+        const settleId = (collateralTokenCode === undefined) ? 'USDC' : collateralTokenCode;
         const baseName = this.safeString(market, 'name');
-        const base = this.safeCurrencyCode(baseName);
+        let base = this.safeCurrencyCode(baseName);
+        base = base.replace(':', '-'); // handle hip3 tokens and converts from like flx:crcl to FLX-CRCL
         const quote = this.safeCurrencyCode(quoteId);
         const baseId = this.safeString(market, 'baseId');
-        const settleId = 'USDC';
         const settle = this.safeCurrencyCode(settleId);
-        let symbol = base.replace(':', '-') + '/' + quote;
+        let symbol = base + '/' + quote;
         const contract = true;
         const swap = true;
         if (contract) {
@@ -211008,6 +211038,7 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
      * @param {string} [params.user] user address, will default to this.walletAddress if not provided
      * @param {string} [params.type] wallet type, ['spot', 'swap'], defaults to swap
      * @param {string} [params.marginMode] 'cross' or 'isolated', for margin trading, uses this.options.defaultMarginMode if not passed, defaults to undefined/None/null
+     * @param {string} [params.dex] for hip3 markets, the dex name, eg: 'xyz'
      * @param {string} [params.subAccountAddress] sub account user address
      * @returns {object} a [balance structure]{@link https://docs.ccxt.com/#/?id=balance-structure}
      */
@@ -214230,6 +214261,13 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
         throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ArgumentsRequired(this.id + ' ' + methodName + '() requires a user parameter inside \'params\' or the wallet address set');
     }
     coinToMarketId(coin) {
+        // handle also hip3 tokens like flx:CRCL
+        if (this.safeDict(this.options['hip3TokensByName'], coin)) {
+            const hip3Dict = this.options['hip3TokensByName'][coin];
+            const quote = this.safeString(hip3Dict, 'quote', 'USDC');
+            const code = this.safeString(hip3Dict, 'code', coin);
+            return code + '/' + quote + ':' + quote;
+        }
         if (coin.indexOf('/') > -1 || coin.indexOf('@') > -1) {
             return coin; // spot
         }
@@ -270948,6 +270986,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @param {int} [limit] the maximum amount of candles to fetch
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @param {int} [params.until] timestamp in ms of the latest candle to fetch
+     * @param {string} [params.price] "last", "mark", "index", default is "last"
      * @returns {int[][]} A list of candles ordered as timestamp, open, high, low, close, volume
      */
     async fetchOHLCV(symbol, timeframe = '1m', since = undefined, limit = undefined, params = {}) {
@@ -270960,7 +270999,11 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
         const now = this.milliseconds();
         const duration = this.parseTimeframe(timeframe);
         const until = this.safeInteger2(params, 'until', 'till', now);
-        params = this.omit(params, ['until', 'till']);
+        const price = this.safeString(params, 'price');
+        if (price !== undefined) {
+            request['price_kind'] = price;
+        }
+        params = this.omit(params, ['until', 'till', 'price']);
         if (since !== undefined) {
             request['start_at'] = since;
             if (limit !== undefined) {
