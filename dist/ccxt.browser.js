@@ -312444,7 +312444,7 @@ class coinbase extends _coinbase_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] *
             'average': this.safeString(order, 'avg_price'),
             'filled': this.safeString(order, 'cumulative_quantity'),
             'remaining': this.safeString(order, 'leaves_quantity'),
-            'status': this.safeStringLower(order, 'status'),
+            'status': this.parseOrderStatus(this.safeString(order, 'status')),
             'fee': {
                 'amount': this.safeString(order, 'total_fees'),
                 'currency': this.safeString(market, 'quote'),
