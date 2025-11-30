@@ -48293,7 +48293,7 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
             '3': 'rejected',
             '4': 'pending',
             '5': 'rejected',
-            '6': 'ok',
+            '6': 'pending',
         };
         return this.safeString(statuses, status, status);
     }
