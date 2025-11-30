@@ -31959,7 +31959,7 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @param {string} symbol unified symbol of the market to fetch the order book for
      * @param {int} [limit] the maximum amount of order book entries to return
      * @param {object} [params] extra parameters specific to the exchange API endpoint
-     * @param {boolean} [params.rpi] *swap only* set to true to use the RPI endpoint
+     * @param {boolean} [params.rpi] *future only* set to true to use the RPI endpoint
      * @returns {object} A dictionary of [order book structures]{@link https://docs.ccxt.com/#/?id=order-book-structure} indexed by market symbols
      */
     async fetchOrderBook(symbol, limit = undefined, params = {}) {
@@ -31979,6 +31979,8 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
             const rpi = this.safeValue(params, 'rpi', false);
             params = this.omit(params, 'rpi');
             if (rpi) {
+                // rpi limit only supports 1000
+                request['limit'] = 1000;
                 response = await this.fapiPublicGetRpiDepth(this.extend(request, params));
             }
             else {
@@ -71306,6 +71308,7 @@ class bitmart extends _abstract_bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                 'broad': {
                     'You contract account available balance not enough': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InsufficientFunds,
                     'you contract account available balance not enough': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InsufficientFunds,
+                    'This trading pair does not support API trading': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadSymbol, // {"message":"This trading pair does not support API trading","code":51008,"trace":"5d3ebd46-4e7a-4505-b37b-74464f398f01","data":{}}
                 },
             },
             'commonCurrencies': {
@@ -178541,7 +178544,6 @@ class gate extends _abstract_gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                     'LOAN_RECORD_NOT_FOUND': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.OrderNotFound,
                     'NO_MATCHED_LOAN': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.ExchangeError,
                     'NOT_MERGEABLE': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.ExchangeError,
-                    'NO_CHANGE': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.ExchangeError,
                     'REPAY_TOO_MUCH': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.ExchangeError,
                     'TOO_MANY_CURRENCY_PAIRS': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
                     'TOO_MANY_ORDERS': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
@@ -178583,7 +178585,8 @@ class gate extends _abstract_gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                     'AUTO_TRIGGER_PRICE_LESS_LAST': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
                     'AUTO_TRIGGER_PRICE_GREATE_LAST': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
                     'POSITION_HOLDING': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
-                    'USER_LOAN_EXCEEDED': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest, // {"label":"USER_LOAN_EXCEEDED","message":"Max loan amount per user would be exceeded"}
+                    'USER_LOAN_EXCEEDED': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
+                    'NO_CHANGE': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder, // {"label":"NO_CHANGE","message":"No change is made"}
                 },
                 'broad': {},
             },
@@ -288292,6 +288295,7 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
      * @see https://developers.binance.com/docs/binance-spot-api-docs/web-socket-streams#diff-depth-stream
      * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Partial-Book-Depth-Streams
      * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams
+     * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams-RPI
      * @see https://developers.binance.com/docs/derivatives/coin-margined-futures/websocket-market-streams/Partial-Book-Depth-Streams
      * @see https://developers.binance.com/docs/derivatives/coin-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams
      * @param {string} symbol unified symbol of the market to fetch the order book for
@@ -288347,11 +288351,13 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
      * @see https://developers.binance.com/docs/binance-spot-api-docs/web-socket-streams#diff-depth-stream
      * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Partial-Book-Depth-Streams
      * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams
+     * @see https://developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams-RPI
      * @see https://developers.binance.com/docs/derivatives/coin-margined-futures/websocket-market-streams/Partial-Book-Depth-Streams
      * @see https://developers.binance.com/docs/derivatives/coin-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams
      * @param {string[]} symbols unified array of symbols
      * @param {int} [limit] the maximum amount of order book entries to return
      * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {boolean} [params.rpi] *future only* set to true to use the RPI endpoint
      * @returns {object} A dictionary of [order book structures]{@link https://docs.ccxt.com/#/?id=order-book-structure} indexed by market symbols
      */
     async watchOrderBookForSymbols(symbols, limit = undefined, params = {}) {
@@ -288362,7 +288368,7 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         if (firstMarket['contract']) {
             type = firstMarket['linear'] ? 'future' : 'delivery';
         }
-        const name = 'depth';
+        let name = 'depth';
         let streamHash = 'multipleOrderbook';
         if (symbols !== undefined) {
             const symbolsLength = symbols.length;
@@ -288371,7 +288377,14 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             }
             streamHash += '::' + symbols.join(',');
         }
-        const watchOrderBookRate = this.safeString(this.options, 'watchOrderBookRate', '100');
+        let watchOrderBookRate = undefined;
+        [watchOrderBookRate, params] = this.handleOptionAndParams(params, 'watchOrderBookForSymbols', 'watchOrderBookRate', '100');
+        let rpi = undefined;
+        [rpi, params] = this.handleOptionAndParams(params, 'watchOrderBookForSymbols', 'rpi', false);
+        if (rpi && type === 'future') {
+            name = 'rpiDepth';
+            watchOrderBookRate = '500';
+        }
         const subParams = [];
         const messageHashes = [];
         for (let i = 0; i < symbols.length; i++) {
