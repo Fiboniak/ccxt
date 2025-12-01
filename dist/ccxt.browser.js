@@ -291051,7 +291051,7 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             payload['origClientOrderId'] = clientOrderId;
         }
         else {
-            payload['orderId'] = this.parseToInt(id);
+            payload['orderId'] = this.numberToString(id);
         }
         params = this.omit(params, ['origClientOrderId', 'clientOrderId']);
         const message = {
@@ -291135,7 +291135,7 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             payload['origClientOrderId'] = clientOrderId;
         }
         else {
-            payload['orderId'] = this.parseToInt(id);
+            payload['orderId'] = this.numberToString(id);
         }
         const message = {
             'id': messageHash,
