@@ -38774,7 +38774,7 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
         //         }
         //     ]
         //
-        return this.parsePosition(response[0], market);
+        return this.parseOptionPosition(response[0], market);
     }
     /**
      * @method
@@ -38831,11 +38831,11 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
         //
         const result = [];
         for (let i = 0; i < response.length; i++) {
-            result.push(this.parsePosition(response[i], market));
+            result.push(this.parseOptionPosition(response[i], market));
         }
         return this.filterByArrayPositions(result, 'symbol', symbols, false);
     }
-    parsePosition(position, market = undefined) {
+    parseOptionPosition(position, market = undefined) {
         //
         //     {
         //         "entryPrice": "27.70000000",
@@ -312479,7 +312479,7 @@ class coinbase extends _coinbase_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] *
             'type': this.safeString(order, 'order_type'),
             'timeInForce': undefined,
             'postOnly': undefined,
-            'side': this.safeString2(order, 'side', 'order_side'),
+            'side': this.safeStringLower2(order, 'side', 'order_side'),
             'price': this.safeString(order, 'limit_price'),
             'stopPrice': stopPrice,
             'triggerPrice': stopPrice,
