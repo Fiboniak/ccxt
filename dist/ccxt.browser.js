@@ -19167,7 +19167,7 @@ class Exchange {
         }
         return this.safeMarketStructure({ 'symbol': marketId, 'marketId': marketId });
     }
-    marketOrNull(symbol) {
+    marketOrNull(symbol = undefined) {
         if (symbol === undefined) {
             return undefined;
         }
@@ -205956,7 +205956,9 @@ class htx extends _abstract_htx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
                 params = this.omit(params, ['clientOrderId']);
             }
             if (type === 'limit' || type === 'ioc' || type === 'fok' || type === 'post_only') {
-                request['price'] = this.priceToPrecision(symbol, price);
+                if (price !== undefined) {
+                    request['price'] = this.priceToPrecision(symbol, price);
+                }
             }
         }
         const reduceOnly = this.safeBool2(params, 'reduceOnly', 'reduce_only', false);
@@ -210215,10 +210217,10 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
                 'fetchPositions': true,
                 'fetchPositionsRisk': false,
                 'fetchPremiumIndexOHLCV': false,
+                'fetchStatus': true,
                 'fetchTicker': 'emulated',
                 'fetchTickers': true,
                 'fetchTime': true,
-                'fetchStatus': true,
                 'fetchTrades': true,
                 'fetchTradingFee': true,
                 'fetchTradingFees': false,
@@ -210751,7 +210753,9 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
                 const data = this.extend(this.safeDict(universe, j, {}), this.safeDict(assetCtxs, j, {}));
                 data['baseId'] = j + offset;
                 data['collateralToken'] = collateralToken;
-                const cachedCurrencies = this.safeDict(this.options, 'c', {});
+                data['hip3'] = true;
+                data['dex'] = dexName;
+                const cachedCurrencies = this.safeDict(this.options, 'cachedCurrenciesById', {});
                 // injecting collateral token name for further usage in parseMarket, already converted from like '0' to 'USDC', etc
                 if (collateralToken in cachedCurrencies) {
                     const name = this.safeString(data, 'name');
@@ -210799,8 +210803,6 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
         //     ]
         //
         //
-        // reset currency cache not needed anymore
-        this.options['cachedCurrenciesById'] = {};
         return markets;
     }
     /**
@@ -211340,6 +211342,7 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
      * @param {string[]} [symbols] unified symbols of the markets to fetch the ticker for, all market tickers are returned if not assigned
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @param {string} [params.type] 'spot' or 'swap', by default fetches both
+     * @param {boolean} [params.hip3] set to true to fetch hip3 markets only
      * @returns {object} a dictionary of [ticker structures]{@link https://docs.ccxt.com/#/?id=ticker-structure}
      */
     async fetchTickers(symbols = undefined, params = {}) {
@@ -211349,7 +211352,21 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
         let response = [];
         const type = this.safeString(params, 'type');
         params = this.omit(params, 'type');
-        if (type === 'spot') {
+        let hip3 = false;
+        [hip3, params] = this.handleOptionAndParams(params, 'fetchTickers', 'hip3', false);
+        if (symbols !== undefined) {
+            // infer from first symbol
+            const firstSymbol = this.safeString(symbols, 0);
+            const market = this.market(firstSymbol);
+            if (this.safeBool(this.safeDict(market, 'info'), 'hip3')) {
+                hip3 = true;
+            }
+        }
+        if (hip3) {
+            params = this.omit(params, 'hip3');
+            response = await this.fetchHip3Markets(params);
+        }
+        else if (type === 'spot') {
             response = await this.fetchSpotMarkets(params);
         }
         else if (type === 'swap') {
@@ -211489,6 +211506,9 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
         //         "circulatingSupply": "998949190.03400207", // only in spot
         //     },
         //
+        const name = this.safeString(ticker, 'name');
+        const marketId = this.coinToMarketId(name);
+        market = this.safeMarket(marketId, market);
         const bidAsk = this.safeList(ticker, 'impactPxs');
         return this.safeTicker({
             'symbol': market['symbol'],
@@ -214421,6 +214441,9 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
     }
     coinToMarketId(coin) {
         // handle also hip3 tokens like flx:CRCL
+        if (coin === undefined) {
+            return undefined;
+        }
         if (this.safeDict(this.options['hip3TokensByName'], coin)) {
             const hip3Dict = this.options['hip3TokensByName'][coin];
             const quote = this.safeString(hip3Dict, 'quote', 'USDC');
@@ -288548,7 +288571,7 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             const market = this.market(symbol);
             messageHashes.push('orderbook::' + symbol);
             const subscriptionHash = market['lowercaseId'] + '@' + name;
-            const symbolHash = subscriptionHash + '@' + watchOrderBookRate + 'ms';
+            const symbolHash = subscriptionHash + '@' + watchOrderBookRate.toString() + 'ms';
             subParams.push(symbolHash);
         }
         const messageHashesLength = messageHashes.length;
@@ -291223,25 +291246,30 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         };
         const isConditional = this.safeBoolN(params, ['stop', 'trigger', 'conditional']);
         const clientOrderId = this.safeStringN(params, ['clientAlgoId', 'origClientOrderId', 'clientOrderId']);
+        const shouldUseAlgoOrder = market['linear'] && market['swap'] && isConditional;
         if (clientOrderId !== undefined) {
-            payload['origClientOrderId'] = clientOrderId;
-        }
-        if (market['linear'] && market['swap'] && isConditional) {
-            payload['clientAlgoId'] = clientOrderId;
+            if (shouldUseAlgoOrder) {
+                payload['clientAlgoId'] = clientOrderId;
+            }
+            else {
+                payload['origClientOrderId'] = clientOrderId;
+            }
         }
         else {
-            payload['orderId'] = this.numberToString(id);
+            if (shouldUseAlgoOrder) {
+                payload['algoId'] = this.numberToString(id);
+            }
+            else {
+                payload['orderId'] = this.numberToString(id);
+            }
         }
         params = this.omit(params, ['origClientOrderId', 'clientOrderId', 'stop', 'trigger', 'conditional']);
-        if (market['linear'] && market['swap'] && isConditional) {
-            payload['algoId'] = id;
-        }
         const message = {
             'id': messageHash,
             'method': 'order.cancel',
             'params': this.signParams(this.extend(payload, params)),
         };
-        if (market['linear'] && market['swap'] && isConditional) {
+        if (shouldUseAlgoOrder) {
             message['method'] = 'algoOrder.cancel';
         }
         const subscription = {
@@ -333922,6 +333950,11 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
     async watchTicker(symbol, params = {}) {
         const market = this.market(symbol);
         symbol = market['symbol'];
+        // try to infer dex from market
+        const dexName = this.safeString(this.safeDict(market, 'info', {}), 'dex');
+        if (dexName) {
+            params = this.extend(params, { 'dex': dexName });
+        }
         const tickers = await this.watchTickers([symbol], params);
         return tickers[symbol];
     }
@@ -333932,12 +333965,13 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
      * @see https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/subscriptions
      * @param {string[]} symbols unified symbol of the market to fetch the ticker for
      * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.dex] for for hip3 tokens subscription, eg: 'xyz' or 'flx`, if symbols are provided we will infer it from the first symbol's market
      * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/#/?id=ticker-structure}
      */
     async watchTickers(symbols = undefined, params = {}) {
         await this.loadMarkets();
         symbols = this.marketSymbols(symbols, undefined, true);
-        const messageHash = 'tickers';
+        let messageHash = 'tickers';
         const url = this.urls['api']['ws']['public'];
         const request = {
             'method': 'subscribe',
@@ -333946,6 +333980,21 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
                 'user': '0x0000000000000000000000000000000000000000',
             },
         };
+        let defaultDex = this.safeString(params, 'dex');
+        const firstSymbol = this.safeString(symbols, 0);
+        if (firstSymbol !== undefined) {
+            const market = this.market(firstSymbol);
+            const dexName = this.safeString(this.safeDict(market, 'info', {}), 'dex');
+            if (dexName !== undefined) {
+                defaultDex = dexName;
+            }
+        }
+        if (defaultDex !== undefined) {
+            params = this.omit(params, 'dex');
+            messageHash = 'tickers:' + defaultDex;
+            request['subscription']['type'] = 'allMids';
+            request['subscription']['dex'] = defaultDex;
+        }
         const tickers = await this.watch(url, messageHash, this.extend(request, params), messageHash);
         if (this.newUpdates) {
             return this.filterByArrayTickers(tickers, 'symbol', symbols);
@@ -334013,6 +334062,19 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         return this.filterBySymbolSinceLimit(trades, symbol, since, limit, true);
     }
     handleWsTickers(client, message) {
+        // hip3 mids
+        // {
+        //     channel: 'allMids',
+        //     data: {
+        //         dex: 'flx',
+        //         mids: {
+        //         'flx:COIN': '270.075',
+        //         'flx:CRCL': '78.8175',
+        //         'flx:NVDA': '180.64',
+        //         'flx:TSLA': '436.075'
+        //         }
+        //     }
+        // }
         //
         //     {
         //         "channel": "webData2",
@@ -334059,13 +334121,36 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         //         }
         //     }
         //
+        // handle hip3 mids
+        const channel = this.safeString(message, 'channel');
+        if (channel === 'allMids') {
+            const data = this.safeDict(message, 'data', {});
+            const mids = this.safeDict(data, 'mids', {});
+            if (mids !== undefined) {
+                const keys = Object.keys(mids);
+                for (let i = 0; i < keys.length; i++) {
+                    const name = keys[i];
+                    const marketId = this.coinToMarketId(name);
+                    const market = this.safeMarket(marketId, undefined, undefined, 'swap');
+                    const symbol = market['symbol'];
+                    const ticker = this.parseWsTicker({
+                        'price': this.safeNumber(mids, name),
+                    }, market);
+                    this.tickers[symbol] = ticker;
+                }
+                const messageHash = 'tickers:' + this.safeString(data, 'dex');
+                client.resolve(this.tickers, messageHash);
+                return true;
+            }
+        }
         // spot
         const rawData = this.safeDict(message, 'data', {});
         const spotAssets = this.safeList(rawData, 'spotAssetCtxs', []);
         const parsedTickers = [];
         for (let i = 0; i < spotAssets.length; i++) {
             const assetObject = spotAssets[i];
-            const marketId = this.safeString(assetObject, 'coin');
+            const coin = this.safeString(assetObject, 'coin');
+            const marketId = this.coinToMarketId(coin);
             const market = this.safeMarket(marketId, undefined, undefined, 'spot');
             const symbol = market['symbol'];
             const ticker = this.parseWsTicker(assetObject, market);
@@ -334078,8 +334163,9 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         const assetCtxs = this.safeList(rawData, 'assetCtxs', []);
         for (let i = 0; i < universe.length; i++) {
             const data = this.extend(this.safeDict(universe, i, {}), this.safeDict(assetCtxs, i, {}));
-            const id = data['name'] + '/USDC:USDC';
-            const market = this.safeMarket(id, undefined, undefined, 'swap');
+            const coin = this.safeString(data, 'name');
+            const marketId = this.coinToMarketId(coin);
+            const market = this.safeMarket(marketId, undefined, undefined, 'swap');
             const symbol = market['symbol'];
             const ticker = this.parseWsTicker(data, market);
             this.tickers[symbol] = ticker;
@@ -334087,6 +334173,7 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         }
         const tickers = this.indexBy(parsedTickers, 'symbol');
         client.resolve(tickers, 'tickers');
+        return true;
     }
     parseWsTicker(rawTicker, market = undefined) {
         return this.parseTicker(rawTicker, market);
@@ -334148,18 +334235,18 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         const messageHash = 'myTrades';
         client.resolve(trades, messageHash);
     }
+    /**
+     * @method
+     * @name hyperliquid#watchTrades
+     * @description watches information on multiple trades made in a market
+     * @see https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/subscriptions
+     * @param {string} symbol unified market symbol of the market trades were made in
+     * @param {int} [since] the earliest time in ms to fetch trades for
+     * @param {int} [limit] the maximum number of trade structures to retrieve
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=trade-structure}
+     */
     async watchTrades(symbol, since = undefined, limit = undefined, params = {}) {
-        // s
-        // @method
-        // @name hyperliquid#watchTrades
-        // @description watches information on multiple trades made in a market
-        // @see https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/subscriptions
-        // @param {string} symbol unified market symbol of the market trades were made in
-        // @param {int} [since] the earliest time in ms to fetch trades for
-        // @param {int} [limit] the maximum number of trade structures to retrieve
-        // @param {object} [params] extra parameters specific to the exchange API endpoint
-        // @returns {object[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=trade-structure}
-        //
         await this.loadMarkets();
         const market = this.market(symbol);
         symbol = market['symbol'];
@@ -334697,6 +334784,7 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
             'orderUpdates': this.handleOrder,
             'userFills': this.handleMyTrades,
             'webData2': this.handleWsTickers,
+            'allMids': this.handleWsTickers,
             'post': this.handleWsPost,
             'subscriptionResponse': this.handleSubscriptionResponse,
         };
