@@ -16075,10 +16075,8 @@ class Exchange {
         if (value === undefined) {
             return defaultValue;
         }
-        if ((typeof value === 'object')) {
-            if (!Array.isArray(value)) {
-                return value;
-            }
+        if ((typeof value === 'object') && !Array.isArray(value)) {
+            return value;
         }
         return defaultValue;
     }
@@ -213695,9 +213693,9 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
         let fetchDexesList = [];
         const options = this.safeDict(this.options, 'fetchMarkets', {});
         const hip3 = this.safeDict(options, 'hip3', {});
-        const defaultLimit = this.safeInteger(hip3, 'limit', 5);
+        const defaultLimit = this.safeInteger(hip3, 'limit', 10);
         const dexesLength = fetchDexes.length;
-        if (dexesLength >= defaultLimit) { // first element is null
+        if (dexesLength > defaultLimit) { // first element is null
             const defaultDexes = this.safeList(hip3, 'dex', []);
             if (defaultDexes.length === 0) {
                 throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ArgumentsRequired(this.id + ' fetchHip3Markets() Too many DEXes found. Please specify a list of DEXes in the exchange.options["fetchMarkets"]["hip3"]["dex"] parameter to fetch markets from those DEXes only. The limit is set to ' + defaultLimit.toString() + ' DEXes by default.');
@@ -217430,8 +217428,9 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
         if (coin === undefined) {
             return undefined;
         }
-        if (this.safeDict(this.options['hip3TokensByName'], coin)) {
-            const hip3Dict = this.options['hip3TokensByName'][coin];
+        const hi3TokensByname = this.safeDict(this.options, 'hip3TokensByName', {});
+        if (this.safeDict(hi3TokensByname, coin)) {
+            const hip3Dict = this.safeDict(hi3TokensByname, coin);
             const quote = this.safeString(hip3Dict, 'quote', 'USDC');
             const code = this.safeString(hip3Dict, 'code', coin);
             return code + '/' + quote + ':' + quote;
