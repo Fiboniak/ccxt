@@ -204298,6 +204298,10 @@ class htx extends _abstract_htx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
                     'order-marketorder-amount-min-error': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
                     'order-limitorder-price-min-error': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
                     'order-limitorder-price-max-error': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
+                    'order-limitorder-price-buy-min-error': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
+                    'order-limitorder-price-buy-max-error': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
+                    'order-limitorder-price-sell-min-error': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
+                    'order-limitorder-price-sell-max-error': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
                     'order-stop-order-hit-trigger': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
                     'order-value-min-error': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
                     'order-invalid-price': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
@@ -210995,7 +210999,7 @@ class htx extends _abstract_htx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
         }
         if ('status' in response) {
             //
-            //     {"status":"error","err-code":"order-limitorder-amount-min-error","err-msg":"limit order amount error, min: `0.001`","data":null}
+            //     {"status":"error","err-code":"o-amount-min-error","err-msg":"limit order amount error, min: `0.001`","data":null}
             //     {"status":"ok","data":{"errors":[{"order_id":"1349442392365359104","err_code":1061,"err_msg":"The order does not exist."}],"successes":""},"ts":1741773744526}
             //
             const status = this.safeString(response, 'status');
