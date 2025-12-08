@@ -76552,7 +76552,8 @@ class bitmart extends _abstract_bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
         //     {"errno":"OK","message":"INVALID_PARAMETER","code":49998,"trace":"eb5ebb54-23cd-4de2-9064-e090b6c3b2e3","data":null}
         //
         const message = this.safeString(response, 'message');
-        const isErrorMessage = (message !== undefined) && (message !== 'ok') && (message !== 'success');
+        const messageLower = message.toLowerCase();
+        const isErrorMessage = (message !== undefined) && (messageLower !== 'ok') && (messageLower !== 'success');
         const errorCode = this.safeString(response, 'code');
         const isErrorCode = (errorCode !== undefined) && (errorCode !== '1000');
         if (isErrorCode || isErrorMessage) {
@@ -449153,7 +449154,7 @@ SOFTWARE.
 
 //-----------------------------------------------------------------------------
 // this is updated by vss.js when building
-const ccxt_version = '4.5.24';
+const ccxt_version = '4.5.25';
 ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k.ccxtVersion = ccxt_version;
 //-----------------------------------------------------------------------------
 
