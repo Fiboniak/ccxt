@@ -141155,10 +141155,12 @@ class coinmate extends _abstract_coinmate_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
                         'products',
                         'transactions',
                         'tradingPairs',
+                        'system/time',
                     ],
                 },
                 'private': {
                     'post': [
+                        'currencies',
                         'balances',
                         'bitcoinCashWithdrawal',
                         'bitcoinCashDepositAddresses',
@@ -141211,6 +141213,7 @@ class coinmate extends _abstract_coinmate_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
                         'solWithdrawal',
                         'solDepositAddresses',
                         'unconfirmedSolDeposits',
+                        'bankWireWithdrawal',
                     ],
                 },
             },
@@ -141342,6 +141345,23 @@ class coinmate extends _abstract_coinmate_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
             },
             'precisionMode': _base_functions_number_js__WEBPACK_IMPORTED_MODULE_2__/* .TICK_SIZE */ .kb,
         });
+    }
+    /**
+     * @method
+     * @name coinmate#fetchTime
+     * @description fetches the current integer timestamp in milliseconds from the bingx server
+     * @see https://coinmate.docs.apiary.io/#reference/system/get-server-time/get
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {int} the current integer timestamp in milliseconds from the bingx server
+     */
+    async fetchTime(params = {}) {
+        const response = await this.publicGetSystemTime(params);
+        //
+        //     {
+        //         "serverTime": 1765250628745
+        //     }
+        //
+        return this.safeInteger(response, 'serverTime');
     }
     /**
      * @method
@@ -449154,7 +449174,7 @@ SOFTWARE.
 
 //-----------------------------------------------------------------------------
 // this is updated by vss.js when building
-const ccxt_version = '4.5.25';
+const ccxt_version = '4.5.26';
 ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k.ccxtVersion = ccxt_version;
 //-----------------------------------------------------------------------------
 
