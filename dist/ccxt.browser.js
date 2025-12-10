@@ -59881,6 +59881,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                     'invalid end time': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.BadRequest,
                     '20003': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ExchangeError,
                     '01001': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ExchangeError,
+                    '40024': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.RestrictedLocation,
                     '43111': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.PermissionDenied, // {"code":"43111","msg":"参数错误 address not in address book","requestTime":1665394201164,"data":null}
                 },
                 'broad': {
@@ -135159,6 +135160,7 @@ class coinex extends _abstract_coinex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                             'futures/index': 1,
                             'futures/funding-rate': 1,
                             'futures/funding-rate-history': 1,
+                            'futures/premium-index-history': 1,
                             'futures/position-level': 1,
                             'futures/liquidation-history': 1,
                             'futures/basis-history': 1,
@@ -135173,20 +135175,26 @@ class coinex extends _abstract_coinex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                             'account/subs/info': 1,
                             'account/subs/api': 40,
                             'account/subs/transfer-history': 40,
+                            'account/subs/balance': 1,
                             'account/subs/spot-balance': 1,
                             'account/trade-fee-rate': 40,
+                            'account/futures-market-settings': 1,
+                            'account/info': 1,
                             'assets/spot/balance': 40,
                             'assets/futures/balance': 40,
                             'assets/margin/balance': 1,
                             'assets/financial/balance': 40,
                             'assets/amm/liquidity': 40,
                             'assets/credit/info': 40,
+                            'assets/spot/transcation-history': 1,
                             'assets/margin/borrow-history': 40,
                             'assets/margin/interest-limit': 1,
                             'assets/deposit-address': 40,
                             'assets/deposit-history': 40,
                             'assets/withdraw': 40,
                             'assets/transfer-history': 40,
+                            'assets/amm/liquidity-pool': 40,
+                            'assets/amm/income-history': 40,
                             'spot/order-status': 8,
                             'spot/batch-order-status': 8,
                             'spot/pending-order': 8,
@@ -135209,6 +135217,12 @@ class coinex extends _abstract_coinex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                             'futures/position-funding-history': 40,
                             'futures/position-adl-history': 1,
                             'futures/position-settle-history': 1,
+                            'refer/referee': 1,
+                            'refer/referee-rebate/record': 1,
+                            'refer/referee-rebate/detail': 1,
+                            'refer/agent-referee': 1,
+                            'refer/agent-rebate/record': 1,
+                            'refer/agent-rebate/detail': 1,
                         },
                         'post': {
                             'account/subs': 40,
@@ -135219,6 +135233,7 @@ class coinex extends _abstract_coinex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                             'account/subs/delete-api': 40,
                             'account/subs/transfer': 40,
                             'account/settings': 40,
+                            'account/futures-market-settings': 40,
                             'assets/margin/borrow': 40,
                             'assets/margin/repay': 40,
                             'assets/renewal-deposit-address': 40,
@@ -135233,6 +135248,7 @@ class coinex extends _abstract_coinex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                             'spot/batch-stop-order': 1,
                             'spot/modify-order': 13.334,
                             'spot/modify-stop-order': 13.334,
+                            'spot/batch-modify-order': 13.334,
                             'spot/cancel-all-order': 1,
                             'spot/cancel-order': 6.667,
                             'spot/cancel-stop-order': 6.667,
@@ -135246,6 +135262,7 @@ class coinex extends _abstract_coinex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                             'futures/batch-stop-order': 1,
                             'futures/modify-order': 20,
                             'futures/modify-stop-order': 20,
+                            'futures/batch-modify-order': 20,
                             'futures/cancel-all-order': 1,
                             'futures/cancel-order': 10,
                             'futures/cancel-stop-order': 10,
@@ -145781,6 +145798,7 @@ class coinsph extends _abstract_coinsph_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                     'get': {
                         'openapi/v1/ping': 1,
                         'openapi/v1/time': 1,
+                        'openapi/v1/user/ip': 1,
                         // cost 1 if 'symbol' param defined (one market symbol) or if 'symbols' param is a list of 1-20 market symbols
                         // cost 20 if 'symbols' param is a list of 21-100 market symbols
                         // cost 40 if 'symbols' param is a list of 101 or more market symbols or if both 'symbol' and 'symbols' params are omited
@@ -145802,11 +145820,14 @@ class coinsph extends _abstract_coinsph_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                 },
                 'private': {
                     'get': {
+                        'openapi/v1/check-sys-status': 1,
                         'openapi/wallet/v1/config/getall': 10,
                         'openapi/wallet/v1/deposit/address': 10,
                         'openapi/wallet/v1/deposit/history': 1,
                         'openapi/wallet/v1/withdraw/history': 1,
+                        'openapi/wallet/v1/withdraw/address-whitelist': 1,
                         'openapi/v1/account': 10,
+                        'openapi/v1/api-keys': 1,
                         // cost 3 for a single symbol; 40 when the symbol parameter is omitted
                         'openapi/v1/openOrders': { 'cost': 3, 'noSymbol': 40 },
                         'openapi/v1/asset/tradeFee': 1,
@@ -145820,6 +145841,15 @@ class coinsph extends _abstract_coinsph_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                         'merchant-api/v1/get-invoices': 1,
                         'openapi/account/v3/crypto-accounts': 1,
                         'openapi/transfer/v3/transfers/{id}': 1,
+                        'openapi/v1/sub-account/list': 10,
+                        'openapi/v1/sub-account/asset': 10,
+                        'openapi/v1/sub-account/transfer/universal-transfer-history': 10,
+                        'openapi/v1/sub-account/transfer/sub-history': 10,
+                        'openapi/v1/sub-account/apikey/ip-restriction': 10,
+                        'openapi/v1/sub-account/wallet/deposit/address': 1,
+                        'openapi/v1/sub-account/wallet/deposit/history': 1,
+                        'openapi/v1/fund-collect/get-fund-record': 1,
+                        'openapi/v1/asset/transaction/history': 20,
                     },
                     'post': {
                         'openapi/wallet/v1/withdraw/apply': 600,
@@ -145836,12 +145866,22 @@ class coinsph extends _abstract_coinsph_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                         'openapi/convert/v1/get-supported-trading-pairs': 1,
                         'openapi/convert/v1/get-quote': 1,
                         'openapi/convert/v1/accpet-quote': 1,
+                        'openapi/convert/v1/query-order-history': 1,
                         'openapi/fiat/v1/support-channel': 1,
                         'openapi/fiat/v1/cash-out': 1,
                         'openapi/fiat/v1/history': 1,
                         'openapi/migration/v4/sellorder': 1,
                         'openapi/migration/v4/validate-field': 1,
                         'openapi/transfer/v3/transfers': 1,
+                        'openapi/v1/sub-account/create': 30,
+                        'openapi/v1/sub-account/transfer/universal-transfer': 100,
+                        'openapi/v1/sub-account/transfer/sub-to-master': 100,
+                        'openapi/v1/sub-account/apikey/add-ip-restriction': 30,
+                        'openapi/v1/sub-account/apikey/delete-ip-restriction': 30,
+                        'openapi/v1/fund-collect/collect-from-sub-account': 1,
+                    },
+                    'put': {
+                        'openapi/v1/userDataStream': 1,
                     },
                     'delete': {
                         'openapi/v1/order': 1,
@@ -410259,6 +410299,7 @@ class whitebit extends _abstract_whitebit_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
                 'timeDifference': 0,
                 'adjustForTimeDifference': false,
                 'fiatCurrencies': ['EUR', 'USD', 'RUB', 'UAH'],
+                'nonceWindow': false,
                 'fetchBalance': {
                     'account': 'spot',
                 },
@@ -413883,7 +413924,8 @@ class whitebit extends _abstract_whitebit_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
             const nonce = this.nonce().toString();
             const secret = this.encode(this.secret);
             const request = '/' + 'api' + '/' + version + pathWithParams;
-            body = this.json(this.extend({ 'request': request, 'nonce': nonce }, params));
+            const [nonceWindow, requestParams] = this.handleOptionAndParams(params, 'sign', 'nonceWindow', false);
+            body = this.json(this.extend({ 'request': request, 'nonce': nonce, 'nonceWindow': nonceWindow }, requestParams));
             const payload = this.stringToBase64(body);
             const signature = this.hmac(this.encode(payload), secret, _static_dependencies_noble_hashes_sha512_js__WEBPACK_IMPORTED_MODULE_4__/* .sha512 */ .Zf);
             headers = {
