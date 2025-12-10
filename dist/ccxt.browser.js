@@ -30616,7 +30616,8 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                 },
                 'broad': {
                     'has no operation privilege': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.PermissionDenied,
-                    'MAX_POSITION': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest, // {"code":-2010,"msg":"Filter failure: MAX_POSITION"}
+                    'MAX_POSITION': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
+                    'PERCENT_PRICE_BY_SIDE': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder, // {"code":-1013,"msg":"Filter failure: PERCENT_PRICE_BY_SIDE"}
                 },
             },
         });
