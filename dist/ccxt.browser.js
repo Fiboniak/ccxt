@@ -180936,6 +180936,7 @@ class gate extends _abstract_gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                             'small_balance': 1,
                             'small_balance_history': 1,
                             'push': 1,
+                            'getLowCapExchangeList': 1,
                         },
                         'post': {
                             'transfers': 2.5,
@@ -181125,6 +181126,7 @@ class gate extends _abstract_gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                         },
                         'put': {
                             '{settle}/orders/{order_id}': 1,
+                            '{settle}/price_orders/{order_id}': 1,
                         },
                         'delete': {
                             '{settle}/orders': 20 / 75,
@@ -410022,7 +410024,7 @@ class whitebit extends _abstract_whitebit_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
             'name': 'WhiteBit',
             'version': 'v4',
             'countries': ['EE'],
-            'rateLimit': 50,
+            'rateLimit': 20,
             'pro': true,
             'has': {
                 'CORS': undefined,
