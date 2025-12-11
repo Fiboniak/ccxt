@@ -1,4 +1,8 @@
-import ccxt from '../../js/ccxt.js';
+- [Hyperliquid Load Hip3 Dexes](./examples/ts/)
+
+
+ ```javascript
+ import ccxt from '../../js/ccxt.js';
 
 // AUTO-TRANSPILE //
 
@@ -20,3 +24,5 @@ async function example () {
     });
 }
 await example ();
+ 
+```
