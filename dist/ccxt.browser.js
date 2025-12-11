@@ -129508,7 +129508,7 @@ class coincatch extends _abstract_coincatch_js__WEBPACK_IMPORTED_MODULE_0__/* ["
         await this.loadMarkets();
         symbols = this.marketSymbols(symbols, undefined, true, true);
         const market = this.getMarketFromSymbols(symbols);
-        let marketType = 'spot';
+        let marketType = undefined;
         [marketType, params] = this.handleMarketTypeAndParams(methodName, market, params, marketType);
         let response = undefined;
         if (marketType === 'spot') {
