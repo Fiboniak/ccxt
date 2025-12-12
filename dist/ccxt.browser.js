@@ -429746,16 +429746,16 @@ class zebpay extends _abstract_zebpay_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             const marginAsset = this.safeString(params, 'marginAsset', 'INR');
             const formType = this.safeStringUpper(params, 'formType', 'ORDER_FORM');
             request['formType'] = formType;
-            request['amount'] = this.amountToPrecision(market['id'], amount);
+            request['amount'] = this.parseToNumeric(this.amountToPrecision(market['id'], amount));
             request['marginAsset'] = marginAsset;
             const hasTP = takeProfitPrice !== undefined;
             const hasSL = stopLossPrice !== undefined;
             if (hasTP || hasSL) {
                 if (hasTP) {
-                    request['takeProfitPrice'] = this.priceToPrecision(symbol, takeProfitPrice);
+                    request['takeProfitPrice'] = this.parseToNumeric(this.priceToPrecision(symbol, takeProfitPrice));
                 }
                 if (hasSL) {
-                    request['stopLossPrice'] = this.priceToPrecision(symbol, stopLossPrice);
+                    request['stopLossPrice'] = this.parseToNumeric(this.priceToPrecision(symbol, stopLossPrice));
                 }
                 response = await this.privateSwapPostV1TradeOrderAddTPSL(this.extend(request, params));
             }
@@ -429765,7 +429765,7 @@ class zebpay extends _abstract_zebpay_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                     if (price === undefined) {
                         throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.ArgumentsRequired(this.id + ' createOrder() requires a price argument for limit orders');
                     }
-                    request['price'] = this.priceToPrecision(symbol, price);
+                    request['price'] = this.parseToNumeric(this.priceToPrecision(symbol, price));
                 }
                 response = await this.privateSwapPostV1TradeOrder(this.extend(request, params));
             }
@@ -430611,10 +430611,11 @@ class zebpay extends _abstract_zebpay_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             }
             else {
                 // For POST/PUT: Convert body to JSON and sign the stringified payload
-                body = JSON.stringify(params);
+                body = this.json(params);
                 signature = this.hmac(this.encode(body), this.encode(this.secret), _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_4__/* .sha256 */ .s, 'hex');
             }
             headers = {
+                'Referrer': 'ccxt',
                 'X-AUTH-APIKEY': this.apiKey,
                 'X-AUTH-SIGNATURE': signature,
             };
