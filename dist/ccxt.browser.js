@@ -19109,8 +19109,8 @@ class Exchange {
         throw new _errors_js__WEBPACK_IMPORTED_MODULE_5__.NotSupported(this.id + ' fetchLedgerEntry() is not supported yet');
     }
     parseBidAsk(bidask, priceKey = 0, amountKey = 1, countOrIdKey = 2) {
-        const price = this.safeNumber(bidask, priceKey);
-        const amount = this.safeNumber(bidask, amountKey);
+        const price = this.safeFloat(bidask, priceKey);
+        const amount = this.safeFloat(bidask, amountKey);
         const countOrId = this.safeInteger(bidask, countOrIdKey);
         const bidAsk = [price, amount];
         if (countOrId !== undefined) {
@@ -111229,13 +111229,16 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
      * @param {string} [params.triggerDirection] *contract only* the direction for trigger orders, 'ascending' or 'descending'
      * @param {float} [params.triggerPrice] The price at which a trigger order is triggered at
      * @param {float} [params.stopLossPrice] The price at which a stop loss order is triggered at
+     * @param {float} [params.stopLossLimitPrice] The limit price for a stoploss order (only when used in OCO with takeProfitPrice)
      * @param {float} [params.takeProfitPrice] The price at which a take profit order is triggered at
+     * @param {float} [params.takeProfitLimitPrice] The limit price for a takeprofit order (only when used in OCO combination with stopLossPrice)
      * @param {object} [params.takeProfit] *takeProfit object in params* containing the triggerPrice at which the attached take profit order will be triggered
      * @param {float} [params.takeProfit.triggerPrice] take profit trigger price
      * @param {object} [params.stopLoss] *stopLoss object in params* containing the triggerPrice at which the attached stop loss order will be triggered
      * @param {float} [params.stopLoss.triggerPrice] stop loss trigger price
      * @param {string} [params.trailingAmount] the quote amount to trail away from the current market price
      * @param {string} [params.trailingTriggerPrice] the price to trigger a trailing order, default uses the price argument
+     * @param {boolean} [params.tradingStopEndpoint] whether to enforce using the tradingStop (https://bybit-exchange.github.io/docs/v5/position/trading-stop) endpoint, makes difference when submitting single tp/sl order
      * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
      */
     async createOrder(symbol, type, side, amount, price = undefined, params = {}) {
@@ -111247,8 +111250,9 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
         const isStopLossOrder = this.safeString(params, 'stopLossPrice') !== undefined;
         const isTakeProfitOrder = this.safeString(params, 'takeProfitPrice') !== undefined;
         const orderRequest = this.createOrderRequest(symbol, type, side, amount, price, params, enableUnifiedAccount);
+        const switchToOco = (isStopLossOrder && isTakeProfitOrder) || this.safeBool(params, 'tradingStopEndpoint', false);
         let defaultMethod = undefined;
-        if ((isTrailingOrder || isStopLossOrder || isTakeProfitOrder) && !market['spot']) {
+        if ((isTrailingOrder || switchToOco) && !market['spot']) {
             defaultMethod = 'privatePostV5PositionTradingStop';
         }
         else {
@@ -111261,7 +111265,7 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
             response = await this.privatePostV5PositionTradingStop(orderRequest);
         }
         else {
-            response = await this.privatePostV5OrderCreate(orderRequest); // already extended inside createOrderRequest
+            response = await this.privatePostV5OrderCreate(orderRequest);
         }
         //
         //     {
@@ -111282,9 +111286,6 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
         const market = this.market(symbol);
         symbol = market['symbol'];
         const lowerCaseType = type.toLowerCase();
-        if ((price === undefined) && (lowerCaseType === 'limit')) {
-            throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ArgumentsRequired(this.id + ' createOrder requires a price argument for limit orders');
-        }
         const request = {
             'symbol': market['id'],
             // 'side': this.capitalize (side),
@@ -111324,12 +111325,13 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
         const isStopLossOrder = stopLossTriggerPrice !== undefined;
         const isTakeProfitOrder = takeProfitTriggerPrice !== undefined;
         const hasStopLoss = stopLoss !== undefined;
-        const isTakeProfit = takeProfit !== undefined;
+        const hasTakeProfit = takeProfit !== undefined;
         const isMarket = lowerCaseType === 'market';
         const isLimit = lowerCaseType === 'limit';
         const isBuy = side === 'buy';
+        const switchToOco = (isStopLossOrder && isTakeProfitOrder) || this.safeBool(params, 'tradingStopEndpoint', false);
         let defaultMethod = undefined;
-        if ((isTrailingOrder || isStopLossOrder || isTakeProfitOrder) && !market['spot']) {
+        if (isTrailingOrder || switchToOco) {
             defaultMethod = 'privatePostV5PositionTradingStop';
         }
         else {
@@ -111338,40 +111340,67 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
         let method = undefined;
         [method, params] = this.handleOptionAndParams(params, 'createOrder', 'method', defaultMethod);
         const endpointIsTradingStop = method === 'privatePostV5PositionTradingStop';
-        const amountString = this.getAmount(symbol, amount);
+        if ((price === undefined) && (lowerCaseType === 'limit') && !endpointIsTradingStop) {
+            throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ArgumentsRequired(this.id + ' createOrder requires a price argument for limit orders');
+        }
+        // workaround, bcz for some langs we have to allow 0.0 as input (bcz of type)
+        if (!_base_Precise_js__WEBPACK_IMPORTED_MODULE_3__/* .Precise */ .Y.stringGt(this.numberToString(amount), '0')) {
+            amount = undefined;
+        }
+        const amountString = (amount !== undefined) ? this.getAmount(symbol, amount) : undefined;
         const priceString = (price !== undefined) ? this.getPrice(symbol, this.numberToString(price)) : undefined;
-        if (isTrailingOrder || endpointIsTradingStop) {
-            if (hasStopLoss || isTakeProfit || isTriggerOrder || market['spot']) {
+        if (endpointIsTradingStop) {
+            if (hasStopLoss || hasTakeProfit || isTriggerOrder || market['spot']) {
                 throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder(this.id + ' the API endpoint used only supports contract trailingAmount, stopLossPrice and takeProfitPrice orders');
             }
             if (isStopLossOrder || isTakeProfitOrder) {
-                const tpslMode = this.safeString(params, 'tpslMode', 'Partial');
-                const isFullTpsl = tpslMode === 'Full';
-                const isPartialTpsl = tpslMode === 'Partial';
-                if (isLimit && isFullTpsl) {
-                    throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder(this.id + ' tpsl orders with "full" tpslMode only support "market" type');
-                }
-                request['tpslMode'] = tpslMode;
+                let tpslModeSl = undefined;
+                let tpslModeTp = undefined;
                 if (isStopLossOrder) {
                     request['stopLoss'] = this.getPrice(symbol, stopLossTriggerPrice);
-                    if (isPartialTpsl) {
+                    const stopLossLimitPrice = this.safeString2(params, 'stopLossLimitPrice', 'slLimitPrice');
+                    if (stopLossLimitPrice !== undefined) {
+                        tpslModeSl = 'Partial';
+                        request['slOrderType'] = 'Limit';
+                        request['slLimitPrice'] = stopLossLimitPrice;
                         request['slSize'] = amountString;
                     }
-                    if (isLimit) {
-                        request['slOrderType'] = 'Limit';
-                        request['slLimitPrice'] = priceString;
+                    else {
+                        request['slOrderType'] = 'Market';
+                        if (amountString !== undefined) {
+                            request['slSize'] = amountString;
+                            tpslModeSl = 'Partial';
+                        }
+                        else {
+                            tpslModeSl = 'Full';
+                        }
                     }
                 }
-                else if (isTakeProfitOrder) {
+                if (isTakeProfitOrder) {
                     request['takeProfit'] = this.getPrice(symbol, takeProfitTriggerPrice);
-                    if (isPartialTpsl) {
+                    const takeProfitLimitPrice = this.safeString2(params, 'takeProfitLimitPrice', 'tpLimitPrice');
+                    if (takeProfitLimitPrice !== undefined) {
+                        tpslModeTp = 'Partial';
+                        request['tpOrderType'] = 'Limit';
+                        request['tpLimitPrice'] = takeProfitLimitPrice;
                         request['tpSize'] = amountString;
                     }
-                    if (isLimit) {
-                        request['tpOrderType'] = 'Limit';
-                        request['tpLimitPrice'] = priceString;
+                    else {
+                        request['tpOrderType'] = 'Market';
+                        if (amountString !== undefined) {
+                            request['tpSize'] = amountString;
+                            tpslModeTp = 'Partial';
+                        }
+                        else {
+                            tpslModeTp = 'Full';
+                        }
                     }
                 }
+                if (tpslModeSl !== tpslModeTp) {
+                    throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder(this.id + ' createOrder() requires both stopLoss and takeProfit to be full or partial when using as OCO combination');
+                }
+                request['tpslMode'] = tpslModeSl; // same as tpslModeTp
+                params = this.omit(params, ['stopLossLimitPrice', 'takeProfitLimitPrice']);
             }
         }
         else {
@@ -111506,7 +111535,7 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
             request['triggerPrice'] = this.getPrice(symbol, triggerPrice);
             request['reduceOnly'] = true;
         }
-        if ((hasStopLoss || isTakeProfit) && !endpointIsTradingStop) {
+        if ((hasStopLoss || hasTakeProfit) && !endpointIsTradingStop) {
             if (hasStopLoss) {
                 const slTriggerPrice = this.safeValue2(stopLoss, 'triggerPrice', 'stopPrice', stopLoss);
                 request['stopLoss'] = this.getPrice(symbol, slTriggerPrice);
@@ -111527,7 +111556,7 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                     throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder(this.id + ' createOrder(): attached stopLoss is not supported for spot market orders');
                 }
             }
-            if (isTakeProfit) {
+            if (hasTakeProfit) {
                 const tpTriggerPrice = this.safeValue2(takeProfit, 'triggerPrice', 'stopPrice', takeProfit);
                 request['takeProfit'] = this.getPrice(symbol, tpTriggerPrice);
                 const tpLimitPrice = this.safeValue(takeProfit, 'price');
@@ -312181,7 +312210,7 @@ class bybit extends _bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         // spot
         //     {
         //         "topic": "tickers.BTCUSDT",
-        //         "ts": 1673853746003,
+        //         "ts": 1673853746002,
         //         "type": "snapshot",
         //         "cs": 2588407389,
         //         "data": {
