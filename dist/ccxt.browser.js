@@ -63680,8 +63680,8 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         const takeProfitTriggerPrice = this.safeNumber(params, 'takeProfitPrice');
         const stopLoss = this.safeValue(params, 'stopLoss');
         const takeProfit = this.safeValue(params, 'takeProfit');
-        const isStopLoss = stopLoss !== undefined;
-        const isTakeProfit = takeProfit !== undefined;
+        const hasStopLoss = stopLoss !== undefined;
+        const hasTakeProfit = takeProfit !== undefined;
         const isStopLossTrigger = stopLossTriggerPrice !== undefined;
         const isTakeProfitTrigger = takeProfitTriggerPrice !== undefined;
         const isStopLossOrTakeProfitTrigger = isStopLossTrigger || isTakeProfitTrigger;
@@ -63713,7 +63713,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             params = this.omit(params, ['stopLossPrice', 'takeProfitPrice']);
         }
         else {
-            if (isStopLoss) {
+            if (hasStopLoss) {
                 const slTriggerPrice = this.safeNumber2(stopLoss, 'triggerPrice', 'stopPrice');
                 const slLimitPrice = this.safeNumber(stopLoss, 'price');
                 request['stopLoss'] = this.priceToPrecision(symbol, slTriggerPrice);
@@ -63725,7 +63725,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                     request['slOrderType'] = this.safeString(params, 'slOrderType', 'market');
                 }
             }
-            if (isTakeProfit) {
+            if (hasTakeProfit) {
                 const tpTriggerPrice = this.safeNumber2(takeProfit, 'triggerPrice', 'stopPrice');
                 const tpLimitPrice = this.safeNumber(takeProfit, 'price');
                 request['takeProfit'] = this.priceToPrecision(symbol, tpTriggerPrice);
@@ -63808,10 +63808,10 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         const isTriggerOrder = triggerPrice !== undefined;
         const isStopLossTriggerOrder = stopLossTriggerPrice !== undefined;
         const isTakeProfitTriggerOrder = takeProfitTriggerPrice !== undefined;
-        const isStopLoss = stopLoss !== undefined;
-        const isTakeProfit = takeProfit !== undefined;
+        const hasStopLoss = stopLoss !== undefined;
+        const hasTakeProfit = takeProfit !== undefined;
         const isStopLossOrTakeProfitTrigger = isStopLossTriggerOrder || isTakeProfitTriggerOrder;
-        const isStopLossOrTakeProfit = isStopLoss || isTakeProfit;
+        const isStopLossOrTakeProfit = hasStopLoss || hasTakeProfit;
         const trailingTriggerPrice = this.safeString(params, 'trailingTriggerPrice', this.numberToString(price));
         const trailingPercent = this.safeString2(params, 'trailingPercent', 'callbackRatio');
         const isTrailingPercentOrder = trailingPercent !== undefined;
@@ -63871,7 +63871,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 if (price !== undefined) {
                     request['executePrice'] = this.priceToPrecision(symbol, price);
                 }
-                if (isStopLoss) {
+                if (hasStopLoss) {
                     const slTriggerPrice = this.safeString2(stopLoss, 'triggerPrice', 'stopPrice');
                     request['stopLossTriggerPrice'] = this.priceToPrecision(symbol, slTriggerPrice);
                     const slPrice = this.safeString(stopLoss, 'price');
@@ -63879,7 +63879,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                     const slType = this.safeString(stopLoss, 'type', 'mark_price');
                     request['stopLossTriggerType'] = slType;
                 }
-                if (isTakeProfit) {
+                if (hasTakeProfit) {
                     const tpTriggerPrice = this.safeString2(takeProfit, 'triggerPrice', 'stopPrice');
                     request['stopSurplusTriggerPrice'] = this.priceToPrecision(symbol, tpTriggerPrice);
                     const tpPrice = this.safeString(takeProfit, 'price');
@@ -63908,11 +63908,11 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 }
             }
             else {
-                if (isStopLoss) {
+                if (hasStopLoss) {
                     const slTriggerPrice = this.safeValue2(stopLoss, 'triggerPrice', 'stopPrice');
                     request['presetStopLossPrice'] = this.priceToPrecision(symbol, slTriggerPrice);
                 }
-                if (isTakeProfit) {
+                if (hasTakeProfit) {
                     const tpTriggerPrice = this.safeValue2(takeProfit, 'triggerPrice', 'stopPrice');
                     request['presetStopSurplusPrice'] = this.priceToPrecision(symbol, tpTriggerPrice);
                 }
@@ -64231,8 +64231,8 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         const isTakeProfitOrder = takeProfitPrice !== undefined;
         const stopLoss = this.safeValue(params, 'stopLoss');
         const takeProfit = this.safeValue(params, 'takeProfit');
-        const isStopLoss = stopLoss !== undefined;
-        const isTakeProfit = takeProfit !== undefined;
+        const hasStopLoss = stopLoss !== undefined;
+        const hasTakeProfit = takeProfit !== undefined;
         const trailingTriggerPrice = this.safeString(params, 'trailingTriggerPrice', this.numberToString(price));
         const trailingPercent = this.safeString2(params, 'trailingPercent', 'newCallbackRatio');
         const isTrailingPercentOrder = trailingPercent !== undefined;
@@ -64356,7 +64356,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             }
             else if (isTriggerOrder) {
                 request['newTriggerPrice'] = this.priceToPrecision(symbol, triggerPrice);
-                if (isStopLoss) {
+                if (hasStopLoss) {
                     const slTriggerPrice = this.safeNumber2(stopLoss, 'triggerPrice', 'stopPrice');
                     request['newStopLossTriggerPrice'] = this.priceToPrecision(symbol, slTriggerPrice);
                     const slPrice = this.safeNumber(stopLoss, 'price');
@@ -64364,7 +64364,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                     const slType = this.safeString(stopLoss, 'type', 'mark_price');
                     request['newStopLossTriggerType'] = slType;
                 }
-                if (isTakeProfit) {
+                if (hasTakeProfit) {
                     const tpTriggerPrice = this.safeNumber2(takeProfit, 'triggerPrice', 'stopPrice');
                     request['newSurplusTriggerPrice'] = this.priceToPrecision(symbol, tpTriggerPrice);
                     const tpPrice = this.safeNumber(takeProfit, 'price');
@@ -64379,11 +64379,11 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 const newClientOrderId = this.safeString2(params, 'newClientOid', 'newClientOrderId', defaultNewClientOrderId);
                 params = this.omit(params, 'newClientOrderId');
                 request['newClientOid'] = newClientOrderId;
-                if (isStopLoss) {
+                if (hasStopLoss) {
                     const slTriggerPrice = this.safeValue2(stopLoss, 'triggerPrice', 'stopPrice');
                     request['newPresetStopLossPrice'] = this.priceToPrecision(symbol, slTriggerPrice);
                 }
-                if (isTakeProfit) {
+                if (hasTakeProfit) {
                     const tpTriggerPrice = this.safeValue2(takeProfit, 'triggerPrice', 'stopPrice');
                     request['newPresetStopSurplusPrice'] = this.priceToPrecision(symbol, tpTriggerPrice);
                 }
@@ -77316,7 +77316,7 @@ class bitmex extends _abstract_bitmex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         // 'positionCurrency' may be empty ("", as Bitmex currently returns for ETHUSD)
         // so let's take the settlCurrency first and then adjust if needed
         const typ = this.safeString(market, 'typ'); // type definitions at: https://www.bitmex.com/api/explorer/#!/Instrument/Instrument_get
-        let type;
+        let type = undefined;
         let swap = false;
         let spot = false;
         let future = false;
@@ -77338,6 +77338,10 @@ class bitmex extends _abstract_bitmex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             baseId = this.safeString(market, 'rootSymbol');
             type = 'future';
             future = true;
+        }
+        else if (typ === 'FFSCSX') {
+            type = 'swap';
+            swap = true;
         }
         const base = this.safeCurrencyCode(baseId);
         const quote = this.safeCurrencyCode(quoteId);
@@ -98521,16 +98525,16 @@ class blofin extends _abstract_blofin_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         const stopLoss = this.safeDict(params, 'stopLoss');
         const takeProfit = this.safeDict(params, 'takeProfit');
         params = this.omit(params, ['stopLoss', 'takeProfit', 'hedged']);
-        const isStopLoss = stopLoss !== undefined;
-        const isTakeProfit = takeProfit !== undefined;
-        if (isStopLoss || isTakeProfit) {
-            if (isStopLoss) {
+        const hasStopLoss = stopLoss !== undefined;
+        const hasTakeProfit = takeProfit !== undefined;
+        if (hasStopLoss || hasTakeProfit) {
+            if (hasStopLoss) {
                 const slTriggerPrice = this.safeString2(stopLoss, 'triggerPrice', 'stopPrice');
                 request['slTriggerPrice'] = this.priceToPrecision(symbol, slTriggerPrice);
                 const slOrderPrice = this.safeString(stopLoss, 'price', '-1');
                 request['slOrderPrice'] = this.priceToPrecision(symbol, slOrderPrice);
             }
-            if (isTakeProfit) {
+            if (hasTakeProfit) {
                 const tpTriggerPrice = this.safeString2(takeProfit, 'triggerPrice', 'stopPrice');
                 request['tpTriggerPrice'] = this.priceToPrecision(symbol, tpTriggerPrice);
                 const tpPrice = this.safeString(takeProfit, 'price', '-1');
@@ -134958,6 +134962,7 @@ class coinex extends _abstract_coinex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'createTakeProfitOrder': true,
                 'createTriggerOrder': true,
                 'editOrder': true,
+                'editOrders': true,
                 'fetchBalance': true,
                 'fetchBorrowInterest': true,
                 'fetchBorrowRateHistories': false,
@@ -137951,6 +137956,82 @@ class coinex extends _abstract_coinex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         }
         const data = this.safeDict(response, 'data', {});
         return this.parseOrder(data, market);
+    }
+    /**
+     * @method
+     * @name coinex#editOrders
+     * @description edit a list of trade orders
+     * @see https://docs.coinex.com/api/v2/spot/order/http/edit-multi-order
+     * @see https://docs.coinex.com/api/v2/futures/order/http/edit-multi-order
+     * @param {Array} orders list of orders to edit, each object should contain the parameters required by editOrder, namely id, symbol, amount, price and params
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} an [order structure]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async editOrders(orders, params = {}) {
+        await this.loadMarkets();
+        const ordersRequests = [];
+        let orderSymbols = [];
+        for (let i = 0; i < orders.length; i++) {
+            const rawOrder = orders[i];
+            const marketId = this.safeString(rawOrder, 'symbol');
+            const market = this.market(marketId);
+            orderSymbols.push(marketId);
+            const id = this.safeString(rawOrder, 'id');
+            const amount = this.safeValue(rawOrder, 'amount');
+            const price = this.safeValue(rawOrder, 'price');
+            let orderParams = this.safeDict(rawOrder, 'params', {});
+            let marginMode = undefined;
+            [marginMode, orderParams] = this.handleMarginModeAndParams('editOrders', orderParams);
+            let market_type = 'SPOT';
+            if (market['swap']) {
+                market_type = 'FUTURES';
+            }
+            else if (marginMode !== undefined) {
+                market_type = 'MARGIN';
+            }
+            const orderRequest = {
+                'order_id': this.parseToNumeric(id),
+                'market': market['id'],
+                'market_type': market_type,
+            };
+            if (amount !== undefined) {
+                orderRequest['amount'] = this.amountToPrecision(marketId, amount);
+            }
+            if (price !== undefined) {
+                orderRequest['price'] = this.priceToPrecision(marketId, price);
+            }
+            ordersRequests.push(this.extend(orderRequest, orderParams));
+        }
+        orderSymbols = this.marketSymbols(orderSymbols, undefined, false, true, true);
+        const firstSymbol = this.safeString(orderSymbols, 0);
+        const firstMarket = this.market(firstSymbol);
+        const request = {
+            'orders': ordersRequests,
+        };
+        let response = undefined;
+        if (firstMarket['spot']) {
+            response = await this.v2PrivatePostSpotBatchModifyOrder(this.extend(request, params));
+        }
+        else {
+            response = await this.v2PrivatePostFuturesBatchModifyOrder(this.extend(request, params));
+        }
+        const data = this.safeList(response, 'data', []);
+        const result = [];
+        for (let i = 0; i < data.length; i++) {
+            const entry = data[i];
+            const code = this.safeString(entry, 'code');
+            const message = this.safeString(entry, 'message');
+            if ((code !== '0') || ((message !== 'Success') && (message !== 'Succeeded') && (message.toLowerCase() !== 'ok') && !data)) {
+                const feedback = this.id + ' ' + message;
+                this.throwBroadlyMatchedException(this.exceptions['broad'], message, feedback);
+                this.throwExactlyMatchedException(this.exceptions['exact'], code, feedback);
+                throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.ExchangeError(feedback);
+            }
+            const item = this.safeDict(entry, 'data', {});
+            const order = this.parseOrder(item);
+            result.push(order);
+        }
+        return result;
     }
     /**
      * @method
