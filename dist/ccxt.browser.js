@@ -28855,6 +28855,8 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                         'lvtKlines': 1,
                         'convert/exchangeInfo': 4,
                         'insuranceBalance': 1,
+                        'symbolAdlRisk': 1,
+                        'tradingSchedule': 5,
                     },
                 },
                 'fapiData': {
@@ -28886,7 +28888,6 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                         'commissionRate': 20,
                         'rateLimit/order': 1,
                         'apiTradingStatus': 1,
-                        'symbolAdlRisk': 1,
                         'multiAssetsMargin': 30,
                         // broker endpoints
                         'apiReferral/ifNewUser': 1,
@@ -28914,6 +28915,7 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                         'algoOrder': 1,
                         'openAlgoOrders': { 'cost': 1, 'noSymbol': 40 },
                         'allAlgoOrders': 5,
+                        'stock/contract': 50,
                     },
                     'post': {
                         'batchOrders': 5,
@@ -46051,8 +46053,8 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
             const isTrailing = isTrailingAmountOrder || isTrailingPercentOrder;
             const stopLoss = this.safeValue(params, 'stopLoss');
             const takeProfit = this.safeValue(params, 'takeProfit');
-            const isStopLoss = stopLoss !== undefined;
-            const isTakeProfit = takeProfit !== undefined;
+            const hasStopLoss = stopLoss !== undefined;
+            const hasTakeProfit = takeProfit !== undefined;
             if (((type === 'LIMIT') || (type === 'TRIGGER_LIMIT') || (type === 'STOP') || (type === 'TAKE_PROFIT')) && !isTrailing) {
                 request['price'] = this.parseToNumeric(this.priceToPrecision(symbol, price));
             }
@@ -46098,9 +46100,9 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                     request['priceRate'] = this.parseToNumeric(requestTrailingPercent);
                 }
             }
-            if (isStopLoss || isTakeProfit) {
+            if (hasStopLoss || hasTakeProfit) {
                 const stringifiedAmount = this.numberToString(amount);
-                if (isStopLoss) {
+                if (hasStopLoss) {
                     const slTriggerPrice = this.safeString2(stopLoss, 'triggerPrice', 'stopPrice', stopLoss);
                     const slWorkingType = this.safeString(stopLoss, 'workingType', 'MARK_PRICE');
                     const slType = this.safeString(stopLoss, 'type', 'STOP_MARKET');
@@ -46117,7 +46119,7 @@ class bingx extends _abstract_bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                     slRequest['quantity'] = this.parseToNumeric(this.amountToPrecision(symbol, slQuantity));
                     request['stopLoss'] = this.json(slRequest);
                 }
-                if (isTakeProfit) {
+                if (hasTakeProfit) {
                     const tkTriggerPrice = this.safeString2(takeProfit, 'triggerPrice', 'stopPrice', takeProfit);
                     const tkWorkingType = this.safeString(takeProfit, 'workingType', 'MARK_PRICE');
                     const tpType = this.safeString(takeProfit, 'type', 'TAKE_PROFIT_MARKET');
@@ -131061,22 +131063,22 @@ class coincatch extends _abstract_coincatch_js__WEBPACK_IMPORTED_MODULE_0__/* ["
         let stopLossPrice = this.safeString(params, 'stopLossPrice');
         let takeProfitPrice = this.safeString(params, 'takeProfitPrice');
         let requestTriggerPrice = undefined;
-        const takeProfitParams = this.safeDict(params, 'takeProfit');
-        const stopLossParams = this.safeDict(params, 'stopLoss');
+        const takeProfit = this.safeDict(params, 'takeProfit');
+        const stopLoss = this.safeDict(params, 'stopLoss');
         const triggerPrice = this.safeString2(params, 'triggerPrice', 'stopPrice');
         const isTrigger = (triggerPrice !== undefined);
         const trailingPercent = this.safeString(params, 'trailingPercent');
         const trailingTriggerPrice = this.safeString(params, 'trailingTriggerPrice');
         let hasTPPrice = (takeProfitPrice !== undefined);
         let hasSLPrice = (stopLossPrice !== undefined);
-        const hasTPParams = (takeProfitParams !== undefined);
-        if (hasTPParams && !hasTPPrice) {
-            takeProfitPrice = this.safeString(takeProfitParams, 'triggerPrice');
+        const hasTakeProfit = (takeProfit !== undefined);
+        if (hasTakeProfit && !hasTPPrice) {
+            takeProfitPrice = this.safeString(takeProfit, 'triggerPrice');
             hasTPPrice = (takeProfitPrice !== undefined);
         }
-        const hasSLParams = (stopLossParams !== undefined);
-        if (hasSLParams && !hasSLPrice) {
-            stopLossPrice = this.safeString(stopLossParams, 'triggerPrice');
+        const hasStopLoss = (stopLoss !== undefined);
+        if (hasStopLoss && !hasSLPrice) {
+            stopLossPrice = this.safeString(stopLoss, 'triggerPrice');
             hasSLPrice = (stopLossPrice !== undefined);
         }
         const hasBothTPAndSL = hasTPPrice && hasSLPrice;
