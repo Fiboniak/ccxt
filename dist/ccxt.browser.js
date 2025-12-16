@@ -234321,14 +234321,14 @@ class kucoinfutures extends _abstract_kucoinfutures_js__WEBPACK_IMPORTED_MODULE_
         const market = this.market(symbol);
         const testOrder = this.safeBool(params, 'test', false);
         params = this.omit(params, 'test');
-        const isTpAndSlOrder = (this.safeValue(params, 'stopLoss') !== undefined) || (this.safeValue(params, 'takeProfit') !== undefined);
+        const hasTpOrSlOrder = (this.safeValue(params, 'stopLoss') !== undefined) || (this.safeValue(params, 'takeProfit') !== undefined);
         const orderRequest = this.createContractOrderRequest(symbol, type, side, amount, price, params);
         let response = undefined;
         if (testOrder) {
             response = await this.futuresPrivatePostOrdersTest(orderRequest);
         }
         else {
-            if (isTpAndSlOrder) {
+            if (hasTpOrSlOrder) {
                 response = await this.futuresPrivatePostStOrders(orderRequest);
             }
             else {
@@ -234426,6 +234426,8 @@ class kucoinfutures extends _abstract_kucoinfutures_js__WEBPACK_IMPORTED_MODULE_
         const [triggerPrice, stopLossPrice, takeProfitPrice] = this.handleTriggerPrices(params);
         const stopLoss = this.safeDict(params, 'stopLoss');
         const takeProfit = this.safeDict(params, 'takeProfit');
+        const hasStopLoss = stopLoss !== undefined;
+        const hasTakeProfit = takeProfit !== undefined;
         // const isTpAndSl = stopLossPrice && takeProfitPrice;
         const triggerPriceTypes = {
             'mark': 'MP',
@@ -234440,15 +234442,15 @@ class kucoinfutures extends _abstract_kucoinfutures_js__WEBPACK_IMPORTED_MODULE_
             request['stopPrice'] = this.priceToPrecision(symbol, triggerPrice);
             request['stopPriceType'] = triggerPriceTypeValue;
         }
-        else if (stopLoss !== undefined || takeProfit !== undefined) {
+        else if (hasStopLoss || hasTakeProfit) {
             let priceType = triggerPriceTypeValue;
-            if (stopLoss !== undefined) {
+            if (hasStopLoss) {
                 const slPrice = this.safeString2(stopLoss, 'triggerPrice', 'stopPrice');
                 request['triggerStopDownPrice'] = this.priceToPrecision(symbol, slPrice);
                 priceType = this.safeString(stopLoss, 'triggerPriceType', 'mark');
                 priceType = this.safeString(triggerPriceTypes, priceType, priceType);
             }
-            if (takeProfit !== undefined) {
+            if (hasTakeProfit) {
                 const tpPrice = this.safeString2(takeProfit, 'triggerPrice', 'takeProfitPrice');
                 request['triggerStopUpPrice'] = this.priceToPrecision(symbol, tpPrice);
                 priceType = this.safeString(takeProfit, 'triggerPriceType', 'mark');
@@ -251375,8 +251377,10 @@ class modetrade extends _abstract_modetrade_js__WEBPACK_IMPORTED_MODULE_0__/* ["
         const triggerPrice = this.safeString2(params, 'triggerPrice', 'stopPrice');
         const stopLoss = this.safeValue(params, 'stopLoss');
         const takeProfit = this.safeValue(params, 'takeProfit');
+        const hasStopLoss = stopLoss !== undefined;
+        const hasTakeProfit = takeProfit !== undefined;
         const algoType = this.safeString(params, 'algoType');
-        const isConditional = triggerPrice !== undefined || stopLoss !== undefined || takeProfit !== undefined || (this.safeValue(params, 'childOrders') !== undefined);
+        const isConditional = triggerPrice !== undefined || hasStopLoss || hasTakeProfit || (this.safeValue(params, 'childOrders') !== undefined);
         const isMarket = orderType === 'MARKET';
         const timeInForce = this.safeStringLower(params, 'timeInForce');
         const postOnly = this.isPostOnly(isMarket, undefined, params);
@@ -251415,7 +251419,7 @@ class modetrade extends _abstract_modetrade_js__WEBPACK_IMPORTED_MODULE_0__/* ["
             request['trigger_price'] = this.priceToPrecision(symbol, triggerPrice);
             request['algo_type'] = 'STOP';
         }
-        else if ((stopLoss !== undefined) || (takeProfit !== undefined)) {
+        else if (hasStopLoss || hasTakeProfit) {
             request['algo_type'] = 'TP_SL';
             const outterOrder = {
                 'symbol': market['id'],
@@ -251425,7 +251429,7 @@ class modetrade extends _abstract_modetrade_js__WEBPACK_IMPORTED_MODULE_0__/* ["
             };
             const childOrders = outterOrder['child_orders'];
             const closeSide = (orderSide === 'BUY') ? 'SELL' : 'BUY';
-            if (stopLoss !== undefined) {
+            if (hasStopLoss) {
                 const stopLossPrice = this.safeNumber2(stopLoss, 'triggerPrice', 'price', stopLoss);
                 const stopLossOrder = {
                     'side': closeSide,
@@ -251436,7 +251440,7 @@ class modetrade extends _abstract_modetrade_js__WEBPACK_IMPORTED_MODULE_0__/* ["
                 };
                 childOrders.push(stopLossOrder);
             }
-            if (takeProfit !== undefined) {
+            if (hasTakeProfit) {
                 const takeProfitPrice = this.safeNumber2(takeProfit, 'triggerPrice', 'price', takeProfit);
                 const takeProfitOrder = {
                     'side': closeSide,
@@ -261403,9 +261407,9 @@ class okx extends _abstract_okx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
         const slTriggerPxType = this.safeString(params, 'slTriggerPxType', 'last');
         const clientOrderId = this.safeString2(params, 'clOrdId', 'clientOrderId');
         const stopLoss = this.safeValue(params, 'stopLoss');
-        const stopLossDefined = (stopLoss !== undefined);
         const takeProfit = this.safeValue(params, 'takeProfit');
-        const takeProfitDefined = (takeProfit !== undefined);
+        const hasStopLoss = (stopLoss !== undefined);
+        const hasTakeProfit = (takeProfit !== undefined);
         const trailingPercent = this.safeString2(params, 'trailingPercent', 'callbackRatio');
         const isTrailingPercentOrder = trailingPercent !== undefined;
         const trailingPrice = this.safeString2(params, 'trailingPrice', 'callbackSpread');
@@ -261530,9 +261534,9 @@ class okx extends _abstract_okx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
             request['callbackSpread'] = trailingPrice;
             request['ordType'] = 'move_order_stop';
         }
-        else if (stopLossDefined || takeProfitDefined) {
+        else if (hasStopLoss || hasTakeProfit) {
             let attachAlgoOrd = {};
-            if (stopLossDefined) {
+            if (hasStopLoss) {
                 const stopLossTriggerPrice = this.safeValueN(stopLoss, ['triggerPrice', 'stopPrice', 'slTriggerPx']);
                 if (stopLossTriggerPrice === undefined) {
                     throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder(this.id + ' createOrder() requires a trigger price in params["stopLoss"]["triggerPrice"], or params["stopLoss"]["stopPrice"], or params["stopLoss"]["slTriggerPx"] for a stop loss order');
@@ -261575,7 +261579,7 @@ class okx extends _abstract_okx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
                 }
                 attachAlgoOrd = this.extend(attachAlgoOrd, slOrder);
             }
-            if (takeProfitDefined) {
+            if (hasTakeProfit) {
                 const takeProfitTriggerPrice = this.safeValueN(takeProfit, ['triggerPrice', 'stopPrice', 'tpTriggerPx']);
                 if (takeProfitTriggerPrice === undefined) {
                     throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder(this.id + ' createOrder() requires a trigger price in params["takeProfit"]["triggerPrice"], or params["takeProfit"]["stopPrice"], or params["takeProfit"]["tpTriggerPx"] for a take profit order');
@@ -261829,8 +261833,8 @@ class okx extends _abstract_okx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
         const takeProfitTriggerPriceType = this.safeString(params, 'newTpTriggerPxType', 'last');
         const stopLoss = this.safeValue(params, 'stopLoss');
         const takeProfit = this.safeValue(params, 'takeProfit');
-        const stopLossDefined = (stopLoss !== undefined);
-        const takeProfitDefined = (takeProfit !== undefined);
+        const hasStopLoss = (stopLoss !== undefined);
+        const hasTakeProfit = (takeProfit !== undefined);
         if (isAlgoOrder) {
             if ((stopLossTriggerPrice === undefined) && (takeProfitTriggerPrice === undefined)) {
                 throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.BadRequest(this.id + ' editOrder() requires a stopLossPrice or takeProfitPrice parameter for editing an algo order');
@@ -261863,7 +261867,7 @@ class okx extends _abstract_okx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
                 request['newTpOrdPx'] = (type === 'market') ? '-1' : this.priceToPrecision(symbol, takeProfitPrice);
                 request['newTpTriggerPxType'] = takeProfitTriggerPriceType;
             }
-            if (stopLossDefined) {
+            if (hasStopLoss) {
                 stopLossTriggerPrice = this.safeValue(stopLoss, 'triggerPrice');
                 stopLossPrice = this.safeValue(stopLoss, 'price');
                 const stopLossType = this.safeString(stopLoss, 'type');
@@ -261871,7 +261875,7 @@ class okx extends _abstract_okx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
                 request['newSlOrdPx'] = (stopLossType === 'market') ? '-1' : this.priceToPrecision(symbol, stopLossPrice);
                 request['newSlTriggerPxType'] = stopLossTriggerPriceType;
             }
-            if (takeProfitDefined) {
+            if (hasTakeProfit) {
                 takeProfitTriggerPrice = this.safeValue(takeProfit, 'triggerPrice');
                 takeProfitPrice = this.safeValue(takeProfit, 'price');
                 const takeProfitType = this.safeString(takeProfit, 'type');
@@ -279770,9 +279774,9 @@ class phemex extends _abstract_phemex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         };
         const clientOrderId = this.safeString2(params, 'clOrdID', 'clientOrderId');
         const stopLoss = this.safeValue(params, 'stopLoss');
-        const stopLossDefined = (stopLoss !== undefined);
         const takeProfit = this.safeValue(params, 'takeProfit');
-        const takeProfitDefined = (takeProfit !== undefined);
+        const hasStopLoss = (stopLoss !== undefined);
+        const hasTakeProfit = (takeProfit !== undefined);
         const isStableSettled = (market['settle'] === 'USDT') || (market['settle'] === 'USDC');
         if (clientOrderId === undefined) {
             const brokerId = this.safeString(this.options, 'brokerId', 'CCXT123456');
@@ -279886,8 +279890,8 @@ class phemex extends _abstract_phemex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                     }
                 }
             }
-            if (stopLossDefined || takeProfitDefined) {
-                if (stopLossDefined) {
+            if (hasStopLoss || hasTakeProfit) {
+                if (hasStopLoss) {
                     const stopLossTriggerPrice = this.safeValue2(stopLoss, 'triggerPrice', 'stopPrice');
                     if (stopLossTriggerPrice === undefined) {
                         throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder(this.id + ' createOrder() requires a trigger price in params["stopLoss"]["triggerPrice"] for a stop loss order');
@@ -279907,7 +279911,7 @@ class phemex extends _abstract_phemex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                         request['slPxRp'] = this.priceToPrecision(symbol, slLimitPrice);
                     }
                 }
-                if (takeProfitDefined) {
+                if (hasTakeProfit) {
                     const takeProfitTriggerPrice = this.safeValue2(takeProfit, 'triggerPrice', 'stopPrice');
                     if (takeProfitTriggerPrice === undefined) {
                         throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder(this.id + ' createOrder() requires a trigger price in params["takeProfit"]["triggerPrice"] for a take profit order');
@@ -403605,11 +403609,13 @@ class toobit extends _abstract_toobit_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
         }
         const stopLoss = this.safeDict(params, 'stopLoss');
         const takeProfit = this.safeDict(params, 'takeProfit');
+        const hasStopLoss = (stopLoss !== undefined);
+        const hasTakeProfit = (takeProfit !== undefined);
         const triggerPriceTypes = {
             'mark': 'MARK_PRICE',
             'last': 'CONTRACT_PRICE',
         };
-        if (stopLoss !== undefined) {
+        if (hasStopLoss) {
             request['stopLoss'] = this.safeValue(stopLoss, 'triggerPrice');
             const limitPrice = this.safeValue(stopLoss, 'price');
             if (limitPrice !== undefined) {
@@ -403622,7 +403628,7 @@ class toobit extends _abstract_toobit_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             }
             params = this.omit(params, 'stopLoss');
         }
-        if (takeProfit !== undefined) {
+        if (hasTakeProfit) {
             request['takeProfit'] = this.safeValue(takeProfit, 'triggerPrice');
             const limitPrice = this.safeValue(takeProfit, 'price');
             if (limitPrice !== undefined) {
@@ -415344,6 +415350,8 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
         const triggerPrice = this.safeString2(params, 'triggerPrice', 'stopPrice');
         const stopLoss = this.safeValue(params, 'stopLoss');
         const takeProfit = this.safeValue(params, 'takeProfit');
+        const hasStopLoss = (stopLoss !== undefined);
+        const hasTakeProfit = (takeProfit !== undefined);
         const algoType = this.safeString(params, 'algoType');
         const trailingTriggerPrice = this.safeString2(params, 'trailingTriggerPrice', 'activatedPrice', this.numberToString(price));
         const trailingAmount = this.safeString2(params, 'trailingAmount', 'callbackValue');
@@ -415351,7 +415359,7 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
         const isTrailingAmountOrder = trailingAmount !== undefined;
         const isTrailingPercentOrder = trailingPercent !== undefined;
         const isTrailing = isTrailingAmountOrder || isTrailingPercentOrder;
-        const isConditional = isTrailing || triggerPrice !== undefined || stopLoss !== undefined || takeProfit !== undefined || (this.safeValue(params, 'childOrders') !== undefined);
+        const isConditional = isTrailing || triggerPrice !== undefined || hasStopLoss || hasTakeProfit || (this.safeValue(params, 'childOrders') !== undefined);
         const isMarket = orderType === 'MARKET';
         const timeInForce = this.safeStringLower(params, 'timeInForce');
         const postOnly = this.isPostOnly(isMarket, undefined, params);
@@ -415423,7 +415431,7 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
                 request['algoType'] = 'STOP';
             }
         }
-        else if ((stopLoss !== undefined) || (takeProfit !== undefined)) {
+        else if (hasStopLoss || hasTakeProfit) {
             request['algoType'] = 'BRACKET';
             const outterOrder = {
                 'symbol': market['id'],
@@ -415433,7 +415441,7 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
             };
             const childOrders = outterOrder['childOrders'];
             const closeSide = (orderSide === 'BUY') ? 'SELL' : 'BUY';
-            if (stopLoss !== undefined) {
+            if (hasStopLoss) {
                 const stopLossPrice = this.safeString(stopLoss, 'triggerPrice', stopLoss);
                 const stopLossOrder = {
                     'side': closeSide,
@@ -415444,7 +415452,7 @@ class woo extends _abstract_woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */
                 };
                 childOrders.push(stopLossOrder);
             }
-            if (takeProfit !== undefined) {
+            if (hasTakeProfit) {
                 const takeProfitPrice = this.safeString(takeProfit, 'triggerPrice', takeProfit);
                 const takeProfitOrder = {
                     'side': closeSide,
@@ -428024,26 +428032,55 @@ class zaif extends _abstract_zaif_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                 'future': false,
                 'option': false,
                 'cancelOrder': true,
+                'closeAllPositions': false,
+                'closePosition': false,
                 'createMarketOrder': false,
                 'createOrder': true,
+                'createStopLossOrder': false,
+                'createTakeProfitOrder': false,
+                'fetchAllGreeks': false,
                 'fetchBalance': true,
                 'fetchClosedOrders': true,
                 'fetchCurrencies': false,
                 'fetchFundingHistory': false,
+                'fetchFundingInterval': false,
+                'fetchFundingIntervals': false,
                 'fetchFundingRate': false,
                 'fetchFundingRateHistory': false,
                 'fetchFundingRates': false,
+                'fetchGreeks': false,
                 'fetchIndexOHLCV': false,
+                'fetchLeverageTiers': false,
+                'fetchLongShortRatio': false,
+                'fetchLongShortRatioHistory': false,
+                'fetchMarketLeverageTiers': false,
                 'fetchMarkets': true,
                 'fetchMarkOHLCV': false,
+                'fetchMarkPrice': false,
+                'fetchMarkPrices': false,
+                'fetchMySettlementHistory': false,
                 'fetchOpenInterestHistory': false,
+                'fetchOpenInterests': false,
                 'fetchOpenOrders': true,
+                'fetchOption': false,
+                'fetchOptionChain': false,
                 'fetchOrderBook': true,
+                'fetchPosition': false,
+                'fetchPositionHistory': false,
+                'fetchPositionMode': false,
+                'fetchPositions': false,
+                'fetchPositionsForSymbol': false,
+                'fetchPositionsHistory': false,
+                'fetchPositionsRisk': false,
                 'fetchPremiumIndexOHLCV': false,
+                'fetchSettlementHistory': false,
                 'fetchTicker': true,
                 'fetchTrades': true,
                 'fetchTradingFee': false,
                 'fetchTradingFees': false,
+                'fetchUnderlyingAssets': false,
+                'fetchVolatilityHistory': false,
+                'setMarginMode': false,
                 'withdraw': true,
             },
             'urls': {
