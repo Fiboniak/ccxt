@@ -378832,6 +378832,7 @@ function assertPrivate(givenGuard, guard, className) {
 /* harmony export */   id: () => (/* binding */ id)
 /* harmony export */ });
 /* unused harmony export sha256 */
+/* harmony import */ var _data_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3867);
 /* harmony import */ var _base_functions_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(8283);
 /* harmony import */ var _noble_hashes_sha3_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8432);
 /**
@@ -378857,13 +378858,20 @@ function assertPrivate(givenGuard, guard, className) {
 
 
 
+
 function id(value) {
     return '0x' + (0,_base_functions_js__WEBPACK_IMPORTED_MODULE_0__/* .hash */ .tW)(value, _noble_hashes_sha3_js__WEBPACK_IMPORTED_MODULE_1__/* .keccak_256 */ .lY, 'hex');
 }
 function keccak256(value) {
+    if ((0,_data_js__WEBPACK_IMPORTED_MODULE_2__/* .isHexString */ .Lo)(value)) {
+        return '0x' + (0,_base_functions_js__WEBPACK_IMPORTED_MODULE_0__/* .hash */ .tW)((0,_data_js__WEBPACK_IMPORTED_MODULE_2__/* .getBytes */ .q5)(value), _noble_hashes_sha3_js__WEBPACK_IMPORTED_MODULE_1__/* .keccak_256 */ .lY, 'hex');
+    }
     return '0x' + (0,_base_functions_js__WEBPACK_IMPORTED_MODULE_0__/* .hash */ .tW)(value, _noble_hashes_sha3_js__WEBPACK_IMPORTED_MODULE_1__/* .keccak_256 */ .lY, 'hex');
 }
 function sha256(value) {
+    if (isHexString(value)) {
+        return '0x' + hash(getBytes(value), sha_256, 'hex');
+    }
     return '0x' + hash(value, sha_256, 'hex');
 }
 
