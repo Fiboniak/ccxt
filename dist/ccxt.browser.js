@@ -215324,11 +215324,12 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
             orderParams['slippage'] = slippage;
             const stopLoss = this.safeValue(orderParams, 'stopLoss');
             const takeProfit = this.safeValue(orderParams, 'takeProfit');
-            const isTrigger = (stopLoss || takeProfit);
+            const hasStopLoss = (stopLoss !== undefined);
+            const hasTakeProfit = (takeProfit !== undefined);
             orderParams = this.omit(orderParams, ['stopLoss', 'takeProfit']);
             const mainOrderObj = this.createOrderRequest(symbol, type, side, amount, price, orderParams);
             orderReq.push(mainOrderObj);
-            if (isTrigger) {
+            if (hasStopLoss || hasTakeProfit) {
                 // grouping opposed orders for sl/tp
                 const stopLossOrderTriggerPrice = this.safeStringN(stopLoss, ['triggerPrice', 'stopPrice']);
                 const stopLossOrderType = this.safeString(stopLoss, 'type', 'limit');
@@ -215345,14 +215346,14 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
                 else {
                     triggerOrderSide = 'buy';
                 }
-                if (takeProfit !== undefined) {
+                if (hasTakeProfit) {
                     const orderObj = this.createOrderRequest(symbol, takeProfitOrderType, triggerOrderSide, amount, takeProfitOrderLimitPrice, this.extend(orderParams, {
                         'takeProfitPrice': takeProfitOrderTriggerPrice,
                         'reduceOnly': true,
                     }));
                     orderReq.push(orderObj);
                 }
-                if (stopLoss !== undefined) {
+                if (hasStopLoss) {
                     const orderObj = this.createOrderRequest(symbol, stopLossOrderType, triggerOrderSide, amount, stopLossOrderLimitPrice, this.extend(orderParams, {
                         'stopLossPrice': stopLossOrderTriggerPrice,
                         'reduceOnly': true,
@@ -428902,13 +428903,26 @@ class zebpay extends _abstract_zebpay_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'future': false,
                 'option': undefined,
                 'addMargin': true,
+                'borrowCrossMargin': false,
+                'borrowIsolatedMargin': false,
+                'borrowMargin': false,
                 'cancelAllOrders': true,
                 'cancelOrder': true,
                 'cancelOrders': false,
                 'closePosition': true,
                 'createOrder': true,
                 'fetchBalance': true,
+                'fetchBorrowInterest': false,
+                'fetchBorrowRate': false,
+                'fetchBorrowRateHistories': false,
+                'fetchBorrowRateHistory': false,
+                'fetchBorrowRates': false,
+                'fetchBorrowRatesPerSymbol': false,
+                'fetchCrossBorrowRate': false,
+                'fetchCrossBorrowRates': false,
                 'fetchCurrencies': true,
+                'fetchIsolatedBorrowRate': false,
+                'fetchIsolatedBorrowRates': false,
                 'fetchLeverage': true,
                 'fetchLeverages': true,
                 'fetchMarkets': true,
@@ -428924,6 +428938,8 @@ class zebpay extends _abstract_zebpay_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 'fetchTrades': true,
                 'fetchTradingFee': true,
                 'reduceMargin': true,
+                'repayCrossMargin': false,
+                'repayIsolatedMargin': false,
                 'setLeverage': true,
             },
             'timeframes': {
