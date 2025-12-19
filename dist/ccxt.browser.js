@@ -14266,6 +14266,8 @@ class Exchange {
         this.tokenBucket = undefined;
         this.throttler = undefined;
         this.enableRateLimit = undefined;
+        this.rollingWindowSize = 0.0; // set to 0.0 to use leaky bucket rate limiter
+        this.rateLimiterAlgorithm = 'leakyBucket';
         this.httpExceptions = undefined;
         this.limits = undefined;
         this.markets_by_id = undefined;
@@ -16048,6 +16050,7 @@ class Exchange {
                 'price': { 'min': undefined, 'max': undefined },
                 'cost': { 'min': undefined, 'max': undefined },
             },
+            'rollingWindowSize': 60000, // default 60 seconds, requires rateLimiterAlgorithm to be set as 'rollingWindow'
         };
     }
     safeBoolN(dictionaryOrList, keys, defaultValue = undefined) {
@@ -16843,12 +16846,16 @@ class Exchange {
         if (this.rateLimit > 0) {
             refillRate = 1 / this.rateLimit;
         }
+        const useLeaky = (this.rollingWindowSize === 0.0) || (this.rateLimiterAlgorithm === 'leakyBucket');
+        const algorithm = useLeaky ? 'leakyBucket' : 'rollingWindow';
         const defaultBucket = {
             'delay': 0.001,
             'capacity': 1,
             'cost': 1,
-            'maxCapacity': this.safeInteger(this.options, 'maxRequestsQueue', 1000),
             'refillRate': refillRate,
+            'algorithm': algorithm,
+            'windowSize': this.rollingWindowSize,
+            'rateLimit': this.rateLimit,
         };
         const existingBucket = (this.tokenBucket === undefined) ? {} : this.tokenBucket;
         this.tokenBucket = this.extend(defaultBucket, existingBucket);
@@ -23928,15 +23935,21 @@ class Throttler {
             'refillRate': 1.0,
             'delay': 0.001,
             'capacity': 1.0,
-            'maxCapacity': 2000,
             'tokens': 0,
             'cost': 1.0,
+            'algorithm': 'leakyBucket',
+            'windowSize': 60000.0,
+            'maxWeight': undefined, // rolling window - rollingWindowSize / rateLimit   // ms_of_window / ms_of_rate_limit
         };
         Object.assign(this.config, config);
+        if (this.config['algorithm'] !== 'leakyBucket') {
+            this.config['maxWeight'] = this.config.windowSize / this.config.rateLimit;
+        }
         this.queue = [];
         this.running = false;
+        this.timestamps = [];
     }
-    async loop() {
+    async leakyBucketLoop() {
         let lastTimestamp = (0,_time_js__WEBPACK_IMPORTED_MODULE_0__/* .now */ .tB)();
         while (this.running) {
             const { resolver, cost } = this.queue[0];
@@ -23960,14 +23973,57 @@ class Throttler {
             }
         }
     }
+    async rollingWindowLoop() {
+        while (this.running) {
+            const { resolver, cost } = this.queue[0];
+            const nowTime = (0,_time_js__WEBPACK_IMPORTED_MODULE_0__/* .now */ .tB)();
+            const cutOffTime = nowTime - this.config.windowSize;
+            let totalCost = 0;
+            // Remove expired timestamps & sum the remaining requests
+            const timestamps = [];
+            for (let i = 0; i < this.timestamps.length; i++) {
+                const element = this.timestamps[i];
+                if (element.timestamp > cutOffTime) {
+                    totalCost += element.cost;
+                    timestamps.push(element);
+                }
+            }
+            this.timestamps = timestamps;
+            // handle current request
+            if (totalCost + cost <= this.config.maxWeight) {
+                // Enough capacity, proceed with request
+                this.timestamps.push({ timestamp: nowTime, cost });
+                resolver();
+                this.queue.shift();
+                await Promise.resolve(); // Yield control to event loop
+                if (this.queue.length === 0) {
+                    this.running = false;
+                }
+            }
+            else {
+                // Calculate the wait time until the oldest request expires
+                const earliestRequestTime = this.timestamps[0].timestamp;
+                const waitTime = (earliestRequestTime + this.config.windowSize) - nowTime;
+                // Ensure waitTime is positive before sleeping
+                if (waitTime > 0) {
+                    await (0,_time_js__WEBPACK_IMPORTED_MODULE_0__/* .sleep */ .yy)(waitTime);
+                }
+            }
+        }
+    }
+    async loop() {
+        if (this.config['algorithm'] === 'leakyBucket') {
+            await this.leakyBucketLoop();
+        }
+        else {
+            await this.rollingWindowLoop();
+        }
+    }
     throttle(cost = undefined) {
         let resolver;
         const promise = new Promise((resolve, reject) => {
             resolver = resolve;
         });
-        if (this.queue.length > this.config['maxCapacity']) {
-            throw new Error('throttle queue is over maxCapacity (' + this.config['maxCapacity'].toString() + '), see https://docs.ccxt.com/#/README?id=maximum-requests-capacity');
-        }
         cost = (cost === undefined) ? this.config['cost'] : cost;
         this.queue.push({ resolver, cost });
         if (!this.running) {
@@ -30639,6 +30695,7 @@ class binance extends _abstract_binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
                     'PERCENT_PRICE_BY_SIDE': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder, // {"code":-1013,"msg":"Filter failure: PERCENT_PRICE_BY_SIDE"}
                 },
             },
+            'rollingWindowSize': 60000.0,
         });
     }
     isInverse(type, subType = undefined) {
@@ -50854,6 +50911,7 @@ class bitbank extends _abstract_bitbank_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
             'name': 'bitbank',
             'countries': ['JP'],
             'version': 'v1',
+            'rateLimit': 100,
             'has': {
                 'CORS': undefined,
                 'spot': true,
@@ -50973,46 +51031,46 @@ class bitbank extends _abstract_bitbank_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
             },
             'api': {
                 'public': {
-                    'get': [
-                        '{pair}/ticker',
-                        'tickers',
-                        'tickers_jpy',
-                        '{pair}/depth',
-                        '{pair}/transactions',
-                        '{pair}/transactions/{yyyymmdd}',
-                        '{pair}/candlestick/{candletype}/{yyyymmdd}',
-                        '{pair}/circuit_break_info',
-                    ],
+                    'get': {
+                        '{pair}/ticker': 1,
+                        'tickers': 1,
+                        'tickers_jpy': 1,
+                        '{pair}/depth': 1,
+                        '{pair}/transactions': 1,
+                        '{pair}/transactions/{yyyymmdd}': 1,
+                        '{pair}/candlestick/{candletype}/{yyyymmdd}': 1,
+                        '{pair}/circuit_break_info': 1,
+                    },
                 },
                 'private': {
-                    'get': [
-                        'user/assets',
-                        'user/spot/order',
-                        'user/spot/active_orders',
-                        'user/margin/positions',
-                        'user/spot/trade_history',
-                        'user/deposit_history',
-                        'user/unconfirmed_deposits',
-                        'user/deposit_originators',
-                        'user/withdrawal_account',
-                        'user/withdrawal_history',
-                        'spot/status',
-                        'spot/pairs',
-                    ],
-                    'post': [
-                        'user/spot/order',
-                        'user/spot/cancel_order',
-                        'user/spot/cancel_orders',
-                        'user/spot/orders_info',
-                        'user/confirm_deposits',
-                        'user/confirm_deposits_all',
-                        'user/request_withdrawal',
-                    ],
+                    'get': {
+                        'user/assets': 1,
+                        'user/spot/order': 1,
+                        'user/spot/active_orders': 1,
+                        'user/margin/positions': 1,
+                        'user/spot/trade_history': 1,
+                        'user/deposit_history': 1,
+                        'user/unconfirmed_deposits': 1,
+                        'user/deposit_originators': 1,
+                        'user/withdrawal_account': 1,
+                        'user/withdrawal_history': 1,
+                        'spot/status': 1,
+                        'spot/pairs': 1,
+                    },
+                    'post': {
+                        'user/spot/order': 1.66,
+                        'user/spot/cancel_order': 1.66,
+                        'user/spot/cancel_orders': 1.66,
+                        'user/spot/orders_info': 1.66,
+                        'user/confirm_deposits': 1.66,
+                        'user/confirm_deposits_all': 1.66,
+                        'user/request_withdrawal': 1.66,
+                    },
                 },
                 'markets': {
-                    'get': [
-                        'spot/pairs',
-                    ],
+                    'get': {
+                        'spot/pairs': 1,
+                    },
                 },
             },
             'features': {
@@ -60161,6 +60219,7 @@ class bitget extends _abstract_bitget_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
                 // fiat currencies on deposit page
                 'fiatCurrencies': ['EUR', 'VND', 'PLN', 'CZK', 'HUF', 'DKK', 'AUD', 'CAD', 'NOK', 'SEK', 'CHF', 'MXN', 'COP', 'ARS', 'GBP', 'BRL', 'UAH', 'ZAR'],
             },
+            'rollingWindowSize': 1000.0,
             'features': {
                 'spot': {
                     'sandbox': true,
@@ -99945,6 +100004,7 @@ class btcalpha extends _abstract_btcalpha_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
             'name': 'BTC-Alpha',
             'countries': ['US'],
             'version': 'v1',
+            'rateLimit': 10,
             'has': {
                 'CORS': undefined,
                 'spot': true,
@@ -100072,28 +100132,28 @@ class btcalpha extends _abstract_btcalpha_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
             },
             'api': {
                 'public': {
-                    'get': [
-                        'currencies/',
-                        'pairs/',
-                        'orderbook/{pair_name}',
-                        'exchanges/',
-                        'charts/{pair}/{type}/chart/',
-                        'ticker/',
-                    ],
+                    'get': {
+                        'currencies/': 1,
+                        'pairs/': 1,
+                        'orderbook/{pair_name}': 1,
+                        'exchanges/': 1,
+                        'charts/{pair}/{type}/chart/': 1,
+                        'ticker/': 1,
+                    },
                 },
                 'private': {
-                    'get': [
-                        'wallets/',
-                        'orders/own/',
-                        'order/{id}/',
-                        'exchanges/own/',
-                        'deposits/',
-                        'withdraws/',
-                    ],
-                    'post': [
-                        'order/',
-                        'order-cancel/',
-                    ],
+                    'get': {
+                        'wallets/': 50,
+                        'orders/own/': 50,
+                        'order/{id}/': 50,
+                        'exchanges/own/': 50,
+                        'deposits/': 50,
+                        'withdraws/': 50,
+                    },
+                    'post': {
+                        'order/': 50,
+                        'order-cancel/': 50,
+                    },
                 },
             },
             'fees': {
@@ -274141,7 +274201,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchTime
      * @description fetches the current integer timestamp in milliseconds from the exchange server
-     * @see https://docs.api.testnet.paradex.trade/#get-system-time-unix-milliseconds
+     * @see https://docs.paradex.trade/api/prod/system/get-time-unix-milliseconds
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {int} the current integer timestamp in milliseconds from the exchange server
      */
@@ -274158,7 +274218,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchStatus
      * @description the latest known information on the availability of the exchange API
-     * @see https://docs.api.testnet.paradex.trade/#get-system-state
+     * @see https://docs.paradex.trade/api/prod/system/get-state
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object} a [status structure]{@link https://docs.ccxt.com/?id=exchange-status-structure}
      */
@@ -274182,7 +274242,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchMarkets
      * @description retrieves data on all markets for bitget
-     * @see https://docs.api.testnet.paradex.trade/#list-available-markets
+     * @see https://docs.paradex.trade/api/prod/markets/get-markets
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object[]} an array of objects representing market data
      */
@@ -274382,7 +274442,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchOHLCV
      * @description fetches historical candlestick data containing the open, high, low, and close price, and the volume of a market
-     * @see https://docs.api.testnet.paradex.trade/#ohlcv-for-a-symbol
+     * @see https://docs.paradex.trade/api/prod/markets/klines
      * @param {string} symbol unified symbol of the market to fetch OHLCV data for
      * @param {string} timeframe the length of time each candle represents
      * @param {int} [since] timestamp in ms of the earliest candle to fetch
@@ -274467,7 +274527,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchTickers
      * @description fetches price tickers for multiple markets, statistical information calculated over the past 24 hours for each market
-     * @see https://docs.api.testnet.paradex.trade/#list-available-markets-summary
+     * @see https://docs.paradex.trade/api/prod/markets/get-markets-summary
      * @param {string[]|undefined} symbols unified symbols of the markets to fetch the ticker for, all market tickers are returned if not assigned
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object} a dictionary of [ticker structures]{@link https://docs.ccxt.com/?id=ticker-structure}
@@ -274507,7 +274567,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchTicker
      * @description fetches a price ticker, a statistical calculation with the information calculated over the past 24 hours for a specific market
-     * @see https://docs.api.testnet.paradex.trade/#list-available-markets-summary
+     * @see https://docs.paradex.trade/api/prod/markets/get-markets-summary
      * @param {string} symbol unified symbol of the market to fetch the ticker for
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/?id=ticker-structure}
@@ -274599,7 +274659,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchOrderBook
      * @description fetches information on open orders with bid (buy) and ask (sell) prices, volumes and other data
-     * @see https://docs.api.testnet.paradex.trade/#get-market-orderbook
+     * @see https://docs.paradex.trade/api/prod/markets/get-orderbook
      * @param {string} symbol unified symbol of the market to fetch the order book for
      * @param {int} [limit] the maximum amount of order book entries to return
      * @param {object} [params] extra parameters specific to the exchange API endpoint
@@ -274641,7 +274701,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchTrades
      * @description get the list of most recent trades for a particular symbol
-     * @see https://docs.api.testnet.paradex.trade/#trade-tape
+     * @see https://docs.paradex.trade/api/prod/trades/trades
      * @param {string} symbol unified symbol of the market to fetch trades for
      * @param {int} [since] timestamp in ms of the earliest trade to fetch
      * @param {int} [limit] the maximum amount of trades to fetch
@@ -274760,7 +274820,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchOpenInterest
      * @description retrieves the open interest of a contract trading pair
-     * @see https://docs.api.testnet.paradex.trade/#list-available-markets-summary
+     * @see https://docs.paradex.trade/api/prod/markets/get-markets-summary
      * @param {string} symbol unified CCXT market symbol
      * @param {object} [params] exchange specific parameters
      * @returns {object} an open interest structure{@link https://docs.ccxt.com/?id=open-interest-structure}
@@ -275113,7 +275173,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#createOrder
      * @description create a trade order
-     * @see https://docs.api.prod.paradex.trade/#create-order
+     * @see https://docs.paradex.trade/api/prod/orders/new
      * @param {string} symbol unified symbol of the market to create an order in
      * @param {string} type 'market' or 'limit'
      * @param {string} side 'buy' or 'sell'
@@ -275279,8 +275339,8 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#cancelOrder
      * @description cancels an open order
-     * @see https://docs.api.prod.paradex.trade/#cancel-order
-     * @see https://docs.api.prod.paradex.trade/#cancel-open-order-by-client-order-id
+     * @see https://docs.paradex.trade/api/prod/orders/cancel
+     * @see https://docs.paradex.trade/api/prod/orders/cancel-by-client-id
      * @param {string} id order id
      * @param {string} symbol unified symbol of the market the order was made in
      * @param {object} [params] extra parameters specific to the exchange API endpoint
@@ -275310,7 +275370,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#cancelAllOrders
      * @description cancel all open orders in a market
-     * @see https://docs.api.prod.paradex.trade/#cancel-all-open-orders
+     * @see https://docs.paradex.trade/api/prod/orders/cancel-all
      * @param {string} symbol unified market symbol of the market to cancel orders in
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/?id=order-structure}
@@ -275335,8 +275395,8 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchOrder
      * @description fetches information on an order made by the user
-     * @see https://docs.api.prod.paradex.trade/#get-order
-     * @see https://docs.api.prod.paradex.trade/#get-order-by-client-id
+     * @see https://docs.paradex.trade/api/prod/orders/get
+     * @see https://docs.paradex.trade/api/prod/orders/get-by-client-id
      * @param {string} id the order id
      * @param {string} symbol unified symbol of the market the order was made in
      * @param {object} [params] extra parameters specific to the exchange API endpoint
@@ -275390,7 +275450,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchOrders
      * @description fetches information on multiple orders made by the user
-     * @see https://docs.api.prod.paradex.trade/#get-orders
+     * @see https://docs.paradex.trade/api/prod/orders/get-orders
      * @param {string} symbol unified market symbol of the market orders were made in
      * @param {int} [since] the earliest time in ms to fetch orders for
      * @param {int} [limit] the maximum number of order structures to retrieve
@@ -275470,7 +275530,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchOpenOrders
      * @description fetches information on multiple orders made by the user
-     * @see https://docs.api.prod.paradex.trade/#paradex-rest-api-orders
+     * @see https://docs.paradex.trade/api/prod/orders/get-open-orders
      * @param {string} symbol unified market symbol of the market orders were made in
      * @param {int} [since] the earliest time in ms to fetch orders for
      * @param {int} [limit] the maximum number of order structures to retrieve
@@ -275526,7 +275586,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchBalance
      * @description query for balance and get the amount of funds available for trading or funds locked in orders
-     * @see https://docs.api.prod.paradex.trade/#list-balances
+     * @see https://docs.paradex.trade/api/prod/account/get-balance
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object} a [balance structure]{@link https://docs.ccxt.com/?id=balance-structure}
      */
@@ -275564,7 +275624,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchMyTrades
      * @description fetch all trades made by the user
-     * @see https://docs.api.prod.paradex.trade/#list-fills
+     * @see https://docs.paradex.trade/api/prod/account/list-fills
      * @param {string} symbol unified market symbol
      * @param {int} [since] the earliest time in ms to fetch trades for
      * @param {int} [limit] the maximum number of trades structures to retrieve
@@ -275628,7 +275688,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchPosition
      * @description fetch data on an open position
-     * @see https://docs.api.prod.paradex.trade/#list-open-positions
+     * @see https://docs.paradex.trade/api/prod/account/get-positions
      * @param {string} symbol unified market symbol of the market the position is held in
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object} a [position structure]{@link https://docs.ccxt.com/?id=position-structure}
@@ -275644,7 +275704,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchPositions
      * @description fetch all open positions
-     * @see https://docs.api.prod.paradex.trade/#list-open-positions
+     * @see https://docs.paradex.trade/api/prod/account/get-positions
      * @param {string[]} [symbols] list of unified market symbols
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object[]} a list of [position structure]{@link https://docs.ccxt.com/?id=position-structure}
@@ -275743,7 +275803,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchLiquidations
      * @description retrieves the public liquidations of a trading pair
-     * @see https://docs.api.prod.paradex.trade/#list-liquidations
+     * @see https://docs.paradex.trade/api/prod/liquidations/get-liquidations
      * @param {string} symbol unified CCXT market symbol
      * @param {int} [since] the earliest time in ms to fetch liquidations for
      * @param {int} [limit] the maximum number of liquidation structures to retrieve
@@ -275801,7 +275861,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchTransfers
      * @description fetch all deposits made to an account
-     * @see https://docs.api.prod.paradex.trade/#paradex-rest-api-transfers
+     * @see https://docs.paradex.trade/api/prod/transfers/get
      * @param {string} code unified currency code
      * @param {int} [since] the earliest time in ms to fetch deposits for
      * @param {int} [limit] the maximum number of deposits structures to retrieve
@@ -275862,7 +275922,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchWithdrawals
      * @description fetch all withdrawals made from an account
-     * @see https://docs.api.prod.paradex.trade/#paradex-rest-api-transfers
+     * @see https://docs.paradex.trade/api/prod/transfers/get
      * @param {string} code unified currency code
      * @param {int} [since] the earliest time in ms to fetch withdrawals for
      * @param {int} [limit] the maximum number of withdrawals structures to retrieve
@@ -275984,7 +276044,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchMarginMode
      * @description fetches the margin mode of a specific symbol
-     * @see https://docs.api.testnet.paradex.trade/#get-account-margin-configuration
+     * @see https://docs.paradex.trade/api/prod/account/get-account-margin
      * @param {string} symbol unified symbol of the market the order was made in
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object} a [margin mode structure]{@link https://docs.ccxt.com/?id=margin-mode-structure}
@@ -276026,7 +276086,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#setMarginMode
      * @description set margin mode to 'cross' or 'isolated'
-     * @see https://docs.api.testnet.paradex.trade/#set-margin-configuration
+     * @see https://docs.paradex.trade/api/prod/account/upsert-account-margin
      * @param {string} marginMode 'cross' or 'isolated'
      * @param {string} symbol unified market symbol
      * @param {object} [params] extra parameters specific to the exchange API endpoint
@@ -276051,7 +276111,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchLeverage
      * @description fetch the set leverage for a market
-     * @see https://docs.api.testnet.paradex.trade/#get-account-margin-configuration
+     * @see https://docs.paradex.trade/api/prod/account/get-account-margin
      * @param {string} symbol unified market symbol
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object} a [leverage structure]{@link https://docs.ccxt.com/?id=leverage-structure}
@@ -276102,7 +276162,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#setLeverage
      * @description set the level of leverage for a market
-     * @see https://docs.api.testnet.paradex.trade/#set-margin-configuration
+     * @see https://docs.paradex.trade/api/prod/account/upsert-account-margin
      * @param {float} leverage the rate of leverage
      * @param {string} [symbol] unified market symbol (is mandatory for swap markets)
      * @param {object} [params] extra parameters specific to the exchange API endpoint
@@ -276127,7 +276187,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchGreeks
      * @description fetches an option contracts greeks, financial metrics used to measure the factors that affect the price of an options contract
-     * @see https://docs.api.testnet.paradex.trade/#list-available-markets-summary
+     * @see https://docs.paradex.trade/api/prod/markets/get-markets-summary
      * @param {string} symbol unified symbol of the market to fetch greeks for
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object} a [greeks structure]{@link https://docs.ccxt.com/?id=greeks-structure}
@@ -276181,7 +276241,7 @@ class paradex extends _abstract_paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["defa
      * @method
      * @name paradex#fetchAllGreeks
      * @description fetches all option contracts greeks, financial metrics used to measure the factors that affect the price of an options contract
-     * @see https://docs.api.testnet.paradex.trade/#list-available-markets-summary
+     * @see https://docs.paradex.trade/api/prod/markets/get-markets-summary
      * @param {string[]} [symbols] unified symbols of the markets to fetch greeks for, all markets are returned if not assigned
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object} a [greeks structure]{@link https://docs.ccxt.com/?id=greeks-structure}
@@ -302397,6 +302457,16 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
                 'watchOHLCV': true,
                 'watchPosition': 'emulated',
                 'watchPositions': true,
+                'unWatchBidsAsks': false,
+                'unWatchOHLCV': true,
+                'unWatchOrderBook': true,
+                'unWatchOrderBookForSymbols': true,
+                'unWatchOrders': true,
+                'unWatchPositions': true,
+                'unWatchTicker': true,
+                'unWatchTickers': true,
+                'unWatchTrades': true,
+                'unWatchTradesForSymbols': true,
             },
             'urls': {
                 'api': {
@@ -302460,10 +302530,18 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         const url = this.implodeHostname(this.urls['api']['ws'][type]['public']);
         let request = {};
         let messageHash = undefined;
+        const unsubscribe = this.safeBool(params, 'unsubscribe', false);
+        let prefix = '';
+        let requestOp = 'subscribe';
+        if (unsubscribe) {
+            params = this.omit(params, 'unsubscribe');
+            prefix = 'unsubscribe::';
+            requestOp = 'unsubscribe';
+        }
         if (type === 'spot') {
             messageHash = 'spot/' + channel + ':' + market['id'];
             request = {
-                'op': 'subscribe',
+                'op': requestOp,
                 'args': [messageHash],
             };
         }
@@ -302475,10 +302553,11 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
                 messageHash += ':' + speed;
             }
             request = {
-                'action': 'subscribe',
+                'action': requestOp,
                 'args': [messageHash],
             };
         }
+        messageHash = prefix + messageHash;
         return await this.watch(url, messageHash, this.deepExtend(request, params), messageHash);
     }
     async subscribeMultiple(channel, type, symbols = undefined, params = {}) {
@@ -302488,11 +302567,23 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         const actionType = (type === 'spot') ? 'op' : 'action';
         const rawSubscriptions = [];
         const messageHashes = [];
+        const subHashes = [];
+        const unsubscribe = this.safeBool(params, 'unsubscribe', false);
+        let prefix = '';
+        let requestOp = 'subscribe';
+        if (unsubscribe) {
+            params = this.omit(params, 'unsubscribe');
+            prefix = 'unsubscribe::';
+            requestOp = 'unsubscribe';
+        }
         for (let i = 0; i < symbols.length; i++) {
             const market = this.market(symbols[i]);
             const message = channelType + '/' + channel + ':' + market['id'];
+            const subHash = prefix + message;
+            const messageHash = prefix + channel + ':' + market['symbol'];
             rawSubscriptions.push(message);
-            messageHashes.push(channel + ':' + market['symbol']);
+            subHashes.push(subHash);
+            messageHashes.push(messageHash);
         }
         // as an exclusion, futures "tickers" need one generic request for all symbols
         // if ((type !== 'spot') && (channel === 'ticker')) {
@@ -302502,8 +302593,8 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         const request = {
             'args': rawSubscriptions,
         };
-        request[actionType] = 'subscribe';
-        return await this.watchMultiple(url, messageHashes, this.deepExtend(request, params), rawSubscriptions);
+        request[actionType] = requestOp;
+        return await this.watchMultiple(url, messageHashes, this.deepExtend(request, params), subHashes);
     }
     /**
      * @method
@@ -302538,8 +302629,8 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         this.setBalanceCache(client, type, messageHash);
         let fetchBalanceSnapshot = undefined;
         let awaitBalanceSnapshot = undefined;
-        [fetchBalanceSnapshot, params] = this.handleOptionAndParams(this.options, 'watchBalance', 'fetchBalanceSnapshot', true);
-        [awaitBalanceSnapshot, params] = this.handleOptionAndParams(this.options, 'watchBalance', 'awaitBalanceSnapshot', false);
+        [fetchBalanceSnapshot, params] = this.handleOptionAndParams(params, 'watchBalance', 'fetchBalanceSnapshot', true);
+        [awaitBalanceSnapshot, params] = this.handleOptionAndParams(params, 'watchBalance', 'awaitBalanceSnapshot', false);
         if (fetchBalanceSnapshot && awaitBalanceSnapshot) {
             await client.future(type + ':fetchBalanceSnapshot');
         }
@@ -302549,7 +302640,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         if (subscribeHash in client.subscriptions) {
             return;
         }
-        const options = this.safeValue(this.options, 'watchBalance');
+        const options = this.safeDict(this.options, 'watchBalance');
         const snapshot = this.safeBool(options, 'fetchBalanceSnapshot', true);
         if (snapshot) {
             const messageHash = type + ':' + 'fetchBalanceSnapshot';
@@ -302615,7 +302706,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
                 const timestamp = this.safeInteger(message, 'event_time');
                 this.balance[type]['timestamp'] = timestamp;
                 this.balance[type]['datetime'] = this.iso8601(timestamp);
-                const balanceDetails = this.safeValue(data[i], 'balance_details', []);
+                const balanceDetails = this.safeList(data[i], 'balance_details', []);
                 for (let ii = 0; ii < balanceDetails.length; ii++) {
                     const rawBalance = balanceDetails[i];
                     const account = this.account();
@@ -302658,6 +302749,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
      * @method
      * @name bitmart#watchTradesForSymbols
      * @see https://developer-pro.bitmart.com/en/spot/#public-trade-channel
+     * @see https://developer-pro.bitmart.com/en/futuresv2/#public-trade-channel
      * @description get the list of most recent trades for a list of symbols
      * @param {string[]} symbols unified symbol of the market to fetch trades for
      * @param {int} [since] timestamp in ms of the earliest trade to fetch
@@ -302683,6 +302775,37 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             return filtered;
         }
         return result;
+    }
+    /**
+     * @method
+     * @name bitmart#unWatchTrades
+     * @description unWatches from the stream channel
+     * @see https://developer-pro.bitmart.com/en/spot/#public-trade-channel
+     * @see https://developer-pro.bitmart.com/en/futuresv2/#public-trade-channel
+     * @param {string} symbol unified symbol of the market to fetch trades for
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=public-trades}
+     */
+    async unWatchTrades(symbol, params = {}) {
+        return await this.unWatchTradesForSymbols([symbol], params);
+    }
+    /**
+     * @method
+     * @name bitmart#unWatchTradesForSymbols
+     * @description unsubscribes from the trades channel
+     * @see https://developer-pro.bitmart.com/en/spot/#public-trade-channel
+     * @see https://developer-pro.bitmart.com/en/futuresv2/#public-trade-channel
+     * @param {string[]} symbols unified symbol of the market to fetch trades for
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object[]} a list of [trade structures]{@link https://docs.ccxt.com/#/?id=public-trades}
+     */
+    async unWatchTradesForSymbols(symbols, params = {}) {
+        await this.loadMarkets();
+        let marketType = undefined;
+        [symbols, marketType, params] = this.getParamsForMultipleSub('unWatchTradesForSymbols', symbols, undefined, params);
+        const channelName = 'trade';
+        params = this.extend(params, { 'unsubscribe': true });
+        return await this.subscribeMultiple(channelName, marketType, symbols, params);
     }
     getParamsForMultipleSub(methodName, symbols, limit = undefined, params = {}) {
         symbols = this.marketSymbols(symbols, undefined, false, true);
@@ -302736,6 +302859,37 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
     }
     /**
      * @method
+     * @name bitmart#unWatchTicker
+     * @description unWatches a price ticker, a statistical calculation with the information calculated over the past 24 hours for a specific market
+     * @see https://developer-pro.bitmart.com/en/spot/#public-ticker-channel
+     * @see https://developer-pro.bitmart.com/en/futuresv2/#public-ticker-channel
+     * @param {string} symbol unified symbol of the market to fetch the ticker for
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/#/?id=ticker-structure}
+     */
+    async unWatchTicker(symbol, params = {}) {
+        return await this.unWatchTickers([symbol], params);
+    }
+    /**
+     * @method
+     * @name bitmart#unWatchTickers
+     * @description unWatches a price ticker, a statistical calculation with the information calculated over the past 24 hours for all markets of a specific list
+     * @see https://developer-pro.bitmart.com/en/spot/#public-ticker-channel
+     * @see https://developer-pro.bitmart.com/en/futuresv2/#public-ticker-channel
+     * @param {string[]} symbols unified symbol of the market to fetch the ticker for
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/#/?id=ticker-structure}
+     */
+    async unWatchTickers(symbols = undefined, params = {}) {
+        await this.loadMarkets();
+        const market = this.getMarketFromSymbols(symbols);
+        let marketType = undefined;
+        [marketType, params] = this.handleMarketTypeAndParams('watchTickers', market, params);
+        params = this.extend(params, { 'unsubscribe': true });
+        return await this.subscribeMultiple('ticker', marketType, symbols, params);
+    }
+    /**
+     * @method
      * @name bitmart#watchBidsAsks
      * @see https://developer-pro.bitmart.com/en/spot/#public-ticker-channel
      * @see https://developer-pro.bitmart.com/en/futuresv2/#public-ticker-channel
@@ -302783,7 +302937,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             rawTickers = this.safeList(message, 'data', []);
         }
         else {
-            rawTickers = [this.safeValue(message, 'data', {})];
+            rawTickers = [this.safeDict(message, 'data', {})];
         }
         if (!rawTickers.length) {
             return;
@@ -302863,6 +303017,54 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         }
         return this.filterBySymbolSinceLimit(this.orders, symbol, since, limit, true);
     }
+    /**
+     * @method
+     * @name bitmart#unWatchOrders
+     * @description unWatches information on multiple orders made by the user
+     * @see https://developer-pro.bitmart.com/en/spot/#private-order-progress
+     * @see https://developer-pro.bitmart.com/en/futuresv2/#private-order-channel
+     * @param {string} symbol unified market symbol of the market orders were made in
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async unWatchOrders(symbol = undefined, params = {}) {
+        await this.loadMarkets();
+        let market = undefined;
+        let messageHash = 'unsubscribe::orders';
+        if (symbol !== undefined) {
+            symbol = this.symbol(symbol);
+            market = this.market(symbol);
+            if (market['swap']) {
+                throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NotSupported(this.id + ' unWatchOrders() does not support a symbol for swap markets, unWatch from all markets only');
+            }
+            messageHash += '::' + symbol;
+        }
+        let type = 'spot';
+        [type, params] = this.handleMarketTypeAndParams('watchOrders', market, params);
+        await this.authenticate(type, params);
+        let request = undefined;
+        if (type === 'spot') {
+            let argsRequest = 'spot/user/order:';
+            if (symbol !== undefined) {
+                argsRequest += market['id'];
+            }
+            else {
+                argsRequest = 'spot/user/orders:ALL_SYMBOLS';
+            }
+            request = {
+                'op': 'unsubscribe',
+                'args': [argsRequest],
+            };
+        }
+        else {
+            request = {
+                'action': 'unsubscribe',
+                'args': ['futures/order'],
+            };
+        }
+        const url = this.implodeHostname(this.urls['api']['ws'][type]['private']);
+        return await this.watch(url, messageHash, this.deepExtend(request, params), messageHash);
+    }
     handleOrders(client, message) {
         //
         // spot
@@ -302917,7 +303119,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         //        ]
         //    }
         //
-        const orders = this.safeValue(message, 'data');
+        const orders = this.safeList(message, 'data');
         if (orders === undefined) {
             return;
         }
@@ -303033,13 +303235,13 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             }, market);
         }
         else {
-            const orderInfo = this.safeValue(order, 'order');
+            const orderInfo = this.safeDict(order, 'order');
             const marketId = this.safeString(orderInfo, 'symbol');
             const symbol = this.safeSymbol(marketId, market, '', 'swap');
             const orderId = this.safeString(orderInfo, 'order_id');
             const timestamp = this.safeInteger(orderInfo, 'create_time');
             const updatedTimestamp = this.safeInteger(orderInfo, 'update_time');
-            const lastTrade = this.safeValue(orderInfo, 'last_trade');
+            const lastTrade = this.safeDict(orderInfo, 'last_trade');
             const cachedOrders = this.orders;
             const orders = this.safeValue(cachedOrders.hashmap, symbol, {});
             const cachedOrder = this.safeValue(orders, orderId);
@@ -303134,6 +303336,31 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         }
         return this.filterBySymbolsSinceLimit(this.positions, symbols, since, limit);
     }
+    /**
+     * @method
+     * @name bitmart#unWatchPositions
+     * @description unWatches all open positions
+     * @see https://developer-pro.bitmart.com/en/futures/#private-position-channel
+     * @param {string[]} [symbols] list of unified market symbols
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} status of the unwatch request
+     */
+    async unWatchPositions(symbols = undefined, params = {}) {
+        if (symbols !== undefined) {
+            const length = symbols.length;
+            if (length > 0) {
+                throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NotSupported(this.id + ' unWatchPositions() does not support a list of symbols, unWatch from all markets only');
+            }
+        }
+        await this.loadMarkets();
+        const request = {
+            'action': 'unsubscribe',
+            'args': ['futures/position'],
+        };
+        const messageHash = 'unsubscribe::positions';
+        const url = this.implodeHostname(this.urls['api']['ws']['swap']['private']);
+        return await this.watch(url, messageHash, this.deepExtend(request, params), messageHash);
+    }
     handlePositions(client, message) {
         //
         //    {
@@ -303170,7 +303397,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         //        ]
         //    }
         //
-        const data = this.safeValue(message, 'data', []);
+        const data = this.safeList(message, 'data', []);
         if (this.positions === undefined) {
             this.positions = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__/* .ArrayCacheBySymbolBySide */ .Hk();
         }
@@ -303282,7 +303509,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         //        ]
         //    }
         //
-        const data = this.safeValue(message, 'data');
+        const data = this.safeList(message, 'data');
         if (data === undefined) {
             return;
         }
@@ -303420,7 +303647,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             rawTickers = this.safeList(message, 'data', []);
         }
         else {
-            rawTickers = [this.safeValue(message, 'data', {})];
+            rawTickers = [this.safeDict(message, 'data', {})];
         }
         if (!rawTickers.length) {
             return;
@@ -303492,8 +303719,8 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         symbol = this.symbol(symbol);
         const market = this.market(symbol);
         let type = 'spot';
-        [type, params] = this.handleMarketTypeAndParams('watchOrderBook', market, params);
-        const timeframes = this.safeValue(this.options, 'timeframes', {});
+        [type, params] = this.handleMarketTypeAndParams('watchOHLCV', market, params);
+        const timeframes = this.safeDict(this.options, 'timeframes', {});
         const interval = this.safeString(timeframes, timeframe);
         let name = undefined;
         if (type === 'spot') {
@@ -303507,6 +303734,35 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             limit = ohlcv.getLimit(symbol, limit);
         }
         return this.filterBySinceLimit(ohlcv, since, limit, 0, true);
+    }
+    /**
+     * @method
+     * @name bitmart#unWatchOHLCV
+     * @description unWatches historical candlestick data containing the open, high, low, and close price, and the volume of a market
+     * @see https://developer-pro.bitmart.com/en/spot/#public-kline-channel
+     * @see https://developer-pro.bitmart.com/en/futuresv2/#public-klinebin-channel
+     * @param {string} symbol unified symbol of the market to fetch OHLCV data for
+     * @param {string} timeframe the length of time each candle represents
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {int[][]} A list of candles ordered as timestamp, open, high, low, close, volume
+     */
+    async unWatchOHLCV(symbol, timeframe = '1m', params = {}) {
+        await this.loadMarkets();
+        symbol = this.symbol(symbol);
+        const market = this.market(symbol);
+        let type = 'spot';
+        [type, params] = this.handleMarketTypeAndParams('unWatchOHLCV', market, params);
+        const timeframes = this.safeDict(this.options, 'timeframes', {});
+        const interval = this.safeString(timeframes, timeframe);
+        let name = undefined;
+        if (type === 'spot') {
+            name = 'kline' + interval;
+        }
+        else {
+            name = 'klineBin' + interval;
+        }
+        params = this.extend(params, { 'unsubscribe': true });
+        return await this.subscribe(name, symbol, type, params);
     }
     handleOHLCV(client, message) {
         //
@@ -303557,7 +303813,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         const intervalParts = interval.split(':');
         interval = this.safeString(intervalParts, 0);
         // use a reverse lookup in a static map instead
-        const timeframes = this.safeValue(this.options, 'timeframes', {});
+        const timeframes = this.safeDict(this.options, 'timeframes', {});
         const timeframe = this.findTimeframe(interval, timeframes);
         const duration = this.parseTimeframe(timeframe);
         const durationInMs = duration * 1000;
@@ -303566,7 +303822,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
                 const marketId = this.safeString(data[i], 'symbol');
                 const market = this.safeMarket(marketId);
                 const symbol = market['symbol'];
-                const rawOHLCV = this.safeValue(data[i], 'candle');
+                const rawOHLCV = this.safeList(data[i], 'candle');
                 const parsed = this.parseOHLCV(rawOHLCV, market);
                 parsed[0] = this.parseToInt(parsed[0] / durationInMs) * durationInMs;
                 this.ohlcvs[symbol] = this.safeValue(this.ohlcvs, symbol, {});
@@ -303585,7 +303841,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             const marketId = this.safeString(data, 'symbol');
             const market = this.safeMarket(marketId, undefined, undefined, 'swap');
             const symbol = market['symbol'];
-            const items = this.safeValue(data, 'items', []);
+            const items = this.safeList(data, 'items', []);
             this.ohlcvs[symbol] = this.safeValue(this.ohlcvs, symbol, {});
             let stored = this.safeValue(this.ohlcvs[symbol], timeframe);
             if (stored === undefined) {
@@ -303616,7 +303872,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
      */
     async watchOrderBook(symbol, limit = undefined, params = {}) {
         await this.loadMarkets();
-        const options = this.safeValue(this.options, 'watchOrderBook', {});
+        const options = this.safeDict(this.options, 'watchOrderBook', {});
         let depth = this.safeString(options, 'depth', 'depth/increase100');
         symbol = this.symbol(symbol);
         const market = this.market(symbol);
@@ -303627,6 +303883,31 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         }
         const orderbook = await this.subscribe(depth, symbol, type, params);
         return orderbook.limit();
+    }
+    /**
+     * @method
+     * @name bitmart#unWatchOrderBook
+     * @description unWatches information on open orders with bid (buy) and ask (sell) prices, volumes and other data
+     * @see https://developer-pro.bitmart.com/en/spot/#public-depth-all-channel
+     * @see https://developer-pro.bitmart.com/en/spot/#public-depth-increase-channel
+     * @see https://developer-pro.bitmart.com/en/futuresv2/#public-depth-channel
+     * @param {string} symbol unified array of symbols
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @returns {object} A dictionary of [order book structures]{@link https://docs.ccxt.com/#/?id=order-book-structure} indexed by market symbols
+     */
+    async unWatchOrderBook(symbol, params = {}) {
+        await this.loadMarkets();
+        const options = this.safeDict(this.options, 'watchOrderBook', {});
+        let depth = this.safeString(options, 'depth', 'depth/increase100');
+        symbol = this.symbol(symbol);
+        const market = this.market(symbol);
+        let type = 'spot';
+        [type, params] = this.handleMarketTypeAndParams('unWatchOrderBook', market, params);
+        if (type === 'swap' && depth === 'depth/increase100') {
+            depth = 'depth50';
+        }
+        params = this.extend(params, { 'unsubscribe': true });
+        return await this.subscribe(depth, symbol, type, params);
     }
     handleDelta(bookside, delta) {
         const price = this.safeFloat(delta, 0);
@@ -303860,6 +304141,28 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         const orderbook = await this.subscribeMultiple(channel, type, symbols, params);
         return orderbook.limit();
     }
+    /**
+     * @method
+     * @name bitmart#unWatchOrderBookForSymbols
+     * @description unWatches information on open orders with bid (buy) and ask (sell) prices, volumes and other data
+     * @see https://developer-pro.bitmart.com/en/spot/#public-depth-increase-channel
+     * @param {string[]} symbols unified array of symbols
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.depth] the type of order book to subscribe to, default is 'depth/increase100', also accepts 'depth5' or 'depth20' or depth50
+     * @returns {object} A dictionary of [order book structures]{@link https://docs.ccxt.com/#/?id=order-book-structure} indexed by market symbols
+     */
+    async unWatchOrderBookForSymbols(symbols, params = {}) {
+        await this.loadMarkets();
+        let type = undefined;
+        [symbols, type, params] = this.getParamsForMultipleSub('unWatchOrderBookForSymbols', symbols, undefined, params);
+        let channel = undefined;
+        [channel, params] = this.handleOptionAndParams(params, 'unWatchOrderBookForSymbols', 'depth', 'depth/increase100');
+        if (type === 'swap' && channel === 'depth/increase100') {
+            channel = 'depth50';
+        }
+        params = this.extend(params, { 'unsubscribe': true });
+        return await this.subscribeMultiple(channel, type, symbols, params);
+    }
     async authenticate(type, params = {}) {
         this.checkRequiredCredentials();
         const url = this.implodeHostname(this.urls['api']['ws'][type]['private']);
@@ -303957,6 +304260,119 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             return true;
         }
     }
+    handleUnSubscription(client, message) {
+        //
+        // spot
+        //     {
+        //         "topic": "spot/ticker:ETH_USDT",
+        //         "event": "unsubscribe"
+        //     }
+        //
+        // swap
+        //     {
+        //         "action": "unsubscribe",
+        //         "group": "futures/ticker:ETHUSDT",
+        //         "success": true,
+        //         "request": {
+        //             "action": "unsubscribe",
+        //             "args": [
+        //                 "futures/ticker:ETHUSDT"
+        //             ]
+        //         }
+        //     }
+        //
+        const messageTopic = this.safeString2(message, 'topic', 'group');
+        const unSubMessageTopic = 'unsubscribe::' + messageTopic;
+        // one message includes info about one unsubscription only even if we requested multiple
+        // so we can not just create subscription object in unWatch method and use it here
+        // we need to reconstruct subscription params from the messageTopic
+        const subscription = this.getUnSubParams(messageTopic);
+        const subHash = this.safeString(subscription, 'subHash');
+        const unsubHash = 'unsubscribe::' + subHash;
+        const subHashIsPrefix = this.safeBool(subscription, 'subHashIsPrefix', false);
+        // clean up both ways of storing subscription and unsubscription
+        this.cleanUnsubscription(client, subHash, unsubHash, subHashIsPrefix);
+        this.cleanUnsubscription(client, messageTopic, unSubMessageTopic, subHashIsPrefix);
+        this.cleanCache(subscription);
+    }
+    getUnSubParams(messageTopic) {
+        const parts = messageTopic.split(':');
+        const channel = this.safeString(parts, 0);
+        const marketTypeAndTopic = channel.split('/');
+        const rawMarketType = this.safeStringLower(marketTypeAndTopic, 0);
+        const marketType = this.parseMarketType(rawMarketType);
+        let topic = this.safeString(marketTypeAndTopic, 1);
+        const thirdPart = this.safeString(marketTypeAndTopic, 2);
+        if (thirdPart !== undefined) {
+            topic += '/' + thirdPart;
+        }
+        const marketId = this.safeString(parts, 1);
+        const symbols = [];
+        let symbol = undefined;
+        let subHash = topic;
+        let hashDelimiter = ':';
+        let subHashIsPrefix = false;
+        const parsedTopic = this.parseTopic(topic);
+        if ((parsedTopic === 'orders') || (parsedTopic === 'positions')) {
+            subHash = parsedTopic;
+            hashDelimiter = '::';
+        }
+        if ((marketId !== undefined) && (marketId !== 'ALL_SYMBOLS')) {
+            // if marketId is defined, we have a single symbol subscription
+            const delimiter = (marketType === 'spot') ? '_' : '';
+            const market = this.safeMarket(marketId, undefined, delimiter, marketType);
+            symbol = market['symbol'];
+            subHash += hashDelimiter + symbol;
+            symbols.push(symbol);
+        }
+        else {
+            subHashIsPrefix = true; // need to clean all subHashes with this prefix
+        }
+        const symbolsAndTimeframes = [];
+        if (topic.startsWith('kline')) {
+            let interval = topic.replace('kline', '');
+            if (interval.startsWith('Bin')) {
+                // swap market
+                interval = interval.replace('Bin', '');
+            }
+            const timeframes = this.safeDict(this.options, 'timeframes', {});
+            const timeframe = this.findTimeframe(interval, timeframes);
+            const symbolAndTimeframe = [symbol, timeframe];
+            symbolsAndTimeframes.push(symbolAndTimeframe);
+        }
+        const result = {
+            'topic': parsedTopic,
+            'symbols': symbols,
+            'subHash': subHash,
+            'symbolsAndTimeframes': symbolsAndTimeframes,
+            'subHashIsPrefix': subHashIsPrefix,
+        };
+        return result;
+    }
+    parseTopic(topic) {
+        if (topic.startsWith('depth')) {
+            return 'orderbook';
+        }
+        if (topic.startsWith('kline')) {
+            return 'ohlcv';
+        }
+        const topics = {
+            'ticker': 'ticker',
+            'trade': 'trades',
+            'user/order': 'orders',
+            'user/orders': 'orders',
+            'order': 'orders',
+            'position': 'positions',
+        };
+        return this.safeString(topics, topic, topic);
+    }
+    parseMarketType(marketType) {
+        const types = {
+            'spot': 'spot',
+            'futures': 'swap',
+        };
+        return this.safeString(types, marketType, marketType);
+    }
     handleMessage(client, message) {
         if (this.handleErrorMessage(client, message)) {
             return;
@@ -304016,6 +304432,7 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
                     'login': this.handleAuthenticate,
                     'access': this.handleAuthenticate,
                     'subscribe': this.handleSubscriptionStatus,
+                    'unsubscribe': this.handleUnSubscription,
                 };
                 const method = this.safeValue(methods, event);
                 if (method !== undefined) {
@@ -356050,7 +356467,7 @@ class paradex extends _paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
      * @method
      * @name paradex#watchTrades
      * @description get the list of most recent trades for a particular symbol
-     * @see https://docs.api.testnet.paradex.trade/#sub-trades-market_symbol-operation
+     * @see https://docs.paradex.trade/ws/web-socket-channels/trades/trades
      * @param {string} symbol unified symbol of the market to fetch trades for
      * @param {int} [since] timestamp in ms of the earliest trade to fetch
      * @param {int} [limit] the maximum amount of trades to fetch
@@ -356118,7 +356535,7 @@ class paradex extends _paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
      * @method
      * @name paradex#watchOrderBook
      * @description watches information on open orders with bid (buy) and ask (sell) prices, volumes and other data
-     * @see https://docs.api.testnet.paradex.trade/#sub-order_book-market_symbol-snapshot-15-refresh_rate-operation
+     * @see https://docs.paradex.trade/ws/web-socket-channels/order-book/order-book
      * @param {string} symbol unified symbol of the market to fetch the order book for
      * @param {int} [limit] the maximum amount of order book entries to return
      * @param {object} [params] extra parameters specific to the exchange API endpoint
@@ -356206,7 +356623,7 @@ class paradex extends _paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
      * @method
      * @name paradex#watchTicker
      * @description watches a price ticker, a statistical calculation with the information calculated over the past 24 hours for a specific market
-     * @see https://docs.api.testnet.paradex.trade/#sub-markets_summary-operation
+     * @see https://docs.paradex.trade/ws/web-socket-channels/markets-summary/markets-summary
      * @param {string} symbol unified symbol of the market to fetch the ticker for
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/?id=ticker-structure}
@@ -356230,7 +356647,7 @@ class paradex extends _paradex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
      * @method
      * @name paradex#watchTickers
      * @description watches a price ticker, a statistical calculation with the information calculated over the past 24 hours for all markets of a specific list
-     * @see https://docs.api.testnet.paradex.trade/#sub-markets_summary-operation
+     * @see https://docs.paradex.trade/ws/web-socket-channels/markets-summary/markets-summary
      * @param {string[]} symbols unified symbol of the market to fetch the ticker for
      * @param {object} [params] extra parameters specific to the exchange API endpoint
      * @returns {object} a [ticker structure]{@link https://docs.ccxt.com/?id=ticker-structure}
@@ -407384,6 +407801,7 @@ class wavesexchange extends _abstract_wavesexchange_js__WEBPACK_IMPORTED_MODULE_
             'certified': false,
             'pro': false,
             'dex': true,
+            'rateLimit': 10,
             'has': {
                 'CORS': undefined,
                 'spot': true,
@@ -407581,76 +407999,76 @@ class wavesexchange extends _abstract_wavesexchange_js__WEBPACK_IMPORTED_MODULE_
                     ],
                 },
                 'node': {
-                    'get': [
-                        'addresses',
-                        'addresses/balance/{address}',
-                        'addresses/balance/{address}/{confirmations}',
-                        'addresses/balance/details/{address}',
-                        'addresses/data/{address}',
-                        'addresses/data/{address}/{key}',
-                        'addresses/effectiveBalance/{address}',
-                        'addresses/effectiveBalance/{address}/{confirmations}',
-                        'addresses/publicKey/{publicKey}',
-                        'addresses/scriptInfo/{address}',
-                        'addresses/scriptInfo/{address}/meta',
-                        'addresses/seed/{address}',
-                        'addresses/seq/{from}/{to}',
-                        'addresses/validate/{address}',
-                        'alias/by-address/{address}',
-                        'alias/by-alias/{alias}',
-                        'assets/{assetId}/distribution/{height}/{limit}',
-                        'assets/balance/{address}',
-                        'assets/balance/{address}/{assetId}',
-                        'assets/details/{assetId}',
-                        'assets/nft/{address}/limit/{limit}',
-                        'blockchain/rewards',
-                        'blockchain/rewards/height',
-                        'blocks/address/{address}/{from}/{to}/',
-                        'blocks/at/{height}',
-                        'blocks/delay/{signature}/{blockNum}',
-                        'blocks/first',
-                        'blocks/headers/last',
-                        'blocks/headers/seq/{from}/{to}',
-                        'blocks/height',
-                        'blocks/height/{signature}',
-                        'blocks/last',
-                        'blocks/seq/{from}/{to}',
-                        'blocks/signature/{signature}',
-                        'consensus/algo',
-                        'consensus/basetarget',
-                        'consensus/basetarget/{blockId}',
-                        'consensus/{generatingbalance}/address',
-                        'consensus/generationsignature',
-                        'consensus/generationsignature/{blockId}',
-                        'debug/balances/history/{address}',
-                        'debug/blocks/{howMany}',
-                        'debug/configInfo',
-                        'debug/historyInfo',
-                        'debug/info',
-                        'debug/minerInfo',
-                        'debug/portfolios/{address}',
-                        'debug/state',
-                        'debug/stateChanges/address/{address}',
-                        'debug/stateChanges/info/{id}',
-                        'debug/stateWaves/{height}',
-                        'leasing/active/{address}',
-                        'node/state',
-                        'node/version',
-                        'peers/all',
-                        'peers/blacklisted',
-                        'peers/connected',
-                        'peers/suspended',
-                        'transactions/address/{address}/limit/{limit}',
-                        'transactions/info/{id}',
-                        'transactions/status',
-                        'transactions/unconfirmed',
-                        'transactions/unconfirmed/info/{id}',
-                        'transactions/unconfirmed/size',
-                        'utils/seed',
-                        'utils/seed/{length}',
-                        'utils/time',
-                        'wallet/seed',
-                    ],
+                    'get': {
+                        'addresses': 5,
+                        'addresses/balance/{address}': 1,
+                        'addresses/balance/{address}/{confirmations}': 1,
+                        'addresses/balance/details/{address}': 1,
+                        'addresses/data/{address}': 100 / 17,
+                        'addresses/data/{address}/{key}': 100 / 17,
+                        'addresses/effectiveBalance/{address}': 5,
+                        'addresses/effectiveBalance/{address}/{confirmations}': 5,
+                        'addresses/publicKey/{publicKey}': 5,
+                        'addresses/scriptInfo/{address}': 5,
+                        'addresses/scriptInfo/{address}/meta': 5,
+                        'addresses/seed/{address}': 5,
+                        'addresses/seq/{from}/{to}': 5,
+                        'addresses/validate/{address}': 5,
+                        'alias/by-address/{address}': 5,
+                        'alias/by-alias/{alias}': 5,
+                        'assets/{assetId}/distribution/{height}/{limit}': 100 / 17,
+                        'assets/balance/{address}': 100 / 17,
+                        'assets/balance/{address}/{assetId}': 1,
+                        'assets/details/{assetId}': 5,
+                        'assets/nft/{address}/limit/{limit}': 5,
+                        'blockchain/rewards': 5,
+                        'blockchain/rewards/height': 5,
+                        'blocks/address/{address}/{from}/{to}/': 5,
+                        'blocks/at/{height}': 100,
+                        'blocks/delay/{signature}/{blockNum}': 5,
+                        'blocks/first': 5,
+                        'blocks/headers/last': 5,
+                        'blocks/headers/seq/{from}/{to}': 5,
+                        'blocks/height': 5,
+                        'blocks/height/{signature}': 5,
+                        'blocks/last': 5,
+                        'blocks/seq/{from}/{to}': 100,
+                        'blocks/signature/{signature}': 5,
+                        'consensus/algo': 5,
+                        'consensus/basetarget': 5,
+                        'consensus/basetarget/{blockId}': 5,
+                        'consensus/{generatingbalance}/address': 5,
+                        'consensus/generationsignature': 5,
+                        'consensus/generationsignature/{blockId}': 5,
+                        'debug/balances/history/{address}': 5,
+                        'debug/blocks/{howMany}': 5,
+                        'debug/configInfo': 5,
+                        'debug/historyInfo': 5,
+                        'debug/info': 5,
+                        'debug/minerInfo': 5,
+                        'debug/portfolios/{address}': 5,
+                        'debug/state': 5,
+                        'debug/stateChanges/address/{address}': 5,
+                        'debug/stateChanges/info/{id}': 5,
+                        'debug/stateWaves/{height}': 5,
+                        'leasing/active/{address}': 5,
+                        'node/state': 5,
+                        'node/version': 5,
+                        'peers/all': 5,
+                        'peers/blacklisted': 5,
+                        'peers/connected': 5,
+                        'peers/suspended': 5,
+                        'transactions/address/{address}/limit/{limit}': 5,
+                        'transactions/info/{id}': 5,
+                        'transactions/status': 5,
+                        'transactions/unconfirmed': 5,
+                        'transactions/unconfirmed/info/{id}': 5,
+                        'transactions/unconfirmed/size': 5,
+                        'utils/seed': 5,
+                        'utils/seed/{length}': 5,
+                        'utils/time': 5,
+                        'wallet/seed': 5, // default: using value for / because no other value matched under https://docs.waves.tech/en/waves-node/api-limitations-of-the-pool-of-public-nodes#limitations-on-mainnet-pool
+                    },
                     'post': [
                         'addresses',
                         'addresses/data/{address}',
