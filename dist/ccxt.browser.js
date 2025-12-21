@@ -331225,44 +331225,6 @@ class gate extends _gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             }
         }
     }
-    cleanCache(subscription) {
-        const topic = this.safeString(subscription, 'topic', '');
-        const symbols = this.safeList(subscription, 'symbols', []);
-        const symbolsLength = symbols.length;
-        if (topic === 'ohlcv') {
-            const symbolsAndTimeFrames = this.safeList(subscription, 'symbolsAndTimeframes', []);
-            for (let i = 0; i < symbolsAndTimeFrames.length; i++) {
-                const symbolAndTimeFrame = symbolsAndTimeFrames[i];
-                const symbol = this.safeString(symbolAndTimeFrame, 0);
-                const timeframe = this.safeString(symbolAndTimeFrame, 1);
-                delete this.ohlcvs[symbol][timeframe];
-            }
-        }
-        else if (symbolsLength > 0) {
-            for (let i = 0; i < symbols.length; i++) {
-                const symbol = symbols[i];
-                if (topic.endsWith('trades')) {
-                    delete this.trades[symbol];
-                }
-                else if (topic === 'orderbook') {
-                    delete this.orderbooks[symbol];
-                }
-                else if (topic === 'ticker') {
-                    delete this.tickers[symbol];
-                }
-            }
-        }
-        else {
-            if (topic.endsWith('trades')) {
-                // don't reset this.myTrades directly here
-                // because in c# we need to use a different object
-                const keys = Object.keys(this.trades);
-                for (let i = 0; i < keys.length; i++) {
-                    delete this.trades[keys[i]];
-                }
-            }
-        }
-    }
     handleMessage(client, message) {
         //
         // subscribe
@@ -418836,6 +418798,9 @@ class woofipro extends _abstract_woofipro_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
                 'future': false,
                 'option': false,
                 'addMargin': false,
+                'borrowCrossMargin': false,
+                'borrowIsolatedMargin': false,
+                'borrowMargin': false,
                 'cancelAllOrders': true,
                 'cancelOrder': true,
                 'cancelOrders': true,
@@ -418860,12 +418825,21 @@ class woofipro extends _abstract_woofipro_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
                 'createTrailingPercentOrder': false,
                 'createTriggerOrder': true,
                 'fetchAccounts': false,
+                'fetchAllGreeks': false,
                 'fetchBalance': true,
+                'fetchBorrowInterest': false,
+                'fetchBorrowRate': false,
+                'fetchBorrowRateHistories': false,
+                'fetchBorrowRateHistory': false,
+                'fetchBorrowRates': false,
+                'fetchBorrowRatesPerSymbol': false,
                 'fetchCanceledOrders': false,
                 'fetchClosedOrder': false,
                 'fetchClosedOrders': true,
                 'fetchConvertCurrencies': false,
                 'fetchConvertQuote': false,
+                'fetchCrossBorrowRate': false,
+                'fetchCrossBorrowRates': false,
                 'fetchCurrencies': true,
                 'fetchDepositAddress': false,
                 'fetchDeposits': true,
@@ -418876,7 +418850,10 @@ class woofipro extends _abstract_woofipro_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
                 'fetchFundingRate': true,
                 'fetchFundingRateHistory': true,
                 'fetchFundingRates': true,
+                'fetchGreeks': false,
                 'fetchIndexOHLCV': false,
+                'fetchIsolatedBorrowRate': false,
+                'fetchIsolatedBorrowRates': false,
                 'fetchLedger': true,
                 'fetchLeverage': true,
                 'fetchMarginAdjustmentHistory': false,
@@ -418888,6 +418865,8 @@ class woofipro extends _abstract_woofipro_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
                 'fetchOpenInterestHistory': false,
                 'fetchOpenOrder': false,
                 'fetchOpenOrders': true,
+                'fetchOption': false,
+                'fetchOptionChain': false,
                 'fetchOrder': true,
                 'fetchOrderBook': true,
                 'fetchOrders': true,
@@ -418905,8 +418884,11 @@ class woofipro extends _abstract_woofipro_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
                 'fetchTradingFees': true,
                 'fetchTransactions': 'emulated',
                 'fetchTransfers': false,
+                'fetchVolatilityHistory': false,
                 'fetchWithdrawals': true,
                 'reduceMargin': false,
+                'repayCrossMargin': false,
+                'repayIsolatedMargin': false,
                 'setLeverage': true,
                 'setMargin': false,
                 'setPositionMode': false,
@@ -421800,6 +421782,7 @@ class xt extends _abstract_xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .
                 'createReduceOnlyOrder': true,
                 'editOrder': true,
                 'fetchAccounts': false,
+                'fetchAllGreeks': false,
                 'fetchBalance': true,
                 'fetchBidsAsks': true,
                 'fetchBorrowInterest': false,
@@ -421824,6 +421807,7 @@ class xt extends _abstract_xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .
                 'fetchFundingRate': true,
                 'fetchFundingRateHistory': true,
                 'fetchFundingRates': false,
+                'fetchGreeks': false,
                 'fetchIndexOHLCV': false,
                 'fetchL3OrderBook': false,
                 'fetchLedger': true,
@@ -421838,6 +421822,8 @@ class xt extends _abstract_xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .
                 'fetchOpenInterest': false,
                 'fetchOpenInterestHistory': false,
                 'fetchOpenOrders': true,
+                'fetchOption': false,
+                'fetchOptionChain': false,
                 'fetchOrder': true,
                 'fetchOrderBook': true,
                 'fetchOrderBooks': false,
@@ -421861,6 +421847,7 @@ class xt extends _abstract_xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .
                 'fetchTransactions': false,
                 'fetchTransfer': false,
                 'fetchTransfers': false,
+                'fetchVolatilityHistory': false,
                 'fetchWithdrawal': false,
                 'fetchWithdrawals': true,
                 'fetchWithdrawalWhitelist': false,
