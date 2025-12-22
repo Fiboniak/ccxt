@@ -338031,8 +338031,10 @@ class huobi extends _htx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
 /* harmony export */   A: () => (/* binding */ hyperliquid)
 /* harmony export */ });
 /* harmony import */ var _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1936);
-/* harmony import */ var _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2931);
+/* harmony import */ var _base_errors_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2079);
+/* harmony import */ var _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2931);
 //  ---------------------------------------------------------------------------
+
 
 
 //  ---------------------------------------------------------------------------
@@ -338056,6 +338058,12 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
                 'watchTrades': true,
                 'watchTradesForSymbols': false,
                 'watchPosition': false,
+                'unWatchOrderBook': true,
+                'unWatchTickers': true,
+                'unWatchTrades': true,
+                'unWatchOHLCV': true,
+                'unWatchMyTrades': true,
+                'unWatchOrders': true,
             },
             'urls': {
                 'api': {
@@ -338448,6 +338456,35 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         }
         return this.filterBySymbolSinceLimit(trades, symbol, since, limit, true);
     }
+    /**
+     * @method
+     * @name hyperliquid#unWatchMyTrades
+     * @description unWatches information on multiple trades made by the user
+     * @see https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/subscriptions
+     * @param {string} symbol unified market symbol of the market orders were made in
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.user] user address, will default to this.walletAddress if not provided
+     * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/?id=order-structure}
+     */
+    async unWatchMyTrades(symbol = undefined, params = {}) {
+        await this.loadMarkets();
+        if (symbol !== undefined) {
+            throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NotSupported(this.id + ' unWatchMyTrades does not support a symbol argument, unWatch from all markets only');
+        }
+        let userAddress = undefined;
+        [userAddress, params] = this.handlePublicAddress('unWatchMyTrades', params);
+        const messageHash = 'unsubscribe:myTrades';
+        const url = this.urls['api']['ws']['public'];
+        const request = {
+            'method': 'unsubscribe',
+            'subscription': {
+                'type': 'userFills',
+                'user': userAddress,
+            },
+        };
+        const message = this.extend(request, params);
+        return await this.watch(url, messageHash, message, messageHash);
+    }
     handleWsTickers(client, message) {
         // hip3 mids
         // {
@@ -338597,7 +338634,7 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         const entry = this.safeDict(message, 'data', {});
         if (this.myTrades === undefined) {
             const limit = this.safeInteger(this.options, 'tradesLimit', 1000);
-            this.myTrades = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_1__/* .ArrayCacheBySymbolById */ .Pt(limit);
+            this.myTrades = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__/* .ArrayCacheBySymbolById */ .Pt(limit);
         }
         const trades = this.myTrades;
         const symbols = {};
@@ -338704,7 +338741,7 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         const symbol = market['symbol'];
         if (!(symbol in this.trades)) {
             const limit = this.safeInteger(this.options, 'tradesLimit', 1000);
-            const stored = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_1__/* .ArrayCache */ .I3(limit);
+            const stored = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__/* .ArrayCache */ .I3(limit);
             this.trades[symbol] = stored;
         }
         const trades = this.trades[symbol];
@@ -338868,7 +338905,7 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         }
         if (!(timeframe in this.ohlcvs[symbol])) {
             const limit = this.safeInteger(this.options, 'OHLCVLimit', 1000);
-            const stored = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_1__/* .ArrayCacheByTimestamp */ .TG(limit);
+            const stored = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__/* .ArrayCacheByTimestamp */ .TG(limit);
             this.ohlcvs[symbol][timeframe] = stored;
         }
         const ohlcv = this.ohlcvs[symbol][timeframe];
@@ -338931,6 +338968,35 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         }
         return this.filterBySymbolSinceLimit(orders, symbol, since, limit, true);
     }
+    /**
+     * @method
+     * @name hyperliquid#unWatchOrders
+     * @description unWatches information on multiple orders made by the user
+     * @see https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/subscriptions
+     * @param {string} symbol unified market symbol of the market orders were made in
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {string} [params.user] user address, will default to this.walletAddress if not provided
+     * @returns {object[]} a list of [order structures]{@link https://docs.ccxt.com/#/?id=order-structure}
+     */
+    async unWatchOrders(symbol = undefined, params = {}) {
+        await this.loadMarkets();
+        if (symbol !== undefined) {
+            throw new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NotSupported(this.id + ' unWatchOrders() does not support a symbol argument, unWatch from all markets only');
+        }
+        const messageHash = 'unsubscribe:order';
+        const url = this.urls['api']['ws']['public'];
+        let userAddress = undefined;
+        [userAddress, params] = this.handlePublicAddress('unWatchOrders', params);
+        const request = {
+            'method': 'unsubscribe',
+            'subscription': {
+                'type': 'orderUpdates',
+                'user': userAddress,
+            },
+        };
+        const message = this.extend(request, params);
+        return await this.watch(url, messageHash, message, messageHash);
+    }
     handleOrder(client, message) {
         //
         //     {
@@ -338955,7 +339021,7 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         const data = this.safeList(message, 'data', []);
         if (this.orders === undefined) {
             const limit = this.safeInteger(this.options, 'ordersLimit', 1000);
-            this.orders = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_1__/* .ArrayCacheBySymbolById */ .Pt(limit);
+            this.orders = new _base_ws_Cache_js__WEBPACK_IMPORTED_MODULE_2__/* .ArrayCacheBySymbolById */ .Pt(limit);
         }
         const dataLength = data.length;
         if (dataLength === 0) {
@@ -339100,6 +339166,24 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
             }
         }
     }
+    handleOrderUnsubscription(client, subscription) {
+        const subHash = 'order';
+        const unSubHash = 'unsubscribe:' + subHash;
+        this.cleanUnsubscription(client, subHash, unSubHash, true);
+        const topicStructure = {
+            'topic': 'orders',
+        };
+        this.cleanCache(topicStructure);
+    }
+    handleMyTradesUnsubscription(client, subscription) {
+        const subHash = 'myTrades';
+        const unSubHash = 'unsubscribe:' + subHash;
+        this.cleanUnsubscription(client, subHash, unSubHash, true);
+        const topicStructure = {
+            'topic': 'myTrades',
+        };
+        this.cleanCache(topicStructure);
+    }
     handleSubscriptionResponse(client, message) {
         // {
         //     "channel":"subscriptionResponse",
@@ -339141,6 +339225,12 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
             }
             else if (type === 'candle') {
                 this.handleOHLCVUnsubscription(client, subscription);
+            }
+            else if (type === 'orderUpdates') {
+                this.handleOrderUnsubscription(client, subscription);
+            }
+            else if (type === 'userFills') {
+                this.handleMyTradesUnsubscription(client, subscription);
             }
         }
     }
