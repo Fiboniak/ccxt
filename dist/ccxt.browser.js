@@ -20574,6 +20574,9 @@ class Exchange {
         const query = this.extend(params, { 'stopPrice': triggerPrice });
         return await this.createOrderWs(symbol, 'market', side, amount, undefined, query);
     }
+    async createSubAccount(name, params = {}) {
+        throw new _errors_js__WEBPACK_IMPORTED_MODULE_5__.NotSupported(this.id + ' createSubAccount() is not supported yet');
+    }
     safeCurrencyCode(currencyId, currency = undefined) {
         currency = this.safeCurrency(currencyId, currency);
         return currency['code'];
@@ -214943,7 +214946,7 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
             'connectionId': hash,
         };
     }
-    actionHash(action, vaultAddress, nonce) {
+    actionHash(action, vaultAddress, nonce, expiresAfter = undefined) {
         const dataBinary = this.packb(action);
         const dataHex = this.binaryToBase16(dataBinary);
         let data = dataHex;
@@ -214955,10 +214958,14 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
             data += '01';
             data += vaultAddress;
         }
+        if (expiresAfter !== undefined) {
+            data += '00';
+            data += '00000' + this.intToBase16(expiresAfter);
+        }
         return this.hash(this.base16ToBinary(data), _static_dependencies_noble_hashes_sha3_js__WEBPACK_IMPORTED_MODULE_4__/* .keccak_256 */ .lY, 'binary');
     }
-    signL1Action(action, nonce, vaultAdress = undefined) {
-        const hash = this.actionHash(action, vaultAdress, nonce);
+    signL1Action(action, nonce, vaultAdress = undefined, expiresAfter = undefined) {
+        const hash = this.actionHash(action, vaultAdress, nonce, expiresAfter);
         const isTestnet = this.safeBool(this.options, 'sandboxMode', false);
         const phantomAgent = this.constructPhantomAgent(hash, isTestnet);
         // const data: Dict = {
@@ -217672,6 +217679,35 @@ class hyperliquid extends _abstract_hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/
             'weight': weight,
         };
         const signature = this.signL1Action(action, nonce);
+        request['action'] = action;
+        request['signature'] = signature;
+        const response = await this.privatePostExchange(this.extend(request, params));
+        return response;
+    }
+    /**
+     * @method
+     * @name hyperliquid#createAccount
+     * @description creates a sub-account under the main account
+     * @param {string} name the name of the sub-account
+     * @param {object} [params] extra parameters specific to the exchange API endpoint
+     * @param {int} [params.expiresAfter] time in ms after which the sub-account will expire
+     * @returns {object} a response object
+     */
+    async createSubAccount(name, params = {}) {
+        const nonce = this.milliseconds();
+        const request = {
+            'nonce': nonce,
+        };
+        const action = {
+            'type': 'createSubAccount',
+            'name': name,
+        };
+        const expiresAfter = this.safeInteger(params, 'expiresAfter');
+        if (expiresAfter !== undefined) {
+            params = this.omit(params, 'expiresAfter');
+            request['expiresAfter'] = expiresAfter;
+        }
+        const signature = this.signL1Action(action, nonce, undefined, expiresAfter);
         request['action'] = action;
         request['signature'] = signature;
         const response = await this.privatePostExchange(this.extend(request, params));
