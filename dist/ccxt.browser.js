@@ -405240,7 +405240,8 @@ class toobit extends _abstract_toobit_js__WEBPACK_IMPORTED_MODULE_0__/* ["defaul
             'coin': currency['id'],
             'address': address,
             'quantity': this.currencyToPrecision(currency['code'], amount),
-            'network': networkCode,
+            'chainType': networkCode,
+            'clientOrderId': this.milliseconds(),
         };
         if (tag !== undefined) {
             request['addressExt'] = tag;
