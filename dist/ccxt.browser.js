@@ -287783,9 +287783,11 @@ class apex extends _apex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             }
         }
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve(cache);
-        client.resolve(cache, 'positions');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve(cache);
+            client.resolve(cache, 'positions');
+        }
     }
     handlePositions(client, lists) {
         //
@@ -293837,9 +293839,11 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         const response = await this.fetchBalance(params);
         this.balance[type] = this.extend(response, this.safeValue(this.balance, type, {}));
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve();
-        client.resolve(this.balance[type], type + ':balance');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve();
+            client.resolve(this.balance[type], type + ':balance');
+        }
     }
     /**
      * @method
@@ -295280,9 +295284,11 @@ class binance extends _binance_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
             }
         }
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve(cache);
-        client.resolve(cache, type + ':position');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve(cache);
+            client.resolve(cache, type + ':position');
+        }
     }
     handlePositions(client, message) {
         //
@@ -297171,9 +297177,11 @@ class bingx extends _bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         const response = await this.fetchBalance({ 'type': type, 'subType': subType });
         this.balance[type] = this.extend(response, this.safeValue(this.balance, type, {}));
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve();
-        client.resolve(this.balance[type], type + ':balance');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve();
+            client.resolve(this.balance[type], type + ':balance');
+        }
     }
     handleErrorMessage(client, message) {
         //
@@ -302725,9 +302733,11 @@ class bitmart extends _bitmart_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         const response = await this.fetchBalance({ 'type': type });
         this.balance[type] = this.extend(response, this.safeValue(this.balance, type, {}));
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve();
-        client.resolve(this.balance[type], 'balance:' + type);
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve();
+            client.resolve(this.balance[type], 'balance:' + type);
+        }
     }
     handleBalance(client, message) {
         //
@@ -313794,9 +313804,11 @@ class bybit extends _bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             }
         }
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve(cache);
-        client.resolve(cache, 'position');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve(cache);
+            client.resolve(cache, 'position');
+        }
     }
     handlePositions(client, message) {
         //
@@ -323751,9 +323763,11 @@ class cryptocom extends _cryptocom_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"]
             }
         }
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve(cache);
-        client.resolve(cache, 'positions');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve(cache);
+            client.resolve(cache, 'positions');
+        }
     }
     handlePositions(client, message) {
         //
@@ -330757,9 +330771,11 @@ class gate extends _gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             }
         }
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve(cache);
-        client.resolve(cache, type + ':position');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve(cache);
+            client.resolve(cache, type + ':position');
+        }
     }
     handlePositions(client, message) {
         //
@@ -333343,9 +333359,11 @@ class hashkey extends _hashkey_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ 
         const response = await this.fetchBalance({ 'type': type });
         this.balance[type] = this.extend(response, this.safeValue(this.balance, type, {}));
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve();
-        client.resolve(this.balance[type], 'balance:' + type);
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve();
+            client.resolve(this.balance[type], 'balance:' + type);
+        }
     }
     handleBalance(client, message) {
         //
@@ -344829,9 +344847,11 @@ class kucoinfutures extends _kucoinfutures_js__WEBPACK_IMPORTED_MODULE_0__/* ["d
         const cache = this.positions;
         cache.append(position);
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve(cache);
-        client.resolve(position, 'position:' + symbol);
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve(cache);
+            client.resolve(position, 'position:' + symbol);
+        }
     }
     handlePosition(client, message) {
         //
@@ -350072,9 +350092,11 @@ class modetrade extends _modetrade_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"]
             }
         }
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve(cache);
-        client.resolve(cache, 'positions');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve(cache);
+            client.resolve(cache, 'positions');
+        }
     }
     handlePositions(client, message) {
         //
@@ -361169,10 +361191,12 @@ class toobit extends _toobit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
         const type = (marketType === 'spot') ? 'spot' : 'contract';
         this.balance[type] = this.extend(response, this.safeDict(this.balance, type, {}));
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve();
-        client.resolve(this.balance[type], type + ':fetchBalanceSnapshot');
-        client.resolve(this.balance[type], type + ':balance'); // we should also resolve right away after snapshot, so user doesn't double-fetch balance
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve();
+            client.resolve(this.balance[type], type + ':fetchBalanceSnapshot');
+            client.resolve(this.balance[type], type + ':balance'); // we should also resolve right away after snapshot, so user doesn't double-fetch balance
+        }
     }
     /**
      * @method
@@ -361432,9 +361456,11 @@ class toobit extends _toobit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
             cache.append(position);
         }
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve(cache);
-        client.resolve(cache, type + ':positions');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve(cache);
+            client.resolve(cache, type + ':positions');
+        }
     }
     handlePositions(client, message) {
         //
@@ -364543,9 +364569,11 @@ class woo extends _woo_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             }
         }
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve(cache);
-        client.resolve(cache, 'positions');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve(cache);
+            client.resolve(cache, 'positions');
+        }
     }
     handlePositions(client, message) {
         //
@@ -365866,9 +365894,11 @@ class woofipro extends _woofipro_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] *
             }
         }
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve(cache);
-        client.resolve(cache, 'positions');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve(cache);
+            client.resolve(cache, 'positions');
+        }
     }
     handlePositions(client, message) {
         //
@@ -366800,9 +366830,11 @@ class xt extends _xt_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             }
         }
         // don't remove the future from the .futures cache
-        const future = client.futures[messageHash];
-        future.resolve(cache);
-        client.resolve(cache, 'position::contract');
+        if (messageHash in client.futures) {
+            const future = client.futures[messageHash];
+            future.resolve(cache);
+            client.resolve(cache, 'position::contract');
+        }
     }
     handlePosition(client, message) {
         //
