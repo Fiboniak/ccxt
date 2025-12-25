@@ -108229,6 +108229,8 @@ class bybit extends _abstract_bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"
                     '170229': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
                     '170234': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ExchangeError,
                     '170241': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.ManualInteractionNeeded,
+                    '170371': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
+                    '170372': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
                     '175000': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
                     '175001': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
                     '175002': _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.InvalidOrder,
@@ -181889,7 +181891,7 @@ class gate extends _abstract_gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
             // https://www.gate.com/docs/developers/apiv4/en/#label-list
             'exceptions': {
                 'exact': {
-                    'INVALID_PARAM_VALUE': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
+                    'INVALID_PARAM_VALUE': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
                     'INVALID_PROTOCOL': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
                     'INVALID_ARGUMENT': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
                     'INVALID_REQUEST_BODY': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
@@ -181984,7 +181986,8 @@ class gate extends _abstract_gate_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] 
                     'AUTO_TRIGGER_PRICE_GREATE_LAST': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
                     'POSITION_HOLDING': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
                     'USER_LOAN_EXCEEDED': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.BadRequest,
-                    'NO_CHANGE': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder, // {"label":"NO_CHANGE","message":"No change is made"}
+                    'NO_CHANGE': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder,
+                    'PRICE_THRESHOLD_EXCEEDED': _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.InvalidOrder, // {"label":"PRICE_THRESHOLD_EXCEEDED","message":": 0.45288"}
                 },
                 'broad': {},
             },
