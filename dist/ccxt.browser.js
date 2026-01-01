@@ -291085,7 +291085,7 @@ class apex extends _apex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         //
         //   { pong: 1653296711335 }
         //
-        client.lastPong = this.safeInteger(message, 'pong');
+        client.lastPong = this.safeInteger(message, 'pong', this.milliseconds());
         return message;
     }
     handlePing(client, message) {
@@ -317813,7 +317813,7 @@ class bybit extends _bybit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         //       "conn_id": "d266o6hqo29sqmnq4vk0-1yus1"
         //   }
         //
-        client.lastPong = this.safeInteger(message, 'pong');
+        client.lastPong = this.safeInteger(message, 'pong', this.milliseconds());
         return message;
     }
     handleAuthenticate(client, message) {
@@ -343514,7 +343514,7 @@ class hyperliquid extends _hyperliquid_js__WEBPACK_IMPORTED_MODULE_0__/* ["defau
         //       "channel": "pong"
         //   }
         //
-        client.lastPong = this.safeInteger(message, 'pong');
+        client.lastPong = this.safeInteger(message, 'pong', this.milliseconds());
         return message;
     }
     requestId() {
@@ -360682,7 +360682,7 @@ class p2b extends _p2b_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
         //        id: 1706539608030
         //    }
         //
-        client.lastPong = this.safeInteger(message, 'id');
+        client.lastPong = this.safeInteger(message, 'id', this.milliseconds());
         return message;
     }
     onError(client, error) {
@@ -456078,7 +456078,7 @@ SOFTWARE.
 
 //-----------------------------------------------------------------------------
 // this is updated by vss.js when building
-const ccxt_version = '4.5.29';
+const ccxt_version = '4.5.30';
 ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k.ccxtVersion = ccxt_version;
 //-----------------------------------------------------------------------------
 
