@@ -15435,6 +15435,11 @@ class Exchange {
     setProperty(obj, property, defaultValue = undefined) {
         obj[property] = defaultValue;
     }
+    exceptionMessage(exc, includeStack = true) {
+        const message = '[' + exc.constructor.name + '] ' + (!includeStack ? exc.message : exc.stack);
+        const length = Math.min(100000, message.length);
+        return message.slice(0, length);
+    }
     axolotl(payload, hexKey, ed25519) {
         return (0,_functions_crypto_js__WEBPACK_IMPORTED_MODULE_9__/* .axolotl */ .Sw)(payload, hexKey, ed25519);
     }
@@ -291070,7 +291075,7 @@ class apex extends _apex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             await client.send({ 'args': [timeStamp.toString()], 'op': 'pong' });
         }
         catch (e) {
-            const error = new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NetworkError(this.id + ' handlePing failed with error ' + this.json(e));
+            const error = new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NetworkError(this.id + ' handlePing failed with error ' + this.exceptionMessage(e));
             client.reset(error);
         }
     }
@@ -292859,7 +292864,7 @@ class ascendex extends _ascendex_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] *
             await client.send({ 'op': 'pong', 'hp': this.safeInteger(message, 'hp') });
         }
         catch (e) {
-            const error = new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.NetworkError(this.id + ' handlePing failed with error ' + this.json(e));
+            const error = new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.NetworkError(this.id + ' handlePing failed with error ' + this.exceptionMessage(e));
             client.reset(error);
         }
     }
@@ -300319,7 +300324,7 @@ class bingx extends _bingx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             }
         }
         catch (e) {
-            const error = new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.NetworkError(this.id + ' pong failed with error ' + this.json(e));
+            const error = new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.NetworkError(this.id + ' pong failed with error ' + this.exceptionMessage(e));
             client.reset(error);
         }
     }
@@ -327059,7 +327064,7 @@ class cryptocom extends _cryptocom_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"]
             await client.send({ 'id': this.safeInteger(message, 'id'), 'method': 'public/respond-heartbeat' });
         }
         catch (e) {
-            const error = new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NetworkError(this.id + ' pong failed with error ' + this.json(e));
+            const error = new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NetworkError(this.id + ' pong failed with error ' + this.exceptionMessage(e));
             client.reset(error);
         }
     }
@@ -341674,7 +341679,7 @@ class htx extends _htx_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A {
             }
         }
         catch (e) {
-            const error = new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NetworkError(this.id + ' pong failed ' + this.json(e));
+            const error = new _base_errors_js__WEBPACK_IMPORTED_MODULE_1__.NetworkError(this.id + ' pong failed ' + this.exceptionMessage(e));
             client.reset(error);
         }
     }
@@ -365705,7 +365710,7 @@ class toobit extends _toobit_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A
                     this.delay(listenKeyRefreshRate, this.keepAliveListenKey, params);
                 }
                 catch (e) {
-                    const err = new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.AuthenticationError(this.id + ' ' + this.json(e));
+                    const err = new _base_errors_js__WEBPACK_IMPORTED_MODULE_2__.AuthenticationError(this.id + ' ' + this.exceptionMessage(e));
                     client.reject(err, messageHash);
                     if (messageHash in client.subscriptions) {
                         delete client.subscriptions[messageHash];
