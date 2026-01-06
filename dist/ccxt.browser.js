@@ -16937,26 +16937,28 @@ class backpack extends _abstract_backpack_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
 /* harmony import */ var _functions_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(7437);
 /* harmony import */ var _functions_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(6238);
 /* harmony import */ var _errors_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(2079);
-/* harmony import */ var _Precise_js__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(5147);
+/* harmony import */ var _Precise_js__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(5147);
 /* harmony import */ var _ws_WsClient_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(7288);
 /* harmony import */ var _ws_Future_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(3206);
 /* harmony import */ var _ws_OrderBook_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(3828);
 /* harmony import */ var _functions_crypto_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(8283);
-/* harmony import */ var _functions_totp_js__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(8995);
+/* harmony import */ var _functions_totp_js__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(8995);
 /* harmony import */ var _static_dependencies_ethers_index_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(5897);
 /* harmony import */ var _static_dependencies_ethers_hash_index_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(4380);
-/* harmony import */ var _static_dependencies_jsencrypt_lib_jsbn_rng_js__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(447);
-/* harmony import */ var _static_dependencies_scure_starknet_index_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(3187);
+/* harmony import */ var _static_dependencies_noble_curves_secp256k1_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(987);
+/* harmony import */ var _static_dependencies_noble_hashes_sha3_js__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(8432);
+/* harmony import */ var _static_dependencies_jsencrypt_lib_jsbn_rng_js__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(447);
+/* harmony import */ var _static_dependencies_scure_starknet_index_js__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(3187);
 /* harmony import */ var _static_dependencies_zklink_zklink_sdk_web_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7661);
-/* harmony import */ var _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(6907);
-/* harmony import */ var _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(9793);
-/* harmony import */ var _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(9491);
-/* harmony import */ var _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(1878);
-/* harmony import */ var _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(4852);
+/* harmony import */ var _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(6907);
+/* harmony import */ var _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(9793);
+/* harmony import */ var _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(9491);
+/* harmony import */ var _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(1878);
+/* harmony import */ var _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(4852);
 /* harmony import */ var _static_dependencies_noble_hashes_sha1_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(3466);
-/* harmony import */ var _static_dependencies_dydx_v4_client_onboarding_js__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(9187);
-/* harmony import */ var _static_dependencies_dydx_v4_client_helpers_js__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(1291);
-/* harmony import */ var _static_dependencies_dydx_v4_client_helpers_js__WEBPACK_IMPORTED_MODULE_19___default = /*#__PURE__*/__webpack_require__.n(_static_dependencies_dydx_v4_client_helpers_js__WEBPACK_IMPORTED_MODULE_19__);
+/* harmony import */ var _static_dependencies_dydx_v4_client_onboarding_js__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(9187);
+/* harmony import */ var _static_dependencies_dydx_v4_client_helpers_js__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(1291);
+/* harmony import */ var _static_dependencies_dydx_v4_client_helpers_js__WEBPACK_IMPORTED_MODULE_21___default = /*#__PURE__*/__webpack_require__.n(_static_dependencies_dydx_v4_client_helpers_js__WEBPACK_IMPORTED_MODULE_21__);
 // ----------------------------------------------------------------------------
 
 
@@ -16969,6 +16971,8 @@ class backpack extends _abstract_backpack_js__WEBPACK_IMPORTED_MODULE_0__/* ["de
 
 // ----------------------------------------------------------------------------
 //
+
+
 
 
 
@@ -18254,18 +18258,35 @@ class Exchange {
     ethEncodeStructuredData(domain, messageTypes, messageData) {
         return this.base16ToBinary(_static_dependencies_ethers_hash_index_js__WEBPACK_IMPORTED_MODULE_11__/* .TypedDataEncoder */ .z.encode(domain, messageTypes, messageData).slice(-132));
     }
+    ethGetAddressFromPrivateKey(privateKey) {
+        // Accepts a "0x"-prefixed hexstring private key and returns the corresponding Ethereum address
+        // Removes the "0x" prefix if present
+        const cleanPrivateKey = this.remove0xPrefix(privateKey);
+        // Get the public key from the private key using secp256k1 curve
+        const publicKeyBytes = _static_dependencies_noble_curves_secp256k1_js__WEBPACK_IMPORTED_MODULE_12__/* .secp256k1 */ .bI.getPublicKey(cleanPrivateKey);
+        // For Ethereum, we need to use the uncompressed public key (without the first byte which indicates compression)
+        // secp256k1.getPublicKey returns compressed key, we need uncompressed
+        const publicKeyUncompressed = _static_dependencies_noble_curves_secp256k1_js__WEBPACK_IMPORTED_MODULE_12__/* .secp256k1 */ .bI.ProjectivePoint.fromHex(publicKeyBytes).toRawBytes(false).slice(1); // Remove 0x04 prefix
+        // Hash the public key with Keccak256
+        const publicKeyHash = (0,_static_dependencies_noble_hashes_sha3_js__WEBPACK_IMPORTED_MODULE_13__/* .keccak_256 */ .lY)(publicKeyUncompressed);
+        // Take the last 20 bytes (40 hex chars)
+        const addressBytes = publicKeyHash.slice(-20);
+        // Convert to hex and add 0x prefix
+        const addressHex = '0x' + this.binaryToBase16(addressBytes);
+        return addressHex;
+    }
     retrieveStarkAccount(signature, accountClassHash, accountProxyClassHash) {
-        const privateKey = (0,_static_dependencies_scure_starknet_index_js__WEBPACK_IMPORTED_MODULE_12__/* .ethSigToPrivate */ .b)(signature);
-        const publicKey = (0,_static_dependencies_scure_starknet_index_js__WEBPACK_IMPORTED_MODULE_12__/* .getStarkKey */ .$u)(privateKey);
-        const callData = _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_13__/* .CallData */ .fP.compile({
+        const privateKey = (0,_static_dependencies_scure_starknet_index_js__WEBPACK_IMPORTED_MODULE_14__/* .ethSigToPrivate */ .b)(signature);
+        const publicKey = (0,_static_dependencies_scure_starknet_index_js__WEBPACK_IMPORTED_MODULE_14__/* .getStarkKey */ .$u)(privateKey);
+        const callData = _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_15__/* .CallData */ .fP.compile({
             'implementation': accountClassHash,
-            'selector': _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_14__/* .getSelectorFromName */ .BK('initialize'),
-            'calldata': _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_13__/* .CallData */ .fP.compile({
+            'selector': _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_16__/* .getSelectorFromName */ .BK('initialize'),
+            'calldata': _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_15__/* .CallData */ .fP.compile({
                 'signer': publicKey,
                 'guardian': '0',
             }),
         });
-        const address = _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_15__/* .calculateContractAddressFromHash */ .r4(publicKey, accountProxyClassHash, callData, 0);
+        const address = _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_17__/* .calculateContractAddressFromHash */ .r4(publicKey, accountProxyClassHash, callData, 0);
         return {
             privateKey,
             publicKey,
@@ -18289,26 +18310,26 @@ class Exchange {
             }, messageTypes),
             'message': messageData,
         };
-        const msgHash = _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_16__/* .getMessageHash */ .E(request, address);
+        const msgHash = _static_dependencies_starknet_index_js__WEBPACK_IMPORTED_MODULE_18__/* .getMessageHash */ .E(request, address);
         return msgHash;
     }
     starknetSign(msgHash, pri) {
         // TODO: unify to ecdsa
-        const signature = (0,_static_dependencies_scure_starknet_index_js__WEBPACK_IMPORTED_MODULE_12__/* .sign */ ._S)(msgHash.replace('0x', ''), pri.replace('0x', ''));
+        const signature = (0,_static_dependencies_scure_starknet_index_js__WEBPACK_IMPORTED_MODULE_14__/* .sign */ ._S)(msgHash.replace('0x', ''), pri.replace('0x', ''));
         return this.json([signature.r.toString(), signature.s.toString()]);
     }
     async getZKContractSignatureObj(seed, params = {}) {
-        const formattedSlotId = BigInt('0x' + this.remove0xPrefix(this.hash(this.encode(this.safeString(params, 'slotId')), _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_17__/* .sha256 */ .s, 'hex'))).toString();
-        const formattedNonce = BigInt('0x' + this.remove0xPrefix(this.hash(this.encode(this.safeString(params, 'nonce')), _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_17__/* .sha256 */ .s, 'hex'))).toString();
+        const formattedSlotId = BigInt('0x' + this.remove0xPrefix(this.hash(this.encode(this.safeString(params, 'slotId')), _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_19__/* .sha256 */ .s, 'hex'))).toString();
+        const formattedNonce = BigInt('0x' + this.remove0xPrefix(this.hash(this.encode(this.safeString(params, 'nonce')), _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_19__/* .sha256 */ .s, 'hex'))).toString();
         const formattedUint64 = '18446744073709551615';
         const formattedUint32 = '4294967295';
-        const accountId = parseInt(_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMod(this.safeString(params, 'accountId'), formattedUint32), 10);
-        const slotId = parseInt(_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMod(formattedSlotId, formattedUint64), formattedUint32), 10);
-        const nonce = parseInt(_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMod(formattedNonce, formattedUint32), 10);
+        const accountId = parseInt(_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMod(this.safeString(params, 'accountId'), formattedUint32), 10);
+        const slotId = parseInt(_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMod(formattedSlotId, formattedUint64), formattedUint32), 10);
+        const nonce = parseInt(_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMod(formattedNonce, formattedUint32), 10);
         await (0,_static_dependencies_zklink_zklink_sdk_web_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Ay)();
         const _signer = _static_dependencies_zklink_zklink_sdk_web_js__WEBPACK_IMPORTED_MODULE_0__/* .newRpcSignerWithProvider */ .$s({});
         await _signer.initZklinkSigner(seed);
-        const tx_builder = new _static_dependencies_zklink_zklink_sdk_web_js__WEBPACK_IMPORTED_MODULE_0__/* .ContractBuilder */ .KR(accountId, 0, slotId, nonce, this.safeInteger(params, 'pairId'), _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(this.safeString(params, 'size'), '1e18'), _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(this.safeString(params, 'price'), '1e18'), this.safeString(params, 'direction') === 'BUY', parseInt(_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(this.safeString(params, 'makerFeeRate'), '10000')), parseInt(_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(this.safeString(params, 'takerFeeRate'), '10000')), false);
+        const tx_builder = new _static_dependencies_zklink_zklink_sdk_web_js__WEBPACK_IMPORTED_MODULE_0__/* .ContractBuilder */ .KR(accountId, 0, slotId, nonce, this.safeInteger(params, 'pairId'), _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(this.safeString(params, 'size'), '1e18'), _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(this.safeString(params, 'price'), '1e18'), this.safeString(params, 'direction') === 'BUY', parseInt(_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(this.safeString(params, 'makerFeeRate'), '10000')), parseInt(_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(this.safeString(params, 'takerFeeRate'), '10000')), false);
         const contractor = _static_dependencies_zklink_zklink_sdk_web_js__WEBPACK_IMPORTED_MODULE_0__/* .newContract */ .JF(tx_builder);
         // const signer = ZkLinkSigner.ethSig(seed);
         // const signer = new Signer(seed);
@@ -18324,8 +18345,8 @@ class Exchange {
         let nonce = this.safeString(params, 'nonce', '0');
         if (this.safeBool(params, 'isContract') === true) {
             const formattedUint32 = '4294967295';
-            const formattedNonce = BigInt('0x' + this.remove0xPrefix(this.hash(this.encode(nonce), _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_17__/* .sha256 */ .s, 'hex'))).toString();
-            nonce = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMod(formattedNonce, formattedUint32);
+            const formattedNonce = BigInt('0x' + this.remove0xPrefix(this.hash(this.encode(nonce), _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_19__/* .sha256 */ .s, 'hex'))).toString();
+            nonce = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMod(formattedNonce, formattedUint32);
         }
         const tx_builder = new _static_dependencies_zklink_zklink_sdk_web_js__WEBPACK_IMPORTED_MODULE_0__/* .TransferBuilder */ .H3(this.safeNumber(params, 'zkAccountId', 0), this.safeString(params, 'receiverAddress'), this.safeNumber(params, 'subAccountId', 0), this.safeNumber(params, 'receiverSubAccountId', 0), this.safeNumber(params, 'tokenId', 0), this.safeString(params, 'fee', '0'), this.safeString(params, 'amount', '0'), this.parseToInt(nonce), this.safeNumber(params, 'timestampSeconds', 0));
         const contractor = _static_dependencies_zklink_zklink_sdk_web_js__WEBPACK_IMPORTED_MODULE_0__/* .newTransfer */ .qj(tx_builder);
@@ -18353,16 +18374,16 @@ class Exchange {
         SignMode = modules[2].SignMode;
     }
     toDydxLong(numStr) {
-        return _static_dependencies_dydx_v4_client_helpers_js__WEBPACK_IMPORTED_MODULE_19___default().fromString(numStr);
+        return _static_dependencies_dydx_v4_client_helpers_js__WEBPACK_IMPORTED_MODULE_21___default().fromString(numStr);
     }
     retrieveDydxCredentials(entropy) {
         let credentials = undefined;
         if (entropy.indexOf(' ') > 0) {
-            credentials = (0,_static_dependencies_dydx_v4_client_onboarding_js__WEBPACK_IMPORTED_MODULE_20__/* .deriveHDKeyFromMnemonic */ .t)(entropy);
+            credentials = (0,_static_dependencies_dydx_v4_client_onboarding_js__WEBPACK_IMPORTED_MODULE_22__/* .deriveHDKeyFromMnemonic */ .t)(entropy);
             credentials['mnemonic'] = entropy;
             return credentials;
         }
-        credentials = (0,_static_dependencies_dydx_v4_client_onboarding_js__WEBPACK_IMPORTED_MODULE_20__/* .exportMnemonicAndPrivateKey */ .e)(this.base16ToBinary(entropy));
+        credentials = (0,_static_dependencies_dydx_v4_client_onboarding_js__WEBPACK_IMPORTED_MODULE_22__/* .exportMnemonicAndPrivateKey */ .e)(this.base16ToBinary(entropy));
         return credentials;
     }
     encodeDydxTxForSimulation(message, memo, sequence, publicKey) {
@@ -18445,7 +18466,7 @@ class Exchange {
             'bodyBytes': txBodyBytes,
             'chainId': chainId,
         });
-        const signingHash = this.hash(SignDoc.encode(signDoc).finish(), _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_17__/* .sha256 */ .s, 'hex');
+        const signingHash = this.hash(SignDoc.encode(signDoc).finish(), _static_dependencies_noble_hashes_sha256_js__WEBPACK_IMPORTED_MODULE_19__/* .sha256 */ .s, 'hex');
         return [signingHash, signDoc];
     }
     encodeDydxTxRaw(signDoc, signature) {
@@ -18471,7 +18492,7 @@ class Exchange {
         return dict;
     }
     randomBytes(length) {
-        const rng = new _static_dependencies_jsencrypt_lib_jsbn_rng_js__WEBPACK_IMPORTED_MODULE_21__/* .SecureRandom */ .D();
+        const rng = new _static_dependencies_jsencrypt_lib_jsbn_rng_js__WEBPACK_IMPORTED_MODULE_23__/* .SecureRandom */ .D();
         const x = [];
         x.length = length;
         rng.nextBytes(x);
@@ -19889,18 +19910,18 @@ class Exchange {
         const amount = this.safeString(entry, 'amount');
         if (amount !== undefined) {
             if (before === undefined && after !== undefined) {
-                before = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringSub(after, amount);
+                before = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringSub(after, amount);
             }
             else if (before !== undefined && after === undefined) {
-                after = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd(before, amount);
+                after = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd(before, amount);
             }
         }
         if (before !== undefined && after !== undefined) {
             if (direction === undefined) {
-                if (_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringGt(before, after)) {
+                if (_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringGt(before, after)) {
                     direction = 'out';
                 }
-                if (_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringGt(after, before)) {
+                if (_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringGt(after, before)) {
                     direction = 'in';
                 }
             }
@@ -19966,13 +19987,13 @@ class Exchange {
                 // find lowest fee (which is more desired)
                 const fee = this.safeString(network, 'fee');
                 const feeMain = this.safeString(currency, 'fee');
-                if (feeMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringLt(fee, feeMain)) {
+                if (feeMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringLt(fee, feeMain)) {
                     currency['fee'] = this.parseNumber(fee);
                 }
                 // find lowest precision (which is more desired)
                 const precision = this.safeString(network, 'precision');
                 const precisionMain = this.safeString(currency, 'precision');
-                if (precisionMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringGt(precision, precisionMain)) {
+                if (precisionMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringGt(precision, precisionMain)) {
                     currency['precision'] = this.parseNumber(precision);
                 }
                 // limits
@@ -19992,11 +20013,11 @@ class Exchange {
                 const limitsDepositMinMain = this.safeString(limitsDepositMain, 'min');
                 const limitsDepositMaxMain = this.safeString(limitsDepositMain, 'max');
                 // find min
-                if (limitsDepositMinMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringLt(limitsDepositMin, limitsDepositMinMain)) {
+                if (limitsDepositMinMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringLt(limitsDepositMin, limitsDepositMinMain)) {
                     currency['limits']['deposit']['min'] = this.parseNumber(limitsDepositMin);
                 }
                 // find max
-                if (limitsDepositMaxMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringGt(limitsDepositMax, limitsDepositMaxMain)) {
+                if (limitsDepositMaxMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringGt(limitsDepositMax, limitsDepositMaxMain)) {
                     currency['limits']['deposit']['max'] = this.parseNumber(limitsDepositMax);
                 }
                 // withdrawals
@@ -20010,11 +20031,11 @@ class Exchange {
                 const limitsWithdrawMinMain = this.safeString(limitsWithdrawMain, 'min');
                 const limitsWithdrawMaxMain = this.safeString(limitsWithdrawMain, 'max');
                 // find min
-                if (limitsWithdrawMinMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringLt(limitsWithdrawMin, limitsWithdrawMinMain)) {
+                if (limitsWithdrawMinMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringLt(limitsWithdrawMin, limitsWithdrawMinMain)) {
                     currency['limits']['withdraw']['min'] = this.parseNumber(limitsWithdrawMin);
                 }
                 // find max
-                if (limitsWithdrawMaxMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringGt(limitsWithdrawMax, limitsWithdrawMaxMain)) {
+                if (limitsWithdrawMaxMain === undefined || _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringGt(limitsWithdrawMax, limitsWithdrawMaxMain)) {
                     currency['limits']['withdraw']['max'] = this.parseNumber(limitsWithdrawMax);
                 }
             }
@@ -20281,13 +20302,13 @@ class Exchange {
             let used = this.safeString(balance[code], 'used');
             const debt = this.safeString(balance[code], 'debt');
             if ((total === undefined) && (free !== undefined) && (used !== undefined)) {
-                total = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd(free, used);
+                total = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd(free, used);
             }
             if ((free === undefined) && (total !== undefined) && (used !== undefined)) {
-                free = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringSub(total, used);
+                free = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringSub(total, used);
             }
             if ((used === undefined) && (total !== undefined) && (free !== undefined)) {
-                used = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringSub(total, free);
+                used = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringSub(total, free);
             }
             balance[code]['free'] = this.parseNumber(free);
             balance[code]['used'] = this.parseNumber(used);
@@ -20377,11 +20398,11 @@ class Exchange {
                     const trade = trades[i];
                     const tradeAmount = this.safeString(trade, 'amount');
                     if (parseFilled && (tradeAmount !== undefined)) {
-                        filled = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd(filled, tradeAmount);
+                        filled = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd(filled, tradeAmount);
                     }
                     const tradeCost = this.safeString(trade, 'cost');
                     if (parseCost && (tradeCost !== undefined)) {
-                        cost = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd(cost, tradeCost);
+                        cost = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd(cost, tradeCost);
                     }
                     if (parseSymbol) {
                         symbol = this.safeString(trade, 'symbol');
@@ -20442,7 +20463,7 @@ class Exchange {
         if (amount === undefined) {
             // ensure amount = filled + remaining
             if (filled !== undefined && remaining !== undefined) {
-                amount = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd(filled, remaining);
+                amount = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd(filled, remaining);
             }
             else if (status === 'closed') {
                 amount = filled;
@@ -20450,7 +20471,7 @@ class Exchange {
         }
         if (filled === undefined) {
             if (amount !== undefined && remaining !== undefined) {
-                filled = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringSub(amount, remaining);
+                filled = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringSub(amount, remaining);
             }
             else if (status === 'closed' && amount !== undefined) {
                 filled = amount;
@@ -20458,7 +20479,7 @@ class Exchange {
         }
         if (remaining === undefined) {
             if (amount !== undefined && filled !== undefined) {
-                remaining = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringSub(amount, filled);
+                remaining = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringSub(amount, filled);
             }
             else if (status === 'closed') {
                 remaining = '0';
@@ -20473,13 +20494,13 @@ class Exchange {
         // linear
         // price = cost / (filled * contract size)
         if (average === undefined) {
-            if ((filled !== undefined) && (cost !== undefined) && _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringGt(filled, '0')) {
-                const filledTimesContractSize = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(filled, contractSize);
+            if ((filled !== undefined) && (cost !== undefined) && _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringGt(filled, '0')) {
+                const filledTimesContractSize = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(filled, contractSize);
                 if (inverse) {
-                    average = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(filledTimesContractSize, cost);
+                    average = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(filledTimesContractSize, cost);
                 }
                 else {
-                    average = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(cost, filledTimesContractSize);
+                    average = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(cost, filledTimesContractSize);
                 }
             }
         }
@@ -20499,17 +20520,17 @@ class Exchange {
                 multiplyPrice = average;
             }
             // contract trading
-            const filledTimesContractSize = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(filled, contractSize);
+            const filledTimesContractSize = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(filled, contractSize);
             if (inverse) {
-                cost = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(filledTimesContractSize, multiplyPrice);
+                cost = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(filledTimesContractSize, multiplyPrice);
             }
             else {
-                cost = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(filledTimesContractSize, multiplyPrice);
+                cost = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(filledTimesContractSize, multiplyPrice);
             }
         }
         // support for market orders
         const orderType = this.safeValue(order, 'type');
-        const emptyPrice = (price === undefined) || _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringEquals(price, '0');
+        const emptyPrice = (price === undefined) || _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringEquals(price, '0');
         if (emptyPrice && (orderType === 'market')) {
             price = average;
         }
@@ -20651,7 +20672,7 @@ class Exchange {
         let key = undefined;
         if (useQuote) {
             const priceString = this.numberToString(price);
-            cost = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(cost, priceString);
+            cost = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(cost, priceString);
             key = 'quote';
         }
         else {
@@ -20666,7 +20687,7 @@ class Exchange {
             takerOrMaker = 'taker';
         }
         const rate = (feeRate !== undefined) ? this.numberToString(feeRate) : this.safeString(market, takerOrMaker);
-        cost = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(cost, rate);
+        cost = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(cost, rate);
         return {
             'type': takerOrMaker,
             'currency': market[key],
@@ -20696,10 +20717,10 @@ class Exchange {
         let baseValue = this.safeString(liquidation, 'baseValue');
         let quoteValue = this.safeString(liquidation, 'quoteValue');
         if ((baseValue === undefined) && (contracts !== undefined) && (contractSize !== undefined) && (price !== undefined)) {
-            baseValue = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(contracts, contractSize);
+            baseValue = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(contracts, contractSize);
         }
         if ((quoteValue === undefined) && (baseValue !== undefined) && (price !== undefined)) {
-            quoteValue = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(baseValue, price);
+            quoteValue = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(baseValue, price);
         }
         liquidation['contracts'] = this.parseNumber(contracts);
         liquidation['contractSize'] = this.parseNumber(contractSize);
@@ -20719,11 +20740,11 @@ class Exchange {
             if (contractSize !== undefined) {
                 const inverse = this.safeBool(market, 'inverse', false);
                 if (inverse) {
-                    multiplyPrice = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv('1', price);
+                    multiplyPrice = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv('1', price);
                 }
-                multiplyPrice = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(multiplyPrice, contractSize);
+                multiplyPrice = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(multiplyPrice, contractSize);
             }
-            cost = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(multiplyPrice, amount);
+            cost = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(multiplyPrice, amount);
         }
         const [resultFee, resultFees] = this.parsedFeeAndFees(trade);
         trade['fee'] = resultFee;
@@ -20887,7 +20908,7 @@ class Exchange {
                 }
                 const rateKey = (rate === undefined) ? '' : rate;
                 if (rateKey in reduced[feeCurrencyCode]) {
-                    reduced[feeCurrencyCode][rateKey]['cost'] = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd(reduced[feeCurrencyCode][rateKey]['cost'], cost);
+                    reduced[feeCurrencyCode][rateKey]['cost'] = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd(reduced[feeCurrencyCode][rateKey]['cost'], cost);
                 }
                 else {
                     reduced[feeCurrencyCode][rateKey] = {
@@ -20918,54 +20939,54 @@ class Exchange {
         const baseVolume = this.safeString(ticker, 'baseVolume');
         const quoteVolume = this.safeString(ticker, 'quoteVolume');
         if (vwap === undefined) {
-            vwap = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(this.omitZero(quoteVolume), baseVolume);
+            vwap = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(this.omitZero(quoteVolume), baseVolume);
         }
         // calculate open
         if (change !== undefined) {
             if (close === undefined && average !== undefined) {
-                close = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd(average, _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(change, '2'));
+                close = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd(average, _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(change, '2'));
             }
             if (open === undefined && close !== undefined) {
-                open = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringSub(close, change);
+                open = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringSub(close, change);
             }
         }
         else if (percentage !== undefined) {
             if (close === undefined && average !== undefined) {
-                const openAddClose = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(average, '2');
+                const openAddClose = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(average, '2');
                 // openAddClose = open * (1 + (100 + percentage)/100)
-                const denominator = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd('2', _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(percentage, '100'));
-                const calcOpen = (open !== undefined) ? open : _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(openAddClose, denominator);
-                close = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(calcOpen, _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd('1', _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(percentage, '100')));
+                const denominator = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd('2', _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(percentage, '100'));
+                const calcOpen = (open !== undefined) ? open : _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(openAddClose, denominator);
+                close = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(calcOpen, _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd('1', _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(percentage, '100')));
             }
             if (open === undefined && close !== undefined) {
-                open = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(close, _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd('1', _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(percentage, '100')));
+                open = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(close, _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd('1', _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(percentage, '100')));
             }
         }
         // change
         if (change === undefined) {
             if (close !== undefined && open !== undefined) {
-                change = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringSub(close, open);
+                change = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringSub(close, open);
             }
             else if (close !== undefined && percentage !== undefined) {
-                change = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(percentage, '100'), _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(close, '100'));
+                change = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(percentage, '100'), _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(close, '100'));
             }
             else if (open !== undefined && percentage !== undefined) {
-                change = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(open, _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(percentage, '100'));
+                change = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(open, _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(percentage, '100'));
             }
         }
         // calculate things according to "open" (similar can be done with "close")
         if (open !== undefined) {
             // percentage (using change)
             if (percentage === undefined && change !== undefined) {
-                percentage = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(change, open), '100');
+                percentage = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(change, open), '100');
             }
             // close (using change)
             if (close === undefined && change !== undefined) {
-                close = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd(open, change);
+                close = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd(open, change);
             }
             // close (using average)
             if (close === undefined && average !== undefined) {
-                close = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(average, '2');
+                close = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(average, '2');
             }
             // average
             if (average === undefined && close !== undefined) {
@@ -20977,7 +20998,7 @@ class Exchange {
                         precision = this.precisionFromString(precisionPrice);
                     }
                 }
-                average = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAdd(open, close), '2', precision);
+                average = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAdd(open, close), '2', precision);
             }
         }
         // timestamp and symbol operations don't belong in safeTicker
@@ -21505,7 +21526,7 @@ class Exchange {
         const percentage = this.safeValue(position, 'percentage');
         if ((percentage === undefined) && (unrealizedPnlString !== undefined) && (initialMarginString !== undefined)) {
             // as it was done in all implementations ( aax, btcex, bybit, deribit, ftx, gate, kucoinfutures, phemex )
-            const percentageString = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringMul(_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringDiv(unrealizedPnlString, initialMarginString, 4), '100');
+            const percentageString = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringMul(_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringDiv(unrealizedPnlString, initialMarginString, 4), '100');
             position['percentage'] = this.parseNumber(percentageString);
         }
         // if contractSize is undefined get from market
@@ -22051,7 +22072,7 @@ class Exchange {
     }
     oath() {
         if (this.twofa !== undefined) {
-            return (0,_functions_totp_js__WEBPACK_IMPORTED_MODULE_22__/* .totp */ .O)(this.twofa);
+            return (0,_functions_totp_js__WEBPACK_IMPORTED_MODULE_24__/* .totp */ .O)(this.twofa);
         }
         else {
             throw new _errors_js__WEBPACK_IMPORTED_MODULE_5__.ExchangeError(this.id + ' exchange.twofa has not been set for 2FA Two-Factor Authentication');
@@ -23282,11 +23303,11 @@ class Exchange {
         if (precision === undefined) {
             return undefined;
         }
-        if (_Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringGe(precision, '0')) {
+        if (_Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringGe(precision, '0')) {
             return this.parsePrecision(precision);
         }
         else {
-            const positivePrecisionString = _Precise_js__WEBPACK_IMPORTED_MODULE_18__/* .Precise */ .Y.stringAbs(precision);
+            const positivePrecisionString = _Precise_js__WEBPACK_IMPORTED_MODULE_20__/* .Precise */ .Y.stringAbs(precision);
             const positivePrecision = parseInt(positivePrecisionString);
             let parsedPrecision = '1';
             for (let i = 0; i < positivePrecision - 1; i++) {
@@ -457834,7 +457855,7 @@ SOFTWARE.
 
 //-----------------------------------------------------------------------------
 // this is updated by vss.js when building
-const ccxt_version = '4.5.30';
+const ccxt_version = '4.5.31';
 ccxt_src_base_Exchange_js_WEBPACK_IMPORTED_MODULE_0_/* .Exchange */ .k.ccxtVersion = ccxt_version;
 //-----------------------------------------------------------------------------
 
